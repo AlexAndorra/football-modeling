@@ -1,0 +1,14 @@
+Underlying data for the Soccer Factor Model:
+
+  - clean_linup.csv
+  - clean_events.csv
+  - clean_games.csv
+
+
+Additional data:
+
+  - clean_stats.csv
+  - clean_players_info.csv
+
+
+Data is sourced from: https://www.kaggle.com/datasets/marclamyhshshs/premier-league-games
