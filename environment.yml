@@ -1,0 +1,23 @@
+name: football-models
+channels:
+  - conda-forge
+dependencies:
+  - black
+  - ipywidgets
+  - isort
+  - jupyter
+  - jupyterlab
+  - matplotlib
+  - nbqa
+  - numba
+  - numpy
+  - numpyro
+  - nutpie
+  - pandas
+  - pymc>=5.13.0
+  - scikit-learn
+  - scipy
+  - seaborn
+  - watermark
+  - pip:
+    - bayesflow
