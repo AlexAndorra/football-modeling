@@ -1,2 +1,3 @@
-SFM.ipynb:         Notebook for the Soccer Factor Model
-auxiliaries.py:    Helper functions 
+SFM.ipynb:           Notebook for the Soccer Factor Model
+SFM_DataPrep.ipynb:  Notebook for preparing data to be fed into the main models
+auxiliaries.py:      Helper functions 
