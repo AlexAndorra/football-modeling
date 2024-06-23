@@ -1,0 +1,259 @@
+all_players = [ # --- Portugal
+              'cristiano-ronaldo','nani','ricardo-quaresma','hugo-almeida','joao-felix','helder-postiga',
+              'andre-silva',
+              # --- Brasil
+              'ronaldo','neymar','pato','ronaldinho','diego-costa','luis-fabiano','adriano','ailton',
+              'robinho','roberto-firmino', 'paulo-sergio', 'giovane-elber',
+              # --- Argentinia
+              'lionel-messi','gonzalo-higuain','sergio-aguero','mauro-icardi','paulo-dybala','diego-milito',
+              # --- Spain
+              'david-villa','fernando-torres','aritz-aduriz','raul','fernando-llorente','joseba-llorente','joselu',
+              'jose-antonio-reyes','alvaro-morata','iago-aspas','nolito','adrian-lopez','jonathan-soriano','manu-del-moral',
+              'michu','sergio-garcia',
+              # --- Uruguay
+              'luis-suarez-2','edinson-cavani','diego-forlan',
+              # --- Italy
+              'lorenzo-insigne','luca-toni','alberto-gilardino','alessandro-del-piero','filippo-inzaghi','ciro-immobile',
+              'emanuele-giaccherini','fabio-quagliarella','antonio-di-natale','giampaolo-pazzini','marco-borriello','graziano-pelle',
+              'antonio-cassano','alberto-paloschi','christian-vieri',
+
+              # --- Germany
+              'miroslav-klose','mario-gomez','oliver-neuville','carsten-jancker','alexander-zickler','lukas-podolski',
+              'nils-petersen','julian-schieber', 'niclas-fuellkrug','stefan-kiessling',
+
+              # --- England
+              'wayne-rooney','harry-kane','jamie-vardy','michael-owen','bobby-zamora','emile-heskey','peter-crouch',
+              'jermain-defoe','alan-shearer','david-nugent',
+
+              # --- France
+              'thierry-henry','karim-benzema','alexandre-lacazette','olivier-giroud','nicolas-anelka','hatem-ben-arfa',
+              'antoine-griezmann','bafetimbi-gomis','jimmy-briand','wissam-ben-yedder',
+
+              # --- Ireland
+              'robbie-keane','leon-best',
+
+              # --- Wales
+              'gareth-bale','craig-bellamy',
+
+              # --- Scotland
+              'kenny-miller',
+
+              # --- Poland
+              'robert-lewandowski','arkadiusz-milik',
+
+              # --- Netherlands
+              'ruud-van-nistelrooy','robin-van-persie','klaas-jan-huntelaar','roy-makaay','arjen-robben',
+
+              # --- Sweden
+              'zlatan-ibrahimovic','henrik-larsson','john-guidetti','markus-rosenberg','johan-elmander','marcus-berg',
+
+              # --- Norway
+              'john-carew','erling-haaland',
+
+              # --- Denmark
+              'ebbe-sand','jon-dahl-tomasson',
+
+              # --- Belgium
+              'christian-benteke','romelu-lukaku','eden-hazard','emile-mpenza','dries-mertens',
+
+              # --- Croatia
+              'mario-mandzukic','ivica-olic','mladen-petric','davor-suker','ivan-klasnic','nikola-kalinic',
+
+              # --- Paraguay
+              'lucas-barrios',
+
+              # --- Colombia
+              'falcao','jackson','carlos-bacca',
+
+              # --- Bulgaria
+              'dimitar-berbatov',
+
+              # --- Hungary
+              'adam-szalai',
+
+              # --- Ukraine
+              'andriy-shevchenko',
+
+              # --- Ghana
+              'inaki-williams',
+
+              # --- Ivory Coast
+              'didier-drogba',
+
+              # --- Cameroon
+              'samuel-etoo','eric-maxim-choupo-moting',
+
+              # --- Gaboon
+              'pierre-emerick-aubameyang',
+
+              # --- Egypt
+              'mohamed-salah',
+
+              # --- Slovakia
+              'marek-mintal',
+
+              # --- Korea
+              'heung-min-son',
+
+              # --- USA
+              'clint-dempsey','jozy-altidore',
+
+              # --- Mexico
+              'chicharito','giovani-dos-santos','carlos-vela','raul-jimenez',
+
+              # --- Australia
+              'tim-cahill'
+
+
+              ]
+
+
+
+
+
+rlp_players = ['ricardo-quaresma',
+ 'hugo-almeida',
+ 'joao-felix',
+ 'helder-postiga',
+ 'andre-silva',
+ 'luis-fabiano',
+ 'ailton',
+ 'paulo-sergio',
+ 'giovane-elber',
+ 'diego-milito',
+ 'aritz-aduriz',
+ 'fernando-llorente',
+ 'joseba-llorente',
+ 'joselu',
+ 'jose-antonio-reyes',
+ 'iago-aspas',
+ 'nolito',
+ 'adrian-lopez',
+ 'jonathan-soriano',
+ 'manu-del-moral',
+ 'michu',
+ 'sergio-garcia',
+ 'edinson-cavani',
+ 'diego-forlan',
+ 'lorenzo-insigne',
+ 'luca-toni',
+ 'alberto-gilardino',
+ 'filippo-inzaghi',
+ 'ciro-immobile',
+ 'emanuele-giaccherini',
+ 'fabio-quagliarella',
+ 'antonio-di-natale',
+ 'giampaolo-pazzini',
+ 'marco-borriello',
+ 'graziano-pelle',
+ 'antonio-cassano',
+ 'alberto-paloschi',
+ 'christian-vieri',
+ 'miroslav-klose',
+ 'mario-gomez',
+ 'oliver-neuville',
+ 'carsten-jancker',
+ 'alexander-zickler',
+ 'lukas-podolski',
+ 'nils-petersen',
+ 'julian-schieber',
+ 'niclas-fuellkrug',
+ 'stefan-kiessling',
+ 'jamie-vardy',
+ 'bobby-zamora',
+ 'emile-heskey',
+ 'peter-crouch',
+ 'jermain-defoe',
+ 'alan-shearer',
+ 'david-nugent',
+ 'alexandre-lacazette',
+ 'olivier-giroud',
+ 'nicolas-anelka',
+ 'hatem-ben-arfa',
+ 'antoine-griezmann',
+ 'bafetimbi-gomis',
+ 'jimmy-briand',
+ 'wissam-ben-yedder',
+ 'robbie-keane',
+ 'leon-best',
+ 'craig-bellamy',
+ 'kenny-miller',
+ 'arkadiusz-milik',
+ 'klaas-jan-huntelaar',
+ 'roy-makaay',
+ 'henrik-larsson',
+ 'john-guidetti',
+ 'markus-rosenberg',
+ 'johan-elmander',
+ 'marcus-berg',
+ 'john-carew',
+ 'ebbe-sand',
+ 'jon-dahl-tomasson',
+ 'christian-benteke',
+ 'emile-mpenza',
+ 'dries-mertens',
+ 'ivica-olic',
+ 'mladen-petric',
+ 'davor-suker',
+ 'ivan-klasnic',
+ 'nikola-kalinic',
+ 'lucas-barrios',
+ 'jackson',
+ 'carlos-bacca',
+ 'dimitar-berbatov',
+ 'adam-szalai',
+ 'inaki-williams',
+ 'eric-maxim-choupo-moting',
+ 'pierre-emerick-aubameyang',
+ 'marek-mintal',
+ 'heung-min-son',
+ 'clint-dempsey',
+ 'jozy-altidore',
+ 'giovani-dos-santos',
+ 'carlos-vela',
+ 'raul-jimenez',
+ 'tim-cahill']
+
+
+elite_players = ['cristiano-ronaldo',
+ 'nani',
+ 'ronaldo',
+ 'neymar',
+ 'pato',
+ 'ronaldinho',
+ 'diego-costa',
+ 'adriano',
+ 'robinho',
+ 'roberto-firmino',
+ 'lionel-messi',
+ 'gonzalo-higuain',
+ 'sergio-aguero',
+ 'mauro-icardi',
+ 'paulo-dybala',
+ 'david-villa',
+ 'fernando-torres',
+ 'raul',
+ 'alvaro-morata',
+ 'luis-suarez-2',
+ 'alessandro-del-piero',
+ 'wayne-rooney',
+ 'harry-kane',
+ 'michael-owen',
+ 'thierry-henry',
+ 'karim-benzema',
+ 'gareth-bale',
+ 'robert-lewandowski',
+ 'ruud-van-nistelrooy',
+ 'robin-van-persie',
+ 'arjen-robben',
+ 'zlatan-ibrahimovic',
+ 'erling-haaland',
+ 'romelu-lukaku',
+ 'eden-hazard',
+ 'mario-mandzukic',
+ 'falcao',
+ 'andriy-shevchenko',
+ 'didier-drogba',
+ 'samuel-etoo',
+ 'mohamed-salah',
+ 'chicharito']
