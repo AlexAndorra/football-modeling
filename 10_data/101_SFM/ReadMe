@@ -1,3 +1,12 @@
+Latest data file: SFM_data_v240622.csv
+
+  - data on 144 players from Premier League, Bundesliga, Serie A, La Liga
+  - data is sourced from the German sports magazine's website 'kicker.de'
+
+
+
+% ------------------------------------- Data for the original SFM ------------------------------------- %
+
 Underlying data for the Soccer Factor Model:
 
   - clean_linup.csv
