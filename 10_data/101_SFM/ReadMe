@@ -4,6 +4,11 @@ Latest data file: SFM_data_v240622.csv
   - data is sourced from the German sports magazine's website 'kicker.de'
 
 
+Data by Team: SFM_data_by_team.csv
+
+  - factors computed by team
+
+
 
 % ------------------------------------- Data for the original SFM ------------------------------------- %
 
