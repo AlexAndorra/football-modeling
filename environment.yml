@@ -14,10 +14,11 @@ dependencies:
   - numpyro
   - nutpie
   - pandas
-  - pymc>=5.13.0
+  - pymc>=5.16.0
   - scikit-learn
   - scipy
   - seaborn
+  - tensorflow
   - watermark
   - pip:
     - bayesflow
