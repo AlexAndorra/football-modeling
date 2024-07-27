@@ -162,3 +162,6 @@ cython_debug/
 # MacOS hidden files
 .DS_Store
 *.key
+
+# netcdf files
+*.nc
