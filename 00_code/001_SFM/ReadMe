@@ -1,3 +1,6 @@
-SFM.ipynb:           Notebook for the Soccer Factor Model
-SFM_DataPrep.ipynb:  Notebook for preparing data to be fed into the main models
-auxiliaries.py:      Helper functions 
+% ------------------------------ Unveiling True Talent: The Soccer Factor Model ------------------------------ %
+
+This is the development repository for the paper: 
+
+Andorra, Alexandre and Göbel, Maximilian (2024). Unveiling True Talent: The Soccer Factor Model for Skill Evaluation. 
+Available on arXiv: https://arxiv.org/abs/2412.05911
