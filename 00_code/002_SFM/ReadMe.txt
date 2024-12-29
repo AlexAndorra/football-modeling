@@ -1,4 +1,4 @@
-% ------------------------------ Unveiling True Skill: The Soccer Factor Model ------------------------------ %
+% ------------------------------ Unveiling True Talent: The Soccer Factor Model ------------------------------ %
 
 This is a development repository for revisions of the first SFM.
 
