@@ -5,6 +5,7 @@ on:
     # Run at 12:00 AM UTC every Tuesday
     #- cron: "0 0 * * 2"
     - cron: '54 16 * * 6'
+  workflow_dispatch:
   
 
 jobs:
