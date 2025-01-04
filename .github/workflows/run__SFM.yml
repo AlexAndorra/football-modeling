@@ -1,0 +1,37 @@
+name: Run SFM
+
+on:
+  schedule:
+    # Run at 12:00 AM UTC every Tuesday
+    - cron: "0 0 * * 2"
+  
+
+jobs:
+  run-script:
+    runs-on: macOS-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set Up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas
+        pip install numpy
+        pip install bs4
+
+    - name: Run Python Script
+      run: python 00_code/00_GitHubActions/00_webscrap.py
+
+    - name: Push Changes to Repository
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+        force: true
