@@ -3,7 +3,8 @@ name: Run SFM
 on:
   schedule:
     # Run at 12:00 AM UTC every Tuesday
-    - cron: "0 0 * * 2"
+    #- cron: "0 0 * * 2"
+    - cron: "37 16 * * 6"
   
 
 jobs:
