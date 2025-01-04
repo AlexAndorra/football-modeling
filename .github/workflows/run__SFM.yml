@@ -27,6 +27,9 @@ jobs:
         pip install pandas
         pip install numpy
         pip install bs4
+        pip install requests
+        pip install tqdm
+        
 
     - name: Run Python Script
       run: python 00_code/00_GitHubActions/00_webscrap.py
