@@ -167,6 +167,8 @@ for ll in N_leagues:
         soup_game = bs(response_game.text)
         response_game.close()
 
+        print(f'URL for current game: {url_address}')
+          
         # --- 1.3.7 Find score:
         gg_scores = soup_game.find_all('div', {'class' : ['kick__v100-scoreBoard__scoreHolder__score']})
 
