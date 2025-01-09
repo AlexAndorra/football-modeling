@@ -35,7 +35,7 @@ import os
 # ====================================== USER INTERACTION ============================================== #
 
 # --- Set your directory to the main folder:
-directory = '../../'
+directory = '.'
 
 
 # --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
