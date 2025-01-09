@@ -3,8 +3,7 @@ name: Run SFM
 on:
   schedule:
     # Run at 12:00 AM UTC every Tuesday
-    #- cron: "0 0 * * 2"
-    - cron: '54 16 * * 6'
+    - cron: "0 0 * * 2"
   workflow_dispatch:
   
 
@@ -37,7 +36,7 @@ jobs:
 
     - name: Run Python Script, Commit and Push Changes
       run: |
-        python 00_code/00_GitHubActions/00_webscrap.py
+        python -u 00_code/00_GitHubActions/00_webscrap.py
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add 10_data/100_RawData/**  # Make sure this matches your output directory
