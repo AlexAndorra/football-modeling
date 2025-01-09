@@ -465,7 +465,7 @@ for ll in N_leagues:
     if not os.path.isdir(f'{directory}/10_data/100_RawData/{ll}'):
       os.mkdir(f'{directory}/10_data/100_RawData/{ll}')
 
-
+    print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
     ss_abreviation = ss.replace('-','')[2:]
     games_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games.csv', index=False)
     scorer_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', index=False)
