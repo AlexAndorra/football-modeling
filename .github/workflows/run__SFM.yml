@@ -41,13 +41,13 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add 10_data/100_RawData/*  # Make sure this matches your output directory
-        git commit -m "Webscraped Raw Data"
+        git commit -a -m "Webscraped Raw Data"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Push Changes to Repository
-      uses: ad-m/github-push-action@v0.6.0
+      uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: main
