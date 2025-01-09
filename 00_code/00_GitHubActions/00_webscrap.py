@@ -128,7 +128,7 @@ for ll in N_leagues:
 
       # --- 1.3.3 Download the current gameday:
       response = requests.get(url_gameday)
-      soup = bs(response.text, features="html.parser)
+      soup = bs(response.text, features="html.parser")
       response.close()
 
 
@@ -167,7 +167,7 @@ for ll in N_leagues:
         url_address = f'https://www.kicker.de/{url_game}/schema'
 
         response_game = requests.get(url_address)
-        soup_game = bs(response_game.text)
+        soup_game = bs(response_game.text, , features="html.parser")
         response_game.close()
 
         print(f'URL for current game: {url_address}')
@@ -382,7 +382,7 @@ for ll in N_leagues:
       # --- --- --- There might be some weired shit going on ...
       while (response_received == False) and (response_counter < 50):
         response_player = requests.get(url_player)
-        soup_player = bs(response_player.text)
+        soup_player = bs(response_player.text, features="html.parser")
         response_player.close()
 
         player_info = soup_player.find_all('div', {'class':'kick__vita__header__person-detail-kvpair-info'})
@@ -435,7 +435,7 @@ for ll in N_leagues:
         url_player_pos = f'https://www.kicker.de/{pp_name}/spielerposition/{ll}/{ss}/{tt}'
 
         response_player = requests.get(url_player_pos)
-        soup_player = bs(response_player.text)
+        soup_player = bs(response_player.text, features="html.parser")
         response_player.close()
 
 
