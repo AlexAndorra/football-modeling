@@ -37,6 +37,16 @@ import os
 # --- Set your directory to the main folder:
 directory = '.'
 
+games_final = pd.DataFrame({'test' = [0,1,2]})
+
+ll = 'premier-league'
+if not os.path.isdir(f'{directory}/10_data/100_RawData/{ll}'):
+      os.mkdir(f'{directory}/10_data/100_RawData/{ll}')
+
+print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
+games_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/games.csv', index=False)
+
+sys.exit(-1)
 
 # --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
 # --- --- a sample of leagues: ['premier-league','bundesliga','2-bundesliga','la-liga','serie-a','ligue-1','a-league','champions-league']
