@@ -1,0 +1,307 @@
+match_id,kick_off,team_home,team_away,score_home_full,score_away_full,score_home_half,score_away_half
+S2425_GD1_G1,2024-08-23,Bor. Mönchengladbach,Bayer 04 Leverkusen,2.0,3.0,0.0,2.0
+S2425_GD1_G2,2024-08-24,RB Leipzig,VfL Bochum,1.0,0.0,0.0,0.0
+S2425_GD1_G3,2024-08-24,TSG Hoffenheim,Holstein Kiel,3.0,2.0,2.0,0.0
+S2425_GD1_G4,2024-08-24,SC Freiburg,VfB Stuttgart,3.0,1.0,1.0,1.0
+S2425_GD1_G5,2024-08-24,FC Augsburg,Werder Bremen,2.0,2.0,2.0,1.0
+S2425_GD1_G6,2024-08-24,1. FSV Mainz 05,1. FC Union Berlin,1.0,1.0,0.0,0.0
+S2425_GD1_G7,2024-08-24,Borussia Dortmund,Eintracht Frankfurt,2.0,0.0,0.0,0.0
+S2425_GD1_G8,2024-08-25,VfL Wolfsburg,Bayern München,2.0,3.0,0.0,1.0
+S2425_GD1_G9,2024-08-25,FC St. Pauli,1. FC Heidenheim,0.0,2.0,0.0,0.0
+S2425_GD2_G1,2024-08-30,1. FC Union Berlin,FC St. Pauli,1.0,0.0,1.0,0.0
+S2425_GD2_G2,2024-08-31,VfB Stuttgart,1. FSV Mainz 05,3.0,3.0,2.0,1.0
+S2425_GD2_G3,2024-08-31,Eintracht Frankfurt,TSG Hoffenheim,3.0,1.0,2.0,0.0
+S2425_GD2_G4,2024-08-31,Werder Bremen,Borussia Dortmund,0.0,0.0,0.0,0.0
+S2425_GD2_G5,2024-08-31,VfL Bochum,Bor. Mönchengladbach,0.0,2.0,0.0,0.0
+S2425_GD2_G6,2024-08-31,Holstein Kiel,VfL Wolfsburg,0.0,2.0,0.0,2.0
+S2425_GD2_G7,2024-08-31,Bayer 04 Leverkusen,RB Leipzig,2.0,3.0,2.0,1.0
+S2425_GD2_G8,2024-09-01,1. FC Heidenheim,FC Augsburg,4.0,0.0,2.0,0.0
+S2425_GD2_G9,2024-09-01,Bayern München,SC Freiburg,2.0,0.0,1.0,0.0
+S2425_GD3_G1,2024-09-13,Borussia Dortmund,1. FC Heidenheim,4.0,2.0,3.0,1.0
+S2425_GD3_G2,2024-09-14,RB Leipzig,1. FC Union Berlin,0.0,0.0,0.0,0.0
+S2425_GD3_G3,2024-09-14,TSG Hoffenheim,Bayer 04 Leverkusen,1.0,4.0,1.0,2.0
+S2425_GD3_G4,2024-09-14,SC Freiburg,VfL Bochum,2.0,1.0,0.0,1.0
+S2425_GD3_G5,2024-09-14,VfL Wolfsburg,Eintracht Frankfurt,1.0,2.0,0.0,1.0
+S2425_GD3_G6,2024-09-14,Bor. Mönchengladbach,VfB Stuttgart,1.0,3.0,1.0,1.0
+S2425_GD3_G7,2024-09-14,Holstein Kiel,Bayern München,1.0,6.0,0.0,4.0
+S2425_GD3_G8,2024-09-15,FC Augsburg,FC St. Pauli,3.0,1.0,0.0,0.0
+S2425_GD3_G9,2024-09-15,1. FSV Mainz 05,Werder Bremen,1.0,2.0,1.0,1.0
+S2425_GD4_G1,2024-09-20,FC Augsburg,1. FSV Mainz 05,2.0,3.0,1.0,2.0
+S2425_GD4_G2,2024-09-21,1. FC Heidenheim,SC Freiburg,0.0,3.0,0.0,0.0
+S2425_GD4_G3,2024-09-21,Werder Bremen,Bayern München,0.0,5.0,0.0,2.0
+S2425_GD4_G4,2024-09-21,1. FC Union Berlin,TSG Hoffenheim,2.0,1.0,2.0,0.0
+S2425_GD4_G5,2024-09-21,VfL Bochum,Holstein Kiel,2.0,2.0,2.0,1.0
+S2425_GD4_G6,2024-09-21,Eintracht Frankfurt,Bor. Mönchengladbach,2.0,0.0,1.0,0.0
+S2425_GD4_G7,2024-09-22,Bayer 04 Leverkusen,VfL Wolfsburg,4.0,3.0,2.0,3.0
+S2425_GD4_G8,2024-09-22,VfB Stuttgart,Borussia Dortmund,5.0,1.0,2.0,0.0
+S2425_GD4_G9,2024-09-22,FC St. Pauli,RB Leipzig,0.0,0.0,0.0,0.0
+S2425_GD5_G1,2024-09-27,Borussia Dortmund,VfL Bochum,4.0,2.0,1.0,2.0
+S2425_GD5_G2,2024-09-28,RB Leipzig,FC Augsburg,4.0,0.0,2.0,0.0
+S2425_GD5_G3,2024-09-28,SC Freiburg,FC St. Pauli,0.0,3.0,0.0,2.0
+S2425_GD5_G4,2024-09-28,VfL Wolfsburg,VfB Stuttgart,2.0,2.0,1.0,1.0
+S2425_GD5_G5,2024-09-28,1. FSV Mainz 05,1. FC Heidenheim,0.0,2.0,0.0,1.0
+S2425_GD5_G6,2024-09-28,Bor. Mönchengladbach,1. FC Union Berlin,1.0,0.0,0.0,0.0
+S2425_GD5_G7,2024-09-28,Bayern München,Bayer 04 Leverkusen,1.0,1.0,1.0,1.0
+S2425_GD5_G8,2024-09-29,Holstein Kiel,Eintracht Frankfurt,2.0,4.0,1.0,1.0
+S2425_GD5_G9,2024-09-29,TSG Hoffenheim,Werder Bremen,3.0,4.0,3.0,3.0
+S2425_GD6_G1,2024-10-04,FC Augsburg,Bor. Mönchengladbach,2.0,1.0,1.0,0.0
+S2425_GD6_G2,2024-10-05,Bayer 04 Leverkusen,Holstein Kiel,2.0,2.0,2.0,1.0
+S2425_GD6_G3,2024-10-05,Werder Bremen,SC Freiburg,0.0,1.0,0.0,0.0
+S2425_GD6_G4,2024-10-05,1. FC Union Berlin,Borussia Dortmund,2.0,1.0,2.0,0.0
+S2425_GD6_G5,2024-10-05,VfL Bochum,VfL Wolfsburg,1.0,3.0,0.0,2.0
+S2425_GD6_G6,2024-10-05,FC St. Pauli,1. FSV Mainz 05,0.0,3.0,0.0,2.0
+S2425_GD6_G7,2024-10-06,1. FC Heidenheim,RB Leipzig,0.0,1.0,0.0,0.0
+S2425_GD6_G8,2024-10-06,Eintracht Frankfurt,Bayern München,3.0,3.0,2.0,2.0
+S2425_GD6_G9,2024-10-06,VfB Stuttgart,TSG Hoffenheim,1.0,1.0,0.0,1.0
+S2425_GD7_G1,2024-10-18,Borussia Dortmund,FC St. Pauli,2.0,1.0,1.0,0.0
+S2425_GD7_G2,2024-10-19,Bayer 04 Leverkusen,Eintracht Frankfurt,2.0,1.0,1.0,1.0
+S2425_GD7_G3,2024-10-19,TSG Hoffenheim,VfL Bochum,3.0,1.0,1.0,0.0
+S2425_GD7_G4,2024-10-19,SC Freiburg,FC Augsburg,3.0,1.0,3.0,0.0
+S2425_GD7_G5,2024-10-19,1. FSV Mainz 05,RB Leipzig,0.0,2.0,0.0,2.0
+S2425_GD7_G6,2024-10-19,Bor. Mönchengladbach,1. FC Heidenheim,3.0,2.0,1.0,1.0
+S2425_GD7_G7,2024-10-19,Bayern München,VfB Stuttgart,4.0,0.0,0.0,0.0
+S2425_GD7_G8,2024-10-20,Holstein Kiel,1. FC Union Berlin,0.0,2.0,0.0,1.0
+S2425_GD7_G9,2024-10-20,VfL Wolfsburg,Werder Bremen,2.0,4.0,1.0,1.0
+S2425_GD8_G1,2024-10-25,1. FSV Mainz 05,Bor. Mönchengladbach,1.0,1.0,0.0,0.0
+S2425_GD8_G2,2024-10-26,VfB Stuttgart,Holstein Kiel,2.0,1.0,1.0,0.0
+S2425_GD8_G3,2024-10-26,RB Leipzig,SC Freiburg,3.0,1.0,0.0,1.0
+S2425_GD8_G4,2024-10-26,FC Augsburg,Borussia Dortmund,2.0,1.0,1.0,1.0
+S2425_GD8_G5,2024-10-26,FC St. Pauli,VfL Wolfsburg,0.0,0.0,0.0,0.0
+S2425_GD8_G6,2024-10-26,Werder Bremen,Bayer 04 Leverkusen,2.0,2.0,0.0,1.0
+S2425_GD8_G7,2024-10-27,VfL Bochum,Bayern München,0.0,5.0,0.0,2.0
+S2425_GD8_G8,2024-10-27,1. FC Union Berlin,Eintracht Frankfurt,1.0,1.0,0.0,1.0
+S2425_GD8_G9,2024-10-27,1. FC Heidenheim,TSG Hoffenheim,0.0,0.0,0.0,0.0
+S2425_GD9_G1,2024-11-01,Bayer 04 Leverkusen,VfB Stuttgart,0.0,0.0,0.0,0.0
+S2425_GD9_G2,2024-11-02,Bayern München,1. FC Union Berlin,3.0,0.0,2.0,0.0
+S2425_GD9_G3,2024-11-02,Eintracht Frankfurt,VfL Bochum,7.0,2.0,4.0,1.0
+S2425_GD9_G4,2024-11-02,TSG Hoffenheim,FC St. Pauli,0.0,2.0,0.0,1.0
+S2425_GD9_G5,2024-11-02,VfL Wolfsburg,FC Augsburg,1.0,1.0,0.0,1.0
+S2425_GD9_G6,2024-11-02,Holstein Kiel,1. FC Heidenheim,1.0,0.0,1.0,0.0
+S2425_GD9_G7,2024-11-02,Borussia Dortmund,RB Leipzig,2.0,1.0,1.0,1.0
+S2425_GD9_G8,2024-11-03,SC Freiburg,1. FSV Mainz 05,0.0,0.0,0.0,0.0
+S2425_GD9_G9,2024-11-03,Bor. Mönchengladbach,Werder Bremen,4.0,1.0,3.0,0.0
+S2425_GD10_G1,2024-11-08,1. FC Union Berlin,SC Freiburg,0.0,0.0,0.0,0.0
+S2425_GD10_G2,2024-11-09,Werder Bremen,Holstein Kiel,2.0,1.0,1.0,0.0
+S2425_GD10_G3,2024-11-09,1. FSV Mainz 05,Borussia Dortmund,3.0,1.0,2.0,1.0
+S2425_GD10_G4,2024-11-09,VfL Bochum,Bayer 04 Leverkusen,1.0,1.0,0.0,1.0
+S2425_GD10_G5,2024-11-09,FC St. Pauli,Bayern München,0.0,1.0,0.0,1.0
+S2425_GD10_G6,2024-11-09,RB Leipzig,Bor. Mönchengladbach,0.0,0.0,0.0,0.0
+S2425_GD10_G7,2024-11-10,FC Augsburg,TSG Hoffenheim,0.0,0.0,0.0,0.0
+S2425_GD10_G8,2024-11-10,VfB Stuttgart,Eintracht Frankfurt,2.0,3.0,0.0,1.0
+S2425_GD10_G9,2024-11-10,1. FC Heidenheim,VfL Wolfsburg,1.0,3.0,0.0,2.0
+S2425_GD11_G1,2024-11-22,Bayern München,FC Augsburg,3.0,0.0,0.0,0.0
+S2425_GD11_G2,2024-11-23,Bayer 04 Leverkusen,1. FC Heidenheim,5.0,2.0,2.0,2.0
+S2425_GD11_G3,2024-11-23,VfB Stuttgart,VfL Bochum,2.0,0.0,0.0,0.0
+S2425_GD11_G4,2024-11-23,Borussia Dortmund,SC Freiburg,4.0,0.0,2.0,0.0
+S2425_GD11_G5,2024-11-23,TSG Hoffenheim,RB Leipzig,4.0,3.0,1.0,2.0
+S2425_GD11_G6,2024-11-23,VfL Wolfsburg,1. FC Union Berlin,1.0,0.0,0.0,0.0
+S2425_GD11_G7,2024-11-23,Eintracht Frankfurt,Werder Bremen,1.0,0.0,1.0,0.0
+S2425_GD11_G8,2024-11-24,Holstein Kiel,1. FSV Mainz 05,0.0,3.0,0.0,2.0
+S2425_GD11_G9,2024-11-24,Bor. Mönchengladbach,FC St. Pauli,2.0,0.0,2.0,0.0
+S2425_GD12_G1,2024-11-29,FC St. Pauli,Holstein Kiel,3.0,1.0,1.0,0.0
+S2425_GD12_G2,2024-11-30,RB Leipzig,VfL Wolfsburg,1.0,5.0,0.0,3.0
+S2425_GD12_G3,2024-11-30,Werder Bremen,VfB Stuttgart,2.0,2.0,1.0,1.0
+S2425_GD12_G4,2024-11-30,SC Freiburg,Bor. Mönchengladbach,3.0,1.0,1.0,0.0
+S2425_GD12_G5,2024-11-30,FC Augsburg,VfL Bochum,1.0,0.0,1.0,0.0
+S2425_GD12_G6,2024-11-30,1. FC Union Berlin,Bayer 04 Leverkusen,1.0,2.0,1.0,1.0
+S2425_GD12_G7,2024-11-30,Borussia Dortmund,Bayern München,1.0,1.0,1.0,0.0
+S2425_GD12_G8,2024-12-01,1. FSV Mainz 05,TSG Hoffenheim,2.0,0.0,2.0,0.0
+S2425_GD12_G9,2024-12-01,1. FC Heidenheim,Eintracht Frankfurt,0.0,4.0,0.0,1.0
+S2425_GD13_G1,2024-12-06,VfB Stuttgart,1. FC Union Berlin,3.0,2.0,0.0,1.0
+S2425_GD13_G2,2024-12-07,Bayer 04 Leverkusen,FC St. Pauli,2.0,1.0,2.0,0.0
+S2425_GD13_G3,2024-12-07,Bayern München,1. FC Heidenheim,4.0,2.0,1.0,0.0
+S2425_GD13_G4,2024-12-07,Eintracht Frankfurt,FC Augsburg,2.0,2.0,0.0,0.0
+S2425_GD13_G5,2024-12-07,VfL Bochum,Werder Bremen,0.0,1.0,0.0,0.0
+S2425_GD13_G6,2024-12-07,Holstein Kiel,RB Leipzig,0.0,2.0,0.0,1.0
+S2425_GD13_G7,2024-12-07,Bor. Mönchengladbach,Borussia Dortmund,1.0,1.0,0.0,0.0
+S2425_GD13_G8,2024-12-08,VfL Wolfsburg,1. FSV Mainz 05,4.0,3.0,1.0,2.0
+S2425_GD13_G9,2024-12-08,TSG Hoffenheim,SC Freiburg,1.0,1.0,0.0,0.0
+S2425_GD14_G1,2024-12-13,SC Freiburg,VfL Wolfsburg,3.0,2.0,1.0,0.0
+S2425_GD14_G2,2024-12-14,FC Augsburg,Bayer 04 Leverkusen,0.0,2.0,0.0,2.0
+S2425_GD14_G3,2024-12-14,1. FSV Mainz 05,Bayern München,2.0,1.0,1.0,0.0
+S2425_GD14_G4,2024-12-14,Bor. Mönchengladbach,Holstein Kiel,4.0,1.0,3.0,1.0
+S2425_GD14_G5,2024-12-14,1. FC Union Berlin,VfL Bochum,1.0,1.0,1.0,1.0
+S2425_GD14_G6,2024-12-14,FC St. Pauli,Werder Bremen,0.0,2.0,0.0,1.0
+S2425_GD14_G7,2024-12-15,1. FC Heidenheim,VfB Stuttgart,1.0,3.0,1.0,2.0
+S2425_GD14_G8,2024-12-15,Borussia Dortmund,TSG Hoffenheim,1.0,1.0,0.0,0.0
+S2425_GD14_G9,2024-12-15,RB Leipzig,Eintracht Frankfurt,2.0,1.0,1.0,1.0
+S2425_GD15_G1,2024-12-20,Bayern München,RB Leipzig,5.0,1.0,3.0,1.0
+S2425_GD15_G2,2024-12-21,VfB Stuttgart,FC St. Pauli,0.0,1.0,0.0,1.0
+S2425_GD15_G3,2024-12-21,Eintracht Frankfurt,1. FSV Mainz 05,1.0,3.0,0.0,2.0
+S2425_GD15_G4,2024-12-21,TSG Hoffenheim,Bor. Mönchengladbach,1.0,2.0,0.0,1.0
+S2425_GD15_G5,2024-12-21,Werder Bremen,1. FC Union Berlin,4.0,1.0,3.0,1.0
+S2425_GD15_G6,2024-12-21,Holstein Kiel,FC Augsburg,5.0,1.0,4.0,1.0
+S2425_GD15_G7,2024-12-21,Bayer 04 Leverkusen,SC Freiburg,5.0,1.0,1.0,0.0
+S2425_GD15_G8,2024-12-22,VfL Bochum,1. FC Heidenheim,2.0,0.0,2.0,0.0
+S2425_GD15_G9,2024-12-22,VfL Wolfsburg,Borussia Dortmund,1.0,3.0,0.0,3.0
+S2425_GD16_G1,2025-01-10,Borussia Dortmund,Bayer 04 Leverkusen,,,,
+S2425_GD16_G2,2025-01-11,TSG Hoffenheim,VfL Wolfsburg,,,,
+S2425_GD16_G3,2025-01-11,1. FC Heidenheim,1. FC Union Berlin,,,,
+S2425_GD16_G4,2025-01-11,SC Freiburg,Holstein Kiel,,,,
+S2425_GD16_G5,2025-01-11,1. FSV Mainz 05,VfL Bochum,,,,
+S2425_GD16_G6,2025-01-11,FC St. Pauli,Eintracht Frankfurt,,,,
+S2425_GD16_G7,2025-01-11,Bor. Mönchengladbach,Bayern München,,,,
+S2425_GD16_G8,2025-01-12,RB Leipzig,Werder Bremen,,,,
+S2425_GD16_G9,2025-01-12,FC Augsburg,VfB Stuttgart,,,,
+S2425_GD17_G1,2025-01-14,Holstein Kiel,Borussia Dortmund,,,,
+S2425_GD17_G2,2025-01-14,Bayer 04 Leverkusen,1. FSV Mainz 05,,,,
+S2425_GD17_G3,2025-01-14,Eintracht Frankfurt,SC Freiburg,,,,
+S2425_GD17_G4,2025-01-14,VfL Wolfsburg,Bor. Mönchengladbach,,,,
+S2425_GD17_G5,2025-01-15,VfL Bochum,FC St. Pauli,,,,
+S2425_GD17_G6,2025-01-15,VfB Stuttgart,RB Leipzig,,,,
+S2425_GD17_G7,2025-01-15,Bayern München,TSG Hoffenheim,,,,
+S2425_GD17_G8,2025-01-15,Werder Bremen,1. FC Heidenheim,,,,
+S2425_GD17_G9,2025-01-15,1. FC Union Berlin,FC Augsburg,,,,
+S2425_GD18_G1,2025-01-17,Eintracht Frankfurt,Borussia Dortmund,,,,
+S2425_GD18_G2,2025-01-18,VfB Stuttgart,SC Freiburg,,,,
+S2425_GD18_G3,2025-01-18,Bayern München,VfL Wolfsburg,,,,
+S2425_GD18_G4,2025-01-18,1. FC Heidenheim,FC St. Pauli,,,,
+S2425_GD18_G5,2025-01-18,VfL Bochum,RB Leipzig,,,,
+S2425_GD18_G6,2025-01-18,Holstein Kiel,TSG Hoffenheim,,,,
+S2425_GD18_G7,2025-01-18,Bayer 04 Leverkusen,Bor. Mönchengladbach,,,,
+S2425_GD18_G8,2025-01-19,1. FC Union Berlin,1. FSV Mainz 05,,,,
+S2425_GD18_G9,2025-01-19,Werder Bremen,FC Augsburg,,,,
+S2425_GD19_G1,2025-01-24,VfL Wolfsburg,Holstein Kiel,,,,
+S2425_GD19_G2,2025-01-25,RB Leipzig,Bayer 04 Leverkusen,,,,
+S2425_GD19_G3,2025-01-25,Borussia Dortmund,Werder Bremen,,,,
+S2425_GD19_G4,2025-01-25,SC Freiburg,Bayern München,,,,
+S2425_GD19_G5,2025-01-25,FC Augsburg,1. FC Heidenheim,,,,
+S2425_GD19_G6,2025-01-25,1. FSV Mainz 05,VfB Stuttgart,,,,
+S2425_GD19_G7,2025-01-25,Bor. Mönchengladbach,VfL Bochum,,,,
+S2425_GD19_G8,2025-01-26,TSG Hoffenheim,Eintracht Frankfurt,,,,
+S2425_GD19_G9,2025-01-26,FC St. Pauli,1. FC Union Berlin,,,,
+S2425_GD20_G1,2025-01-31,Werder Bremen,1. FSV Mainz 05,,,,
+S2425_GD20_G2,2025-02-01,VfB Stuttgart,Bor. Mönchengladbach,,,,
+S2425_GD20_G3,2025-02-01,Bayern München,Holstein Kiel,,,,
+S2425_GD20_G4,2025-02-01,1. FC Heidenheim,Borussia Dortmund,,,,
+S2425_GD20_G5,2025-02-01,VfL Bochum,SC Freiburg,,,,
+S2425_GD20_G6,2025-02-01,FC St. Pauli,FC Augsburg,,,,
+S2425_GD20_G7,2025-02-01,1. FC Union Berlin,RB Leipzig,,,,
+S2425_GD20_G8,2025-02-02,Eintracht Frankfurt,VfL Wolfsburg,,,,
+S2425_GD20_G9,2025-02-02,Bayer 04 Leverkusen,TSG Hoffenheim,,,,
+S2425_GD21_G1,2025-02-07,Bayern München,Werder Bremen,,,,
+S2425_GD21_G2,2025-02-08,Borussia Dortmund,VfB Stuttgart,,,,
+S2425_GD21_G3,2025-02-08,TSG Hoffenheim,1. FC Union Berlin,,,,
+S2425_GD21_G4,2025-02-08,SC Freiburg,1. FC Heidenheim,,,,
+S2425_GD21_G5,2025-02-08,VfL Wolfsburg,Bayer 04 Leverkusen,,,,
+S2425_GD21_G6,2025-02-08,1. FSV Mainz 05,FC Augsburg,,,,
+S2425_GD21_G7,2025-02-08,Bor. Mönchengladbach,Eintracht Frankfurt,,,,
+S2425_GD21_G8,2025-02-09,Holstein Kiel,VfL Bochum,,,,
+S2425_GD21_G9,2025-02-09,RB Leipzig,FC St. Pauli,,,,
+S2425_GD22_G1,2025-02-14,FC Augsburg,RB Leipzig,,,,
+S2425_GD22_G2,2025-02-15,VfB Stuttgart,VfL Wolfsburg,,,,
+S2425_GD22_G3,2025-02-15,1. FC Union Berlin,Bor. Mönchengladbach,,,,
+S2425_GD22_G4,2025-02-15,VfL Bochum,Borussia Dortmund,,,,
+S2425_GD22_G5,2025-02-15,FC St. Pauli,SC Freiburg,,,,
+S2425_GD22_G6,2025-02-15,Bayer 04 Leverkusen,Bayern München,,,,
+S2425_GD22_G7,2025-02-16,Werder Bremen,TSG Hoffenheim,,,,
+S2425_GD22_G8,2025-02-16,Eintracht Frankfurt,Holstein Kiel,,,,
+S2425_GD22_G9,2025-02-16,1. FC Heidenheim,1. FSV Mainz 05,,,,
+S2425_GD23_G1,2025-02-21,SC Freiburg,Werder Bremen,,,,
+S2425_GD23_G2,2025-02-22,VfL Wolfsburg,VfL Bochum,,,,
+S2425_GD23_G3,2025-02-22,1. FSV Mainz 05,FC St. Pauli,,,,
+S2425_GD23_G4,2025-02-22,Bor. Mönchengladbach,FC Augsburg,,,,
+S2425_GD23_G5,2025-02-22,Holstein Kiel,Bayer 04 Leverkusen,,,,
+S2425_GD23_G6,2025-02-22,Borussia Dortmund,1. FC Union Berlin,,,,
+S2425_GD23_G7,2025-02-23,RB Leipzig,1. FC Heidenheim,,,,
+S2425_GD23_G8,2025-02-23,Bayern München,Eintracht Frankfurt,,,,
+S2425_GD23_G9,2025-02-23,TSG Hoffenheim,VfB Stuttgart,,,,
+S2425_GD24_G1,2025-02-28,VfB Stuttgart,Bayern München,,,,
+S2425_GD24_G2,2025-03-01,RB Leipzig,1. FSV Mainz 05,,,,
+S2425_GD24_G3,2025-03-01,1. FC Heidenheim,Bor. Mönchengladbach,,,,
+S2425_GD24_G4,2025-03-01,Werder Bremen,VfL Wolfsburg,,,,
+S2425_GD24_G5,2025-03-01,VfL Bochum,TSG Hoffenheim,,,,
+S2425_GD24_G6,2025-03-01,FC St. Pauli,Borussia Dortmund,,,,
+S2425_GD24_G7,2025-03-01,Eintracht Frankfurt,Bayer 04 Leverkusen,,,,
+S2425_GD24_G8,2025-03-02,1. FC Union Berlin,Holstein Kiel,,,,
+S2425_GD24_G9,2025-03-02,FC Augsburg,SC Freiburg,,,,
+S2425_GD25_G1,2025-03-08,Bayer 04 Leverkusen,Werder Bremen,,,,
+S2425_GD25_G2,2025-03-08,Bayern München,VfL Bochum,,,,
+S2425_GD25_G3,2025-03-08,Borussia Dortmund,FC Augsburg,,,,
+S2425_GD25_G4,2025-03-08,Eintracht Frankfurt,1. FC Union Berlin,,,,
+S2425_GD25_G5,2025-03-08,TSG Hoffenheim,1. FC Heidenheim,,,,
+S2425_GD25_G6,2025-03-08,SC Freiburg,RB Leipzig,,,,
+S2425_GD25_G7,2025-03-08,VfL Wolfsburg,FC St. Pauli,,,,
+S2425_GD25_G8,2025-03-08,Bor. Mönchengladbach,1. FSV Mainz 05,,,,
+S2425_GD25_G9,2025-03-08,Holstein Kiel,VfB Stuttgart,,,,
+S2425_GD26_G1,2025-03-15,VfB Stuttgart,Bayer 04 Leverkusen,,,,
+S2425_GD26_G2,2025-03-15,RB Leipzig,Borussia Dortmund,,,,
+S2425_GD26_G3,2025-03-15,1. FC Heidenheim,Holstein Kiel,,,,
+S2425_GD26_G4,2025-03-15,Werder Bremen,Bor. Mönchengladbach,,,,
+S2425_GD26_G5,2025-03-15,FC Augsburg,VfL Wolfsburg,,,,
+S2425_GD26_G6,2025-03-15,1. FSV Mainz 05,SC Freiburg,,,,
+S2425_GD26_G7,2025-03-15,1. FC Union Berlin,Bayern München,,,,
+S2425_GD26_G8,2025-03-15,VfL Bochum,Eintracht Frankfurt,,,,
+S2425_GD26_G9,2025-03-15,FC St. Pauli,TSG Hoffenheim,,,,
+S2425_GD27_G1,2025-03-29,Bayer 04 Leverkusen,VfL Bochum,,,,
+S2425_GD27_G2,2025-03-29,Bayern München,FC St. Pauli,,,,
+S2425_GD27_G3,2025-03-29,Borussia Dortmund,1. FSV Mainz 05,,,,
+S2425_GD27_G4,2025-03-29,Eintracht Frankfurt,VfB Stuttgart,,,,
+S2425_GD27_G5,2025-03-29,TSG Hoffenheim,FC Augsburg,,,,
+S2425_GD27_G6,2025-03-29,SC Freiburg,1. FC Union Berlin,,,,
+S2425_GD27_G7,2025-03-29,VfL Wolfsburg,1. FC Heidenheim,,,,
+S2425_GD27_G8,2025-03-29,Bor. Mönchengladbach,RB Leipzig,,,,
+S2425_GD27_G9,2025-03-29,Holstein Kiel,Werder Bremen,,,,
+S2425_GD28_G1,2025-04-05,RB Leipzig,TSG Hoffenheim,,,,
+S2425_GD28_G2,2025-04-05,1. FC Heidenheim,Bayer 04 Leverkusen,,,,
+S2425_GD28_G3,2025-04-05,Werder Bremen,Eintracht Frankfurt,,,,
+S2425_GD28_G4,2025-04-05,SC Freiburg,Borussia Dortmund,,,,
+S2425_GD28_G5,2025-04-05,FC Augsburg,Bayern München,,,,
+S2425_GD28_G6,2025-04-05,1. FSV Mainz 05,Holstein Kiel,,,,
+S2425_GD28_G7,2025-04-05,1. FC Union Berlin,VfL Wolfsburg,,,,
+S2425_GD28_G8,2025-04-05,VfL Bochum,VfB Stuttgart,,,,
+S2425_GD28_G9,2025-04-05,FC St. Pauli,Bor. Mönchengladbach,,,,
+S2425_GD29_G1,2025-04-12,Bayer 04 Leverkusen,1. FC Union Berlin,,,,
+S2425_GD29_G2,2025-04-12,VfB Stuttgart,Werder Bremen,,,,
+S2425_GD29_G3,2025-04-12,Bayern München,Borussia Dortmund,,,,
+S2425_GD29_G4,2025-04-12,Eintracht Frankfurt,1. FC Heidenheim,,,,
+S2425_GD29_G5,2025-04-12,TSG Hoffenheim,1. FSV Mainz 05,,,,
+S2425_GD29_G6,2025-04-12,VfL Wolfsburg,RB Leipzig,,,,
+S2425_GD29_G7,2025-04-12,Bor. Mönchengladbach,SC Freiburg,,,,
+S2425_GD29_G8,2025-04-12,VfL Bochum,FC Augsburg,,,,
+S2425_GD29_G9,2025-04-12,Holstein Kiel,FC St. Pauli,,,,
+S2425_GD30_G1,2025-04-19,RB Leipzig,Holstein Kiel,,,,
+S2425_GD30_G2,2025-04-19,Borussia Dortmund,Bor. Mönchengladbach,,,,
+S2425_GD30_G3,2025-04-19,1. FC Heidenheim,Bayern München,,,,
+S2425_GD30_G4,2025-04-19,Werder Bremen,VfL Bochum,,,,
+S2425_GD30_G5,2025-04-19,SC Freiburg,TSG Hoffenheim,,,,
+S2425_GD30_G6,2025-04-19,FC Augsburg,Eintracht Frankfurt,,,,
+S2425_GD30_G7,2025-04-19,1. FSV Mainz 05,VfL Wolfsburg,,,,
+S2425_GD30_G8,2025-04-19,1. FC Union Berlin,VfB Stuttgart,,,,
+S2425_GD30_G9,2025-04-19,FC St. Pauli,Bayer 04 Leverkusen,,,,
+S2425_GD31_G1,2025-04-26,Bayer 04 Leverkusen,FC Augsburg,,,,
+S2425_GD31_G2,2025-04-26,VfB Stuttgart,1. FC Heidenheim,,,,
+S2425_GD31_G3,2025-04-26,Bayern München,1. FSV Mainz 05,,,,
+S2425_GD31_G4,2025-04-26,Eintracht Frankfurt,RB Leipzig,,,,
+S2425_GD31_G5,2025-04-26,TSG Hoffenheim,Borussia Dortmund,,,,
+S2425_GD31_G6,2025-04-26,Werder Bremen,FC St. Pauli,,,,
+S2425_GD31_G7,2025-04-26,VfL Wolfsburg,SC Freiburg,,,,
+S2425_GD31_G8,2025-04-26,VfL Bochum,1. FC Union Berlin,,,,
+S2425_GD31_G9,2025-04-26,Holstein Kiel,Bor. Mönchengladbach,,,,
+S2425_GD32_G1,2025-05-03,RB Leipzig,Bayern München,,,,
+S2425_GD32_G2,2025-05-03,Borussia Dortmund,VfL Wolfsburg,,,,
+S2425_GD32_G3,2025-05-03,1. FC Heidenheim,VfL Bochum,,,,
+S2425_GD32_G4,2025-05-03,SC Freiburg,Bayer 04 Leverkusen,,,,
+S2425_GD32_G5,2025-05-03,FC Augsburg,Holstein Kiel,,,,
+S2425_GD32_G6,2025-05-03,1. FSV Mainz 05,Eintracht Frankfurt,,,,
+S2425_GD32_G7,2025-05-03,Bor. Mönchengladbach,TSG Hoffenheim,,,,
+S2425_GD32_G8,2025-05-03,1. FC Union Berlin,Werder Bremen,,,,
+S2425_GD32_G9,2025-05-03,FC St. Pauli,VfB Stuttgart,,,,
+S2425_GD33_G1,2025-05-10,Bayer 04 Leverkusen,Borussia Dortmund,,,,
+S2425_GD33_G2,2025-05-10,VfB Stuttgart,FC Augsburg,,,,
+S2425_GD33_G3,2025-05-10,Bayern München,Bor. Mönchengladbach,,,,
+S2425_GD33_G4,2025-05-10,Eintracht Frankfurt,FC St. Pauli,,,,
+S2425_GD33_G5,2025-05-10,Werder Bremen,RB Leipzig,,,,
+S2425_GD33_G6,2025-05-10,VfL Wolfsburg,TSG Hoffenheim,,,,
+S2425_GD33_G7,2025-05-10,1. FC Union Berlin,1. FC Heidenheim,,,,
+S2425_GD33_G8,2025-05-10,VfL Bochum,1. FSV Mainz 05,,,,
+S2425_GD33_G9,2025-05-10,Holstein Kiel,SC Freiburg,,,,
+S2425_GD34_G1,2025-05-17,RB Leipzig,VfB Stuttgart,,,,
+S2425_GD34_G2,2025-05-17,Borussia Dortmund,Holstein Kiel,,,,
+S2425_GD34_G3,2025-05-17,TSG Hoffenheim,Bayern München,,,,
+S2425_GD34_G4,2025-05-17,1. FC Heidenheim,Werder Bremen,,,,
+S2425_GD34_G5,2025-05-17,SC Freiburg,Eintracht Frankfurt,,,,
+S2425_GD34_G6,2025-05-17,FC Augsburg,1. FC Union Berlin,,,,
+S2425_GD34_G7,2025-05-17,1. FSV Mainz 05,Bayer 04 Leverkusen,,,,
+S2425_GD34_G8,2025-05-17,Bor. Mönchengladbach,VfL Wolfsburg,,,,
+S2425_GD34_G9,2025-05-17,FC St. Pauli,VfL Bochum,,,,
