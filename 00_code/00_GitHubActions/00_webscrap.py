@@ -46,439 +46,439 @@ if not os.path.isdir(f'{directory}/10_data/100_RawData/{ll}'):
 print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
 games_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/games.csv', index=False)
 
-sys.exit(-1)
-
-# --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
-# --- --- a sample of leagues: ['premier-league','bundesliga','2-bundesliga','la-liga','serie-a','ligue-1','a-league','champions-league']
-N_leagues = ['premier-league','bundesliga','la-liga','serie-a']
-
-# --- Which season(s) do you want to collect? [format: ['YYYY-YY']; e.g. ['2022-23','2023-24']]
-N_seasons = ['2000-01','2001-02','2002-03','2003-04','2004-05','2005-06',
-             '2006-07','2007-08','2008-09','2009-10','2010-11','2011-12','2012-13','2013-14','2014-15',
-             '2015-16','2016-17','2017-18','2018-19','2019-20','2020-21','2021-22','2022-23','2023-24']
-N_seasons = ['2024-25']
-
-
-# --- Which sequence of game days do you want to extract? [format: [integers,integers], e.g. [range(1,34),range(1,29)], i.e. a list of len(N_leagues)]
-N_gamedays = [range(1,39), range(1,35),range(1,39),range(1,39)]
-
-
-# ====================================== USER INTERACTION ============================================== #
-
-"""## 1. &emsp; Extract the data"""
-
-# ====================================== 1. Extract the Data ============================================== #
-
-"""
-
-The data is stored in dictionaries: each game day has its own entry. The dictionaries are as follows:
-
-- game:           time of kick-off; home team; away team; score home full-time; score away full-time;
-                  score home half-time; score away half-time
-
-- lineup:         starting XI home + substitutes; starting XI away + substitutes;
-                  indicator substitute in; indicator substitute out;
-
-- scorer:         player name; team name
-
-
-"""
-
-# --- Some checks before starting:
-assert len(N_leagues) == len(N_gamedays), 'ERROR: \'len(N_leagues)\' must equal \'len(N_games)\''
-
-
-
-# -------------------------------------- Start the Loop -------------------------------------- #
-
-# --- 1.1 Run across all leagues:
-for ll in N_leagues:
-
-
-  # --- 1.2 Run across all seaons:
-  for ss in N_seasons[12:]:
-
-    # --- Storages:
-    dict_game, dict_lineup, dict_scorer = {}, {}, {}
-
-
-    print(f'\nLeague: {ll} --- Season: {ss}')
-
-
-    # --- 1.3 Run across all game days:
-    for gd in tqdm(N_gamedays[N_leagues.index(ll)]):
-
-      # --- 1.3.1 Instantiate a dataframe for the current gameday for each dictionary:
-      dict_game[gd] = pd.DataFrame(columns=['match_id','kick_off','team_home','team_away',
-                                            'score_home_full','score_away_full','score_home_half','score_away_half'])
-      dict_lineup[gd] = pd.DataFrame(columns=['match_id','name_player','name_team',
-                                              'substitute_in','substitute_out'])
-      dict_scorer[gd] = pd.DataFrame(columns=['match_id','name_player','name_team','minute'])
-
-
-      # --- 1.3.2 Build the url for the current gameday:
-      url_gameday = f'https://www.kicker.de/{ll}/spieltag/{ss}/{gd}'
-
-
-      # --- 1.3.3 Download the current gameday:
-      response = requests.get(url_gameday)
-      soup = bs(response.text)
-      response.close()
-
-
-      # --- 1.3.4 Run across all games:
-      gd_games = soup.find_all('div',{'class':['kick__v100-gameCell__team__name']})
-
-      # --- --- Since each match requires two teams, this is a sequence of even numbers:
-      gd_games_seq = list(range(0,len(soup.find_all('div',{'class':['kick__v100-gameCell__team__name']})), 2))
-
-      for gg in gd_games_seq:
-
-
-        # --- 1.3.5 Find Home team:
-        team_home = str(gd_games[gg]).split('>')[1].split(' <')[0]
-
-
-        # --- 1.3.6 Find Away team:
-        team_away = str(gd_games[gg+1]).split('>')[1].split(' <')[0]
-
-
-        # --- 1.3.7 Find time of game:
-        game_idx = gd_games_seq.index(gg)
-        game_kickoff = pd.to_datetime(json.loads(soup.find_all('script', {'type' : ['application/ld+json']})[game_idx+1].text)['startDate'])
-
-        # --- --- Extract the string date:
-        game_kickoff_date = game_kickoff.strftime('%Y-%m-%d')
-
-
-        # --- 1.3.8 Create 'match_id': 'S[SEASON]_GD[GAMEDAY]_G[GAME]'
-        match_id = 'S' + ss.replace('-','')[2:] + f'_GD{gd}' + f'_G{gd_games_seq.index(gg)+1}'
-
-
-        # --- 1.3.9 Enter the game:
-        url_game = soup.find_all('a',{'class':['kick__v100-scoreBoard kick__v100-scoreBoard--standard',
-                                              'kick__v100-scoreBoard kick__v100-scoreBoard--standard kick__v100-scoreBoard--videoincl']})[game_idx]['href'].split('/')[1]
-        url_address = f'https://www.kicker.de/{url_game}/schema'
-
-        response_game = requests.get(url_address)
-        soup_game = bs(response_game.text)
-        response_game.close()
-
-        # --- 1.3.7 Find score:
-        gg_scores = soup_game.find_all('div', {'class' : ['kick__v100-scoreBoard__scoreHolder__score']})
-
-        # --- Check for bugs on the website:
-        website_bug = str(gg_scores[0]).split('>')[1].split('<')[0]
-
-        if website_bug == '-':
-          score_home_full,score_away_full,score_home_half,score_away_half = np.nan,np.nan,np.nan,np.nan
-        else:
-          score_home_full = int(str(gg_scores[0]).split('>')[1].split('<')[0])
-          score_away_full = int(str(gg_scores[1]).split('>')[1].split('<')[0])
-          # --- Is there a half-time result?
-          if len(gg_scores) > 2:
-            score_home_half = str(gg_scores[2]).split('>')[1].split('<')[0]
-            # --- Maybe no numbers?
-            if score_home_half == '':
-              score_home_half = np.nan
+if 1==2:
+    
+    # --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
+    # --- --- a sample of leagues: ['premier-league','bundesliga','2-bundesliga','la-liga','serie-a','ligue-1','a-league','champions-league']
+    N_leagues = ['premier-league','bundesliga','la-liga','serie-a']
+    
+    # --- Which season(s) do you want to collect? [format: ['YYYY-YY']; e.g. ['2022-23','2023-24']]
+    N_seasons = ['2000-01','2001-02','2002-03','2003-04','2004-05','2005-06',
+                 '2006-07','2007-08','2008-09','2009-10','2010-11','2011-12','2012-13','2013-14','2014-15',
+                 '2015-16','2016-17','2017-18','2018-19','2019-20','2020-21','2021-22','2022-23','2023-24']
+    N_seasons = ['2024-25']
+    
+    
+    # --- Which sequence of game days do you want to extract? [format: [integers,integers], e.g. [range(1,34),range(1,29)], i.e. a list of len(N_leagues)]
+    N_gamedays = [range(1,39), range(1,35),range(1,39),range(1,39)]
+    
+    
+    # ====================================== USER INTERACTION ============================================== #
+    
+    """## 1. &emsp; Extract the data"""
+    
+    # ====================================== 1. Extract the Data ============================================== #
+    
+    """
+    
+    The data is stored in dictionaries: each game day has its own entry. The dictionaries are as follows:
+    
+    - game:           time of kick-off; home team; away team; score home full-time; score away full-time;
+                      score home half-time; score away half-time
+    
+    - lineup:         starting XI home + substitutes; starting XI away + substitutes;
+                      indicator substitute in; indicator substitute out;
+    
+    - scorer:         player name; team name
+    
+    
+    """
+    
+    # --- Some checks before starting:
+    assert len(N_leagues) == len(N_gamedays), 'ERROR: \'len(N_leagues)\' must equal \'len(N_games)\''
+    
+    
+    
+    # -------------------------------------- Start the Loop -------------------------------------- #
+    
+    # --- 1.1 Run across all leagues:
+    for ll in N_leagues:
+    
+    
+      # --- 1.2 Run across all seaons:
+      for ss in N_seasons[12:]:
+    
+        # --- Storages:
+        dict_game, dict_lineup, dict_scorer = {}, {}, {}
+    
+    
+        print(f'\nLeague: {ll} --- Season: {ss}')
+    
+    
+        # --- 1.3 Run across all game days:
+        for gd in tqdm(N_gamedays[N_leagues.index(ll)]):
+    
+          # --- 1.3.1 Instantiate a dataframe for the current gameday for each dictionary:
+          dict_game[gd] = pd.DataFrame(columns=['match_id','kick_off','team_home','team_away',
+                                                'score_home_full','score_away_full','score_home_half','score_away_half'])
+          dict_lineup[gd] = pd.DataFrame(columns=['match_id','name_player','name_team',
+                                                  'substitute_in','substitute_out'])
+          dict_scorer[gd] = pd.DataFrame(columns=['match_id','name_player','name_team','minute'])
+    
+    
+          # --- 1.3.2 Build the url for the current gameday:
+          url_gameday = f'https://www.kicker.de/{ll}/spieltag/{ss}/{gd}'
+    
+    
+          # --- 1.3.3 Download the current gameday:
+          response = requests.get(url_gameday)
+          soup = bs(response.text)
+          response.close()
+    
+    
+          # --- 1.3.4 Run across all games:
+          gd_games = soup.find_all('div',{'class':['kick__v100-gameCell__team__name']})
+    
+          # --- --- Since each match requires two teams, this is a sequence of even numbers:
+          gd_games_seq = list(range(0,len(soup.find_all('div',{'class':['kick__v100-gameCell__team__name']})), 2))
+    
+          for gg in gd_games_seq:
+    
+    
+            # --- 1.3.5 Find Home team:
+            team_home = str(gd_games[gg]).split('>')[1].split(' <')[0]
+    
+    
+            # --- 1.3.6 Find Away team:
+            team_away = str(gd_games[gg+1]).split('>')[1].split(' <')[0]
+    
+    
+            # --- 1.3.7 Find time of game:
+            game_idx = gd_games_seq.index(gg)
+            game_kickoff = pd.to_datetime(json.loads(soup.find_all('script', {'type' : ['application/ld+json']})[game_idx+1].text)['startDate'])
+    
+            # --- --- Extract the string date:
+            game_kickoff_date = game_kickoff.strftime('%Y-%m-%d')
+    
+    
+            # --- 1.3.8 Create 'match_id': 'S[SEASON]_GD[GAMEDAY]_G[GAME]'
+            match_id = 'S' + ss.replace('-','')[2:] + f'_GD{gd}' + f'_G{gd_games_seq.index(gg)+1}'
+    
+    
+            # --- 1.3.9 Enter the game:
+            url_game = soup.find_all('a',{'class':['kick__v100-scoreBoard kick__v100-scoreBoard--standard',
+                                                  'kick__v100-scoreBoard kick__v100-scoreBoard--standard kick__v100-scoreBoard--videoincl']})[game_idx]['href'].split('/')[1]
+            url_address = f'https://www.kicker.de/{url_game}/schema'
+    
+            response_game = requests.get(url_address)
+            soup_game = bs(response_game.text)
+            response_game.close()
+    
+            # --- 1.3.7 Find score:
+            gg_scores = soup_game.find_all('div', {'class' : ['kick__v100-scoreBoard__scoreHolder__score']})
+    
+            # --- Check for bugs on the website:
+            website_bug = str(gg_scores[0]).split('>')[1].split('<')[0]
+    
+            if website_bug == '-':
+              score_home_full,score_away_full,score_home_half,score_away_half = np.nan,np.nan,np.nan,np.nan
             else:
-              score_home_half = int(score_home_half)
-
-            score_away_half = str(gg_scores[3]).split('>')[1].split('<')[0]
-            # --- Maybe no numbers?
-            if score_away_half == '':
-              score_away_half = np.nan
-            else:
-              score_away_half = int(score_away_half)
-          else:
-            score_home_half,score_away_half = np.nan,np.nan
-
-
-        # --- 1.3.10 Collect all data in the dataframe:
-        dict_game[gd].loc[dict_game[gd].shape[0]+1] = [match_id, game_kickoff_date, team_home, team_away,
-                                                       score_home_full, score_away_full, score_home_half, score_away_half]
-
-
-        if not (website_bug == '-'):
-
-          # --- 1.4   Go on to the scorers:
-
-
-          # --- 1.4.2 Find scorers -- Home Team
-          scorer_home = soup_game.find_all('div',{'class':['kick__goals__team kick__goals__team--left']})
-          scorer_home_minute = str(soup_game.find_all('span', {'class' : ['kick__goals__time kick__goals__time--left']})).split(',')
-          for sh in range(len(scorer_home)):
-            scorer_home_player = scorer_home[sh].find_all('a', {'class':['kick__goals__player']})
-            # --- --- Did the Home Team score a goal?
-            if len(scorer_home_player) > 0:
-              # --- --- In which minute did he score?
-              scorer_home_player_minute = scorer_home_minute[sh].split('\n')[1].split('\'')[0]
-              # --- --- Append the data frame
-              dict_scorer[gd].loc[dict_scorer[gd].shape[0]+1] = [match_id, scorer_home_player[0]['href'].split('/')[1],
-                                                                 team_home, scorer_home_player_minute]
-
-
-          # --- 1.4.3 Find scorers -- Away Team
-          scorer_away = soup_game.find_all('div',{'class':['kick__goals__team kick__goals__team--right']})
-          scorer_away_minute = str(soup_game.find_all('span', {'class' : ['kick__goals__time']})).split(',')
-          for sh in range(len(scorer_away)):
-            scorer_away_player = scorer_away[sh].find_all('a', {'class':['kick__goals__player']})
-            # --- --- Did the Away Team score a goal?
-            if len(scorer_away_player) > 0:
-              # --- --- In which minute did he score?
-              scorer_away_player_minute = scorer_away_minute[sh+sh+1].split('\n')[1].split('\'')[0]
-              # --- --- Append the data frame
-              dict_scorer[gd].loc[dict_scorer[gd].shape[0]+1] = [match_id, scorer_away_player[0]['href'].split('/')[1],
-                                                                team_away, scorer_away_player_minute]
-
-
-
-
-          # --- 1.5   Go on to the lineup -- if available:
-          if len(soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})) > 0 and len(soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})[0]) >= 11:
-
-
-
-            # --- 1.5.1 Find Players --- Substitutes Home Team
-            subs_home = soup_game.find_all('div',{'class':['kick__substitutions__team kick__substitutions__team--left']})[0].find_all('a', {'class':['kick__substitutions__player']})
-            players_subs_home = []
-            for sh in range(len(subs_home)):
-              players_subs_home.append(subs_home[sh]['href'].split('/')[1])
-
-
-
-            # --- 1.5.2 Find Players --- Starting XI Home Team
-            startingXI_home = soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})[0].find_all('a')
-            players_XI_home = []
-            for sh in range(len(startingXI_home)):
-              players_XI_home.append(startingXI_home[sh]['href'].split('/')[1])
-
-
-            # --- 1.5.3 Get indicators for in-/out-subs --- Home Team:
-            players_home = pd.unique(np.array(players_XI_home + players_subs_home))
-            subs_in_home, subs_out_home = [], []
-            for ph in players_home:
-              if (ph in players_XI_home) & (ph in players_subs_home):
-                subs_in_home.append(0)
-                subs_out_home.append(1)
-              elif (ph in players_XI_home) & (ph not in players_subs_home):
-                subs_in_home.append(0)
-                subs_out_home.append(0)
-              elif (ph not in players_XI_home) & (ph in players_subs_home):
-                subs_in_home.append(1)
-                subs_out_home.append(0)
-
-
-            # --- 1.5.4 Collect in the dictionary
-            help_df = pd.DataFrame({'match_id':match_id,
-                                    'name_player':players_home,
-                                    'name_team':team_home,
-                                    'substitute_in':subs_in_home,
-                                    'substitute_out':subs_out_home})
-
-            dict_lineup[gd] = pd.concat([dict_lineup[gd],help_df],axis=0)
-
-
-
-
-            # --- 1.5.5 Find Players --- Substitutes Away Team
-            subs_away = soup_game.find_all('div',{'class':['kick__substitutions__team kick__substitutions__team--right']})[0].find_all('a', {'class':['kick__substitutions__player']})
-            players_subs_away = []
-            for sh in range(len(subs_away)):
-              players_subs_away.append(subs_away[sh]['href'].split('/')[1])
-
-
-
-            # --- 1.5.6 Find Players --- Starting XI Away Team
-            startingXI_away = soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})[1].find_all('a')
-            players_XI_away = []
-            for sh in range(len(startingXI_away)):
-              players_XI_away.append(startingXI_away[sh]['href'].split('/')[1])
-
-
-            # --- 1.5.7 Get indicators for in-/out-subs --- Away Team:
-            players_away = pd.unique(np.array(players_XI_away + players_subs_away))
-            subs_in_away, subs_out_away = [], []
-            for ph in players_away:
-              if (ph in players_XI_away) & (ph in players_subs_away):
-                subs_in_away.append(0)
-                subs_out_away.append(1)
-              elif (ph in players_XI_away) & (ph not in players_subs_away):
-                subs_in_away.append(0)
-                subs_out_away.append(0)
-              elif (ph not in players_XI_away) & (ph in players_subs_away):
-                subs_in_away.append(1)
-                subs_out_away.append(0)
-
-
-            # --- 1.5.8 Collect in the dictionary
-            help_df = pd.DataFrame({'match_id':match_id,
-                                    'name_player':players_away,
-                                    'name_team':team_away,
-                                    'substitute_in':subs_in_away,
-                                    'substitute_out':subs_out_away})
-
-            dict_lineup[gd] = pd.concat([dict_lineup[gd],help_df],axis=0)
-
-
-
-
-
-
-
-    # --- 1.6 At the end of the season: some further cleaning might be necessitated: check for duplicates
-    games_final = pd.concat(dict_game.values()).reset_index(drop=True)
-    scorer_final = pd.concat(dict_scorer.values()).reset_index(drop=True)
-    lineup_final = pd.concat(dict_lineup.values()).reset_index(drop=True)
-
-    # --- --- --- Store the original 'match_id'
-    games_IDs_orig = games_final['match_id']
-
-    # --- --- --- Remove duplicated games:
-    games_final = games_final.loc[~games_final.duplicated(['team_home','team_away'], keep='last'),:].reset_index(drop=True)
-
-    # --- --- --- Get inidices that were removed
-    games_IDs_removed = games_IDs_orig[~games_IDs_orig.isin(games_final['match_id'])].values
-
-    # --- --- --- Remove observations with 'games_IDs_removed' in the 'scorer_final' & 'lineup_final' dataframes:
-    scorer_final = scorer_final.loc[~scorer_final['match_id'].isin(games_IDs_removed),:]
-    lineup_final = lineup_final.loc[~lineup_final['match_id'].isin(games_IDs_removed),:]
-
-
-
-    # --- 1.7 Extract Player-specific information:
-    players_final = pd.DataFrame({'season':ss,'name_player':pd.unique(lineup_final['name_player']),
-                                  'position_player':'NA', 'date_of_birth':'NA',
-                                  'N_games_left':0,'N_games_center':0,'N_games_right':0})
-
-
-    print('\nCollecting palyers\' information ...')
-    for pp in tqdm(range(players_final.shape[0])):
-
-      # --- --- Extract the name of the player:
-      pp_name = players_final.loc[pp,'name_player']
-
-      # --- --- Which team(s) did the player play for?
-      pp_ss_teams = pd.unique(lineup_final.loc[lineup_final['name_player'] == pp_name,'name_team'])
-      tt = pp_ss_teams[0].lower().replace(" ",'-')
-
-      # --- --- Download player specific information:
-      #         ---> only take the FIRST team that the player has played for in this season, since it is only generic information
-      url_player = f'https://www.kicker.de/{pp_name}/spieler/{ll}/{ss}/'
-      #url_player = f'https://www.kicker.de/{pp_name}/spieler/{ll}/{ss}/{tt}'
-
-      response_received = False
-      response_counter = 0
-      response_not_received = []
-      player_info = []
-      # --- --- --- There might be some weired shit going on ...
-      while (response_received == False) and (response_counter < 50):
-        response_player = requests.get(url_player)
-        soup_player = bs(response_player.text)
-        response_player.close()
-
-        player_info = soup_player.find_all('div', {'class':'kick__vita__header__person-detail-kvpair-info'})
-
-        if len(player_info) > 0:
-          response_received = True
+              score_home_full = int(str(gg_scores[0]).split('>')[1].split('<')[0])
+              score_away_full = int(str(gg_scores[1]).split('>')[1].split('<')[0])
+              # --- Is there a half-time result?
+              if len(gg_scores) > 2:
+                score_home_half = str(gg_scores[2]).split('>')[1].split('<')[0]
+                # --- Maybe no numbers?
+                if score_home_half == '':
+                  score_home_half = np.nan
+                else:
+                  score_home_half = int(score_home_half)
+    
+                score_away_half = str(gg_scores[3]).split('>')[1].split('<')[0]
+                # --- Maybe no numbers?
+                if score_away_half == '':
+                  score_away_half = np.nan
+                else:
+                  score_away_half = int(score_away_half)
+              else:
+                score_home_half,score_away_half = np.nan,np.nan
+    
+    
+            # --- 1.3.10 Collect all data in the dataframe:
+            dict_game[gd].loc[dict_game[gd].shape[0]+1] = [match_id, game_kickoff_date, team_home, team_away,
+                                                           score_home_full, score_away_full, score_home_half, score_away_half]
+    
+    
+            if not (website_bug == '-'):
+    
+              # --- 1.4   Go on to the scorers:
+    
+    
+              # --- 1.4.2 Find scorers -- Home Team
+              scorer_home = soup_game.find_all('div',{'class':['kick__goals__team kick__goals__team--left']})
+              scorer_home_minute = str(soup_game.find_all('span', {'class' : ['kick__goals__time kick__goals__time--left']})).split(',')
+              for sh in range(len(scorer_home)):
+                scorer_home_player = scorer_home[sh].find_all('a', {'class':['kick__goals__player']})
+                # --- --- Did the Home Team score a goal?
+                if len(scorer_home_player) > 0:
+                  # --- --- In which minute did he score?
+                  scorer_home_player_minute = scorer_home_minute[sh].split('\n')[1].split('\'')[0]
+                  # --- --- Append the data frame
+                  dict_scorer[gd].loc[dict_scorer[gd].shape[0]+1] = [match_id, scorer_home_player[0]['href'].split('/')[1],
+                                                                     team_home, scorer_home_player_minute]
+    
+    
+              # --- 1.4.3 Find scorers -- Away Team
+              scorer_away = soup_game.find_all('div',{'class':['kick__goals__team kick__goals__team--right']})
+              scorer_away_minute = str(soup_game.find_all('span', {'class' : ['kick__goals__time']})).split(',')
+              for sh in range(len(scorer_away)):
+                scorer_away_player = scorer_away[sh].find_all('a', {'class':['kick__goals__player']})
+                # --- --- Did the Away Team score a goal?
+                if len(scorer_away_player) > 0:
+                  # --- --- In which minute did he score?
+                  scorer_away_player_minute = scorer_away_minute[sh+sh+1].split('\n')[1].split('\'')[0]
+                  # --- --- Append the data frame
+                  dict_scorer[gd].loc[dict_scorer[gd].shape[0]+1] = [match_id, scorer_away_player[0]['href'].split('/')[1],
+                                                                    team_away, scorer_away_player_minute]
+    
+    
+    
+    
+              # --- 1.5   Go on to the lineup -- if available:
+              if len(soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})) > 0 and len(soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})[0]) >= 11:
+    
+    
+    
+                # --- 1.5.1 Find Players --- Substitutes Home Team
+                subs_home = soup_game.find_all('div',{'class':['kick__substitutions__team kick__substitutions__team--left']})[0].find_all('a', {'class':['kick__substitutions__player']})
+                players_subs_home = []
+                for sh in range(len(subs_home)):
+                  players_subs_home.append(subs_home[sh]['href'].split('/')[1])
+    
+    
+    
+                # --- 1.5.2 Find Players --- Starting XI Home Team
+                startingXI_home = soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})[0].find_all('a')
+                players_XI_home = []
+                for sh in range(len(startingXI_home)):
+                  players_XI_home.append(startingXI_home[sh]['href'].split('/')[1])
+    
+    
+                # --- 1.5.3 Get indicators for in-/out-subs --- Home Team:
+                players_home = pd.unique(np.array(players_XI_home + players_subs_home))
+                subs_in_home, subs_out_home = [], []
+                for ph in players_home:
+                  if (ph in players_XI_home) & (ph in players_subs_home):
+                    subs_in_home.append(0)
+                    subs_out_home.append(1)
+                  elif (ph in players_XI_home) & (ph not in players_subs_home):
+                    subs_in_home.append(0)
+                    subs_out_home.append(0)
+                  elif (ph not in players_XI_home) & (ph in players_subs_home):
+                    subs_in_home.append(1)
+                    subs_out_home.append(0)
+    
+    
+                # --- 1.5.4 Collect in the dictionary
+                help_df = pd.DataFrame({'match_id':match_id,
+                                        'name_player':players_home,
+                                        'name_team':team_home,
+                                        'substitute_in':subs_in_home,
+                                        'substitute_out':subs_out_home})
+    
+                dict_lineup[gd] = pd.concat([dict_lineup[gd],help_df],axis=0)
+    
+    
+    
+    
+                # --- 1.5.5 Find Players --- Substitutes Away Team
+                subs_away = soup_game.find_all('div',{'class':['kick__substitutions__team kick__substitutions__team--right']})[0].find_all('a', {'class':['kick__substitutions__player']})
+                players_subs_away = []
+                for sh in range(len(subs_away)):
+                  players_subs_away.append(subs_away[sh]['href'].split('/')[1])
+    
+    
+    
+                # --- 1.5.6 Find Players --- Starting XI Away Team
+                startingXI_away = soup_game.find_all('div',{'class':['kick__lineup-text__unorderedList']})[1].find_all('a')
+                players_XI_away = []
+                for sh in range(len(startingXI_away)):
+                  players_XI_away.append(startingXI_away[sh]['href'].split('/')[1])
+    
+    
+                # --- 1.5.7 Get indicators for in-/out-subs --- Away Team:
+                players_away = pd.unique(np.array(players_XI_away + players_subs_away))
+                subs_in_away, subs_out_away = [], []
+                for ph in players_away:
+                  if (ph in players_XI_away) & (ph in players_subs_away):
+                    subs_in_away.append(0)
+                    subs_out_away.append(1)
+                  elif (ph in players_XI_away) & (ph not in players_subs_away):
+                    subs_in_away.append(0)
+                    subs_out_away.append(0)
+                  elif (ph not in players_XI_away) & (ph in players_subs_away):
+                    subs_in_away.append(1)
+                    subs_out_away.append(0)
+    
+    
+                # --- 1.5.8 Collect in the dictionary
+                help_df = pd.DataFrame({'match_id':match_id,
+                                        'name_player':players_away,
+                                        'name_team':team_away,
+                                        'substitute_in':subs_in_away,
+                                        'substitute_out':subs_out_away})
+    
+                dict_lineup[gd] = pd.concat([dict_lineup[gd],help_df],axis=0)
+    
+    
+    
+    
+    
+    
+    
+        # --- 1.6 At the end of the season: some further cleaning might be necessitated: check for duplicates
+        games_final = pd.concat(dict_game.values()).reset_index(drop=True)
+        scorer_final = pd.concat(dict_scorer.values()).reset_index(drop=True)
+        lineup_final = pd.concat(dict_lineup.values()).reset_index(drop=True)
+    
+        # --- --- --- Store the original 'match_id'
+        games_IDs_orig = games_final['match_id']
+    
+        # --- --- --- Remove duplicated games:
+        games_final = games_final.loc[~games_final.duplicated(['team_home','team_away'], keep='last'),:].reset_index(drop=True)
+    
+        # --- --- --- Get inidices that were removed
+        games_IDs_removed = games_IDs_orig[~games_IDs_orig.isin(games_final['match_id'])].values
+    
+        # --- --- --- Remove observations with 'games_IDs_removed' in the 'scorer_final' & 'lineup_final' dataframes:
+        scorer_final = scorer_final.loc[~scorer_final['match_id'].isin(games_IDs_removed),:]
+        lineup_final = lineup_final.loc[~lineup_final['match_id'].isin(games_IDs_removed),:]
+    
+    
+    
+        # --- 1.7 Extract Player-specific information:
+        players_final = pd.DataFrame({'season':ss,'name_player':pd.unique(lineup_final['name_player']),
+                                      'position_player':'NA', 'date_of_birth':'NA',
+                                      'N_games_left':0,'N_games_center':0,'N_games_right':0})
+    
+    
+        print('\nCollecting palyers\' information ...')
+        for pp in tqdm(range(players_final.shape[0])):
+    
+          # --- --- Extract the name of the player:
+          pp_name = players_final.loc[pp,'name_player']
+    
+          # --- --- Which team(s) did the player play for?
+          pp_ss_teams = pd.unique(lineup_final.loc[lineup_final['name_player'] == pp_name,'name_team'])
+          tt = pp_ss_teams[0].lower().replace(" ",'-')
+    
+          # --- --- Download player specific information:
+          #         ---> only take the FIRST team that the player has played for in this season, since it is only generic information
+          url_player = f'https://www.kicker.de/{pp_name}/spieler/{ll}/{ss}/'
+          #url_player = f'https://www.kicker.de/{pp_name}/spieler/{ll}/{ss}/{tt}'
+    
+          response_received = False
           response_counter = 0
-        else:
-          response_counter += 1
-          time.sleep(5)
-
-      if len(player_info) == 0:
-        response_not_received.append(pp_name)
-        break
-
-
-
-      # --- --- Extract the position
-      players_final.loc[pp,'position_player'] = str(player_info[0]).split('</span>')[1].split('</div>')[0]
-
-      # --- --- Extract date of birth:
-      if str(player_info[1]).split('</span>')[0].split('</div>')[0].split('<span>')[1][:7] == 'Geboren':
-        pp_birth = str(player_info[1]).split('</span>')[1].split('</div>')[0][:10]
-        players_final.loc[pp,'date_of_birth'] = pd.to_datetime(pp_birth, format='%d.%m.%Y')
-
-      if len(player_info) == 4:
-        # --- --- Extract height:
-        players_final.loc[pp,'height_player'] = str(player_info[2]).split('</span>')[1].split('</div>')[0][:3]
-
-        # --- --- Extract weight:
-        players_final.loc[pp,'weight_player'] = str(player_info[3]).split('</span>')[1].split('</div>')[0][:2]
-
-      # --- --- Extract nationality:
-      players_final.loc[pp,'nationality_player'] = str(soup_player.find_all('div', {'class':'kick__vita__header__person-detail-kvpair--nation'})[0]).split('>')[1].split(' <span')[0].split(' ')[-1]
-
-
-
-      # --- --- Get information on the position
-
-      # --- Some pre-allocation
-      ss_N_games, ss_degree_left, ss_degree_forward = [],[],[]
-      ss_N_games_left, ss_N_games_center, ss_N_games_right = [],[],[]
-
-      for tt in pp_ss_teams:
-
-        # --- Some modfication on the team-name:
-        tt = tt.lower().replace(" ",'-')
-
-        # --- Compose the URL:
-        url_player_pos = f'https://www.kicker.de/{pp_name}/spielerposition/{ll}/{ss}/{tt}'
-
-        response_player = requests.get(url_player_pos)
-        soup_player = bs(response_player.text)
-        response_player.close()
-
-
-        # --- Access the Positions
-        pp_positions = soup_player.find_all('div', {'class':'kick__stat__position__map'})
-        if len(pp_positions) > 0:
-
-          pp_positions_split = str(pp_positions[0]).split('</div>')
-
-
-          for i in pp_positions_split:
-
-            # --- Split the string
-            ll_split = i.split(' ')
-            # --- Is there information on the position?
-            ll_pos_info = [pos for pos in range(len(ll_split)) if 'data-tooltip' in ll_split[pos]]
-
-            if (len(ll_pos_info) == 1):
-              # --- How many games did he play in position 'll'
-              ss_N_games.append(int(ll_split[ll_pos_info[0]].split('"')[1]))
-              # --- Degree to which he played on the LEFT
-              ll_pos_info = [pos+1 for pos in range(len(ll_split)) if 'right:' in ll_split[pos]]
-              ss_degree_left.append(int(ll_split[ll_pos_info[0]].split('%')[0]) / 100)
-              # --- Degree to which he played as forward
-              ll_pos_info = [pos+1 for pos in range(len(ll_split)) if 'style="bottom' in ll_split[pos]]
-              ss_degree_forward.append(int(ll_split[ll_pos_info[0]].split('%')[0]) / 75)
-
-              # --- Number of games as left, right, center:
-              if ss_degree_left[-1] > 0.66:
-                ss_N_games_left.append(ss_N_games[-1])
-              elif (ss_degree_left[-1] <= 0.66) and (ss_degree_left[-1] > 0.33):
-                ss_N_games_center.append(ss_N_games[-1])
-              elif ss_degree_left[-1] <= 0.33:
-                ss_N_games_right.append(ss_N_games[-1])
-
-
-        # --- Sum over Number of Games Played Left, Center, Right
-        players_final.loc[pp,'N_games_left'] = int(np.sum(ss_N_games_left))
-        players_final.loc[pp,'N_games_center'] = int(np.sum(ss_N_games_center))
-        players_final.loc[pp,'N_games_right'] = int(np.sum(ss_N_games_right))
-
-
-    # --- 1.8 Export the data '/[LEAGUE]'/S[SEASON]_['games','scorers','lineup'].csv'
-
-    # --- --- Check if directory exists:
-    if not os.path.isdir(f'{directory}/10_data/100_RawData/{ll}'):
-      os.mkdir(f'{directory}/10_data/100_RawData/{ll}')
-
-    print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
-    ss_abreviation = ss.replace('-','')[2:]
-    games_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games.csv', index=False)
-    scorer_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', index=False)
-    lineup_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_lineup.csv', index=False)
-    players_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_players.csv', index=False)
+          response_not_received = []
+          player_info = []
+          # --- --- --- There might be some weired shit going on ...
+          while (response_received == False) and (response_counter < 50):
+            response_player = requests.get(url_player)
+            soup_player = bs(response_player.text)
+            response_player.close()
+    
+            player_info = soup_player.find_all('div', {'class':'kick__vita__header__person-detail-kvpair-info'})
+    
+            if len(player_info) > 0:
+              response_received = True
+              response_counter = 0
+            else:
+              response_counter += 1
+              time.sleep(5)
+    
+          if len(player_info) == 0:
+            response_not_received.append(pp_name)
+            break
+    
+    
+    
+          # --- --- Extract the position
+          players_final.loc[pp,'position_player'] = str(player_info[0]).split('</span>')[1].split('</div>')[0]
+    
+          # --- --- Extract date of birth:
+          if str(player_info[1]).split('</span>')[0].split('</div>')[0].split('<span>')[1][:7] == 'Geboren':
+            pp_birth = str(player_info[1]).split('</span>')[1].split('</div>')[0][:10]
+            players_final.loc[pp,'date_of_birth'] = pd.to_datetime(pp_birth, format='%d.%m.%Y')
+    
+          if len(player_info) == 4:
+            # --- --- Extract height:
+            players_final.loc[pp,'height_player'] = str(player_info[2]).split('</span>')[1].split('</div>')[0][:3]
+    
+            # --- --- Extract weight:
+            players_final.loc[pp,'weight_player'] = str(player_info[3]).split('</span>')[1].split('</div>')[0][:2]
+    
+          # --- --- Extract nationality:
+          players_final.loc[pp,'nationality_player'] = str(soup_player.find_all('div', {'class':'kick__vita__header__person-detail-kvpair--nation'})[0]).split('>')[1].split(' <span')[0].split(' ')[-1]
+    
+    
+    
+          # --- --- Get information on the position
+    
+          # --- Some pre-allocation
+          ss_N_games, ss_degree_left, ss_degree_forward = [],[],[]
+          ss_N_games_left, ss_N_games_center, ss_N_games_right = [],[],[]
+    
+          for tt in pp_ss_teams:
+    
+            # --- Some modfication on the team-name:
+            tt = tt.lower().replace(" ",'-')
+    
+            # --- Compose the URL:
+            url_player_pos = f'https://www.kicker.de/{pp_name}/spielerposition/{ll}/{ss}/{tt}'
+    
+            response_player = requests.get(url_player_pos)
+            soup_player = bs(response_player.text)
+            response_player.close()
+    
+    
+            # --- Access the Positions
+            pp_positions = soup_player.find_all('div', {'class':'kick__stat__position__map'})
+            if len(pp_positions) > 0:
+    
+              pp_positions_split = str(pp_positions[0]).split('</div>')
+    
+    
+              for i in pp_positions_split:
+    
+                # --- Split the string
+                ll_split = i.split(' ')
+                # --- Is there information on the position?
+                ll_pos_info = [pos for pos in range(len(ll_split)) if 'data-tooltip' in ll_split[pos]]
+    
+                if (len(ll_pos_info) == 1):
+                  # --- How many games did he play in position 'll'
+                  ss_N_games.append(int(ll_split[ll_pos_info[0]].split('"')[1]))
+                  # --- Degree to which he played on the LEFT
+                  ll_pos_info = [pos+1 for pos in range(len(ll_split)) if 'right:' in ll_split[pos]]
+                  ss_degree_left.append(int(ll_split[ll_pos_info[0]].split('%')[0]) / 100)
+                  # --- Degree to which he played as forward
+                  ll_pos_info = [pos+1 for pos in range(len(ll_split)) if 'style="bottom' in ll_split[pos]]
+                  ss_degree_forward.append(int(ll_split[ll_pos_info[0]].split('%')[0]) / 75)
+    
+                  # --- Number of games as left, right, center:
+                  if ss_degree_left[-1] > 0.66:
+                    ss_N_games_left.append(ss_N_games[-1])
+                  elif (ss_degree_left[-1] <= 0.66) and (ss_degree_left[-1] > 0.33):
+                    ss_N_games_center.append(ss_N_games[-1])
+                  elif ss_degree_left[-1] <= 0.33:
+                    ss_N_games_right.append(ss_N_games[-1])
+    
+    
+            # --- Sum over Number of Games Played Left, Center, Right
+            players_final.loc[pp,'N_games_left'] = int(np.sum(ss_N_games_left))
+            players_final.loc[pp,'N_games_center'] = int(np.sum(ss_N_games_center))
+            players_final.loc[pp,'N_games_right'] = int(np.sum(ss_N_games_right))
+    
+    
+        # --- 1.8 Export the data '/[LEAGUE]'/S[SEASON]_['games','scorers','lineup'].csv'
+    
+        # --- --- Check if directory exists:
+        if not os.path.isdir(f'{directory}/10_data/100_RawData/{ll}'):
+          os.mkdir(f'{directory}/10_data/100_RawData/{ll}')
+    
+        print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
+        ss_abreviation = ss.replace('-','')[2:]
+        games_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games.csv', index=False)
+        scorer_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', index=False)
+        lineup_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_lineup.csv', index=False)
+        players_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_players.csv', index=False)
