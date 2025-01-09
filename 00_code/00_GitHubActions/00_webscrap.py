@@ -467,7 +467,7 @@ for ll in N_leagues:
 
 
     ss_abreviation = ss.replace('-','')[2:]
-    games_final.to_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_games.csv', index=False)
-    scorer_final.to_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_scorers.csv', index=False)
-    lineup_final.to_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_lineup.csv', index=False)
-    players_final.to_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_players.csv', index=False)
+    games_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games.csv', index=False)
+    scorer_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', index=False)
+    lineup_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_lineup.csv', index=False)
+    players_final.to_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_players.csv', index=False)
