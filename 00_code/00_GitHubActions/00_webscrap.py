@@ -167,7 +167,7 @@ for ll in N_leagues:
         url_address = f'https://www.kicker.de/{url_game}/schema'
 
         response_game = requests.get(url_address)
-        soup_game = bs(response_game.text, , features="html.parser")
+        soup_game = bs(response_game.text, features="html.parser")
         response_game.close()
 
         print(f'URL for current game: {url_address}')
