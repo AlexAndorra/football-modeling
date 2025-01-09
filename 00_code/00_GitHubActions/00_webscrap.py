@@ -360,6 +360,7 @@ for ll in N_leagues:
       response_received = False
       response_counter = 0
       response_not_received = []
+      player_info = []
       # --- --- --- There might be some weired shit going on ...
       while (response_received == False) and (response_counter < 50):
         response_player = requests.get(url_player)
