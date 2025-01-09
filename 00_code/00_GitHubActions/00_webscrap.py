@@ -175,6 +175,11 @@ for ll in N_leagues:
         # --- 1.3.7 Find score:
         gg_scores = soup_game.find_all('div', {'class' : ['kick__v100-scoreBoard__scoreHolder__score']})
 
+
+        # --- Check if game was suspended:
+        if len(gg_scores) == 0:
+            continue
+
         # --- Check for bugs on the website:
         website_bug = str(gg_scores[0]).split('>')[1].split('<')[0]
 
