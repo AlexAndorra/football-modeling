@@ -37,7 +37,7 @@ import os
 # --- Set your directory to the main folder:
 directory = '.'
 
-games_final = pd.DataFrame({'test' = [0,1,2]})
+games_final = pd.DataFrame({'test': [0,1,2]})
 
 ll = 'premier-league'
 if not os.path.isdir(f'{directory}/10_data/100_RawData/{ll}'):
