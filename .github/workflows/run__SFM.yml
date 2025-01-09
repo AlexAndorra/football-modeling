@@ -35,15 +35,13 @@ jobs:
         pip install pyarrow
         
 
-    - name: Run Python Script
-      run: python 00_code/00_GitHubActions/00_webscrap.py
-
-    - name: Commit and Push Changes
+    - name: Run Python Script, Commit and Push Changes
       run: |
+        python 00_code/00_GitHubActions/00_webscrap.py
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add 10_data/100_RawData/*  # Make sure this matches your output directory
-        git commit -m "Add CSV outputs from GitHub Actions"
+        git commit -m "Webscraped Raw Data"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
