@@ -153,6 +153,10 @@ for ll in N_leagues:
         game_idx = gd_games_seq.index(gg)
         game_kickoff = pd.to_datetime(json.loads(soup.find_all('script', {'type' : ['application/ld+json']})[game_idx+1].text)['startDate'])
 
+        # --- --- For REAL-TIME Updates: only continue if 'game_kickoff' preceeded the time that this code is run
+        if pd.to_datetime('today') < game_kickoff:
+            continue
+          
         # --- --- Extract the string date:
         game_kickoff_date = game_kickoff.strftime('%Y-%m-%d')
 
