@@ -21,6 +21,7 @@ import numpy as np
 import pyarrow.feather as feather
 from tqdm import tqdm
 from scipy.stats import rankdata
+import sys
 
 # --- Directory stuff
 import os
@@ -595,11 +596,13 @@ players_list = players_raw['name_player'].values
 # --- Create a Dictionary where to store each Player's individual Data:
 MY_PLAYER = {key: [] for key in my_player}
 
+noDATA = 0
 for pp in my_player:
 
   # --- Check if 'pp' is still playing in one of the leagues we're looking at:
   if pp not in lineup_raw['name_player']:
       print(f'\nNo Observations on: {pp} ...')
+      noDATA += 1
       continue
     
   print(f'\nCurrent Player: {pp} ...')
@@ -694,6 +697,13 @@ for pp in my_player:
 
 Assemble the data in a single matrix called `data` .
 """
+
+
+# ------------------------ If no Players were Collected ------------------------ #
+#             because your list only included players which do not
+#                play anymore (in the leagues we cover).
+if len(MY_PLAYER) == noDATA:
+    sys.exit('Couldn't find any data on players in the list you've specified. The existing data is thus still up to date.')
 
 # ========================================================================================================= #
 #
