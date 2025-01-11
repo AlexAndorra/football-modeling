@@ -78,26 +78,26 @@ for ll in N_leagues:
     ll_games_raw['name_league'] = ll
     # --- Attach the league abbreviation:
     ll_games_raw['match_id'] = league_abbreviations[ll] + '-' + ll_games_raw['match_id'].values
-    games_raw = pd.concat([games_raw,ll_games_raw], axis=0)
+    games_raw = pd.concat([games_raw,ll_games_raw], axis=0).reset_index(drop=True)
 
-    ll_scorer_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv')
+    ll_scorer_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', converters = {'name_player': str})
     # --- Attach the league name:
     ll_scorer_raw['name_league'] = ll
     # --- Attach the league abbreviation:
     ll_scorer_raw['match_id'] = league_abbreviations[ll] + '-' + ll_scorer_raw['match_id'].values
-    scorer_raw = pd.concat([scorer_raw,ll_scorer_raw], axis=0)
+    scorer_raw = pd.concat([scorer_raw,ll_scorer_raw], axis=0).reset_index(drop=True)
 
-    ll_players_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_players.csv')
+    ll_players_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_players.csv', converters = {'name_player': str})
     # --- Attach the league name:
     ll_players_raw['name_league'] = ll
-    players_raw = pd.concat([players_raw,ll_players_raw], axis=0)
+    players_raw = pd.concat([players_raw,ll_players_raw], axis=0).reset_index(drop=True)
 
-    ll_lineup_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_lineup.csv')
+    ll_lineup_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_lineup.csv', converters = {'name_player': str})
     # --- Attach the league name:
     ll_lineup_raw['name_league'] = ll
     # --- Attach the league abbreviation:
     ll_lineup_raw['match_id'] = league_abbreviations[ll] + '-' + ll_lineup_raw['match_id'].values
-    lineup_raw = pd.concat([lineup_raw,ll_lineup_raw], axis=0)
+    lineup_raw = pd.concat([lineup_raw,ll_lineup_raw], axis=0).reset_index(drop=True)
 
 # ============================== Summary Statistics ============================= #
 goals_total = np.nansum(games_raw[['score_home_full','score_away_full']].values)
