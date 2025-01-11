@@ -1,4 +1,4 @@
-name: Run SFM
+name: Build Features
 
 on:
   #schedule:
