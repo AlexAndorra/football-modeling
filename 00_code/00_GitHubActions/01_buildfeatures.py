@@ -748,10 +748,10 @@ data_ID = 'SFM_data_byPlayer'
 # --- Load the Existing Data:
 data_existing = pd.read_csv(f'{directory}/{directory_add}SFM_data_byPlayer.csv')
 
-# --- --- Place a hard-copy of the existing data in folder '00_vintage'
+# --- --- Place a hard-copy of the existing data in folder '00_vintage':
 data_existing.to_csv(f'{directory}/{directory_add}SFM_data_byPlayer__{pd.to_datetime("today").strftime("%Y-%m-%d")}.csv')
 
 
 # --- Export:
-data = pd.concat([data_existing,data],axis=0)
+data = pd.concat([data_existing,data],axis=0).drop_duplicates().reset_index(drop=True)
 data.to_csv(f'{directory}/{directory_add}_{data_ID}.csv', index=False)
