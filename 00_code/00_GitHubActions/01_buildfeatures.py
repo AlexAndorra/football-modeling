@@ -703,7 +703,8 @@ Assemble the data in a single matrix called `data` .
 #             because your list only included players which do not
 #                play anymore (in the leagues we cover).
 if len(MY_PLAYER) == noDATA:
-    sys.exit('Couldn't find any data on players in the list you've specified. The existing data is thus still up to date.')
+    print("Couldn't find any data on players in the list you've specified. The existing data is thus still up to date.")
+    exit()
 
 # ========================================================================================================= #
 #
