@@ -267,9 +267,9 @@ def get_ladder(seasons, directory='./'):
 
       # --- Load the necessary data:
 
-      games_raw = pd.read_csv(f'{directory}/10_data/{name_league}/S{ss}_games.csv')
+      games_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{name_league}/S{ss}_games.csv')
 
-      scorer_raw = pd.read_csv(f'{directory}/10_data/{name_league}/S{ss}_scorers.csv')
+      scorer_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{name_league}/S{ss}_scorers.csv')
 
 
 
