@@ -1,4 +1,4 @@
-name: Run SFM
+name: Web Scrape
 
 on:
   schedule:
