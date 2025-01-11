@@ -13,9 +13,7 @@ Original file is located at
 This tool creates features/statistics from webscarped data based on the notebook *00_WebScrap.ipynb*.
 """
 
-# --- Connect to Google-Drive
-from google.colab import drive
-drive.mount('/content/drive')
+
 
 # --- The usual Libraries
 import pandas as pd
@@ -30,7 +28,7 @@ import os
 # ====================================== USER INTERACTION ============================================== #
 
 # --- Set your directory to the main folder:
-directory = '/content/drive/MyDrive/Colab Notebooks/51_SoccerAnalytics/'
+directory = '.'
 
 
 # --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
@@ -42,10 +40,10 @@ N_leagues = ['premier-league','bundesliga','la-liga','serie-a']
 N_seasons = ['2000-01','2001-02','2002-03','2003-04','2004-05','2005-06',
              '2006-07','2007-08','2008-09','2009-10','2010-11','2011-12','2012-13','2013-14','2014-15',
              '2015-16','2016-17','2017-18','2018-19','2019-20','2020-21','2021-22','2022-23','2023-24']
+N_seasons = ['2024-2025']
 
-
-# --- Which Players do you want to look at?
-my_player = ['heung-min-son','erling-haaland']
+# --- Which Players do you want to look at? ---> Deprecated: see list below
+#my_player = ['heung-min-son','erling-haaland']
 
 
 # --- How many match-days shall be discarded at the beginning of the season? (Motivation: claculate meaningful team-/player-statistics)
@@ -742,11 +740,18 @@ print(data.shape)
 # ======================================== Export the data as a csv-file ==================================== #
 
 # --- Specify the directory where you want to export the data to:
-directory_add = '10_data/SFM_data'
+directory_add = '10_data/101_SFM/'
 
 # --- Any ID you want to add to the file name?
-data_ID = 'byPlayer_v240814'
+data_ID = 'SFM_data_byPlayer'
+
+# --- Load the Existing Data:
+data_existing = pd.read_csv(f'{directory}/{directory_add}SFM_data_byPlayer.csv')
+
+# --- --- Place a hard-copy of the existing data in folder '00_vintage'
+data_existing.to_csv(f'{directory}/{directory_add}SFM_data_byPlayer__{pd.to_datetime("today").strftime("%Y-%m-%d")}.csv')
 
 
 # --- Export:
-data.to_csv(f'{directory}{directory_add}_{data_ID}.csv', index=False)
+data = pd.concat([data_existing,data],axis=0)
+data.to_csv(f'{directory}/{directory_add}_{data_ID}.csv', index=False)
