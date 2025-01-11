@@ -592,19 +592,22 @@ factors_stats = ['goal', 'goals_in_match', 'points_team', 'points_opp',
 # --- Extract the players:
 players_list = players_raw['name_player'].values
 
+# --- Check which players are available from the list you requested:
+my_player = [p for p in my_player if p in players_list]
+
+# --- Check if 'pp' is still playing in one of the leagues we're looking at:
+if len(my_player) == 0:
+  print('\nNo Observations on any of your requested players ...')
+  exit()
+
 # =============================== Start the Data-Preparation Loop =============================== #
 
 # --- Create a Dictionary where to store each Player's individual Data:
 MY_PLAYER = {key: [] for key in my_player}
 
-noDATA = 0
+
 for pp in my_player:
 
-  # --- Check if 'pp' is still playing in one of the leagues we're looking at:
-  if pp not in lineup_raw['name_player'].to_list():
-      print(f'\nNo Observations on: {pp} ...')
-      noDATA += 1
-      continue
     
   print(f'\nCurrent Player: {pp} ...')
 
@@ -700,12 +703,7 @@ Assemble the data in a single matrix called `data` .
 """
 
 
-# ------------------------ If no Players were Collected ------------------------ #
-#             because your list only included players which do not
-#                play anymore (in the leagues we cover).
-if len(MY_PLAYER) == noDATA:
-    print("Couldn't find any data on players in the list you've specified. The existing data is thus still up to date.")
-    exit()
+
 
 # ========================================================================================================= #
 #
