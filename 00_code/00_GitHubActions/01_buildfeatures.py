@@ -72,26 +72,26 @@ for ll in N_leagues:
     # --- Extract the season-abbreviation:
     ss_abreviation = ss.replace('-','')[2:]
 
-    ll_games_raw = pd.read_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_games.csv')
+    ll_games_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games.csv')
     # --- Attach the league name:
     ll_games_raw['name_league'] = ll
     # --- Attach the league abbreviation:
     ll_games_raw['match_id'] = league_abbreviations[ll] + '-' + ll_games_raw['match_id'].values
     games_raw = pd.concat([games_raw,ll_games_raw], axis=0)
 
-    ll_scorer_raw = pd.read_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_scorers.csv')
+    ll_scorer_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv')
     # --- Attach the league name:
     ll_scorer_raw['name_league'] = ll
     # --- Attach the league abbreviation:
     ll_scorer_raw['match_id'] = league_abbreviations[ll] + '-' + ll_scorer_raw['match_id'].values
     scorer_raw = pd.concat([scorer_raw,ll_scorer_raw], axis=0)
 
-    ll_players_raw = pd.read_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_players.csv')
+    ll_players_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_players.csv')
     # --- Attach the league name:
     ll_players_raw['name_league'] = ll
     players_raw = pd.concat([players_raw,ll_players_raw], axis=0)
 
-    ll_lineup_raw = pd.read_csv(f'{directory}/10_data/{ll}/S{ss_abreviation}_lineup.csv')
+    ll_lineup_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_lineup.csv')
     # --- Attach the league name:
     ll_lineup_raw['name_league'] = ll
     # --- Attach the league abbreviation:
