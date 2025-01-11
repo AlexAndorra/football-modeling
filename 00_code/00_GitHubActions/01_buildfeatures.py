@@ -597,6 +597,11 @@ MY_PLAYER = {key: [] for key in my_player}
 
 for pp in my_player:
 
+  # --- Check if 'pp' is still playing in one of the leagues we're looking at:
+  if pp not in lineup_raw['name_player']:
+      print(f'\nNo Observations on: {pp} ...')
+      continue
+    
   print(f'\nCurrent Player: {pp} ...')
 
   # ================================ Some Information on the Player ====================================== #
