@@ -80,7 +80,7 @@ for ll in N_leagues:
     ll_games_raw['match_id'] = league_abbreviations[ll] + '-' + ll_games_raw['match_id'].values
     games_raw = pd.concat([games_raw,ll_games_raw], axis=0).reset_index(drop=True)
 
-    ll_scorer_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', converters = {'name_player': str})
+    ll_scorer_raw = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_scorers.csv', converters = {'name_player': str, 'minute':int})
     # --- Attach the league name:
     ll_scorer_raw['name_league'] = ll
     # --- Attach the league abbreviation:
