@@ -109,9 +109,9 @@ for ll in N_leagues:
 
 
     # --- Check if we're in the midst of the season, and just run over the matchdays not yet done
-    if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace('-','')[2:]}_games.csv'):
+    if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv'):
         # --- Load the file to get the latest matchday for which you have data:
-        games_done = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace('-','')[2:]}_games.csv')
+        games_done = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv')
         # --- Extract the latest matchday:
         matchday_done = int(str(games_done.loc[-1,'match_id']).split('GD')[1].split('_')[0])
         # --- Adjust the Number of Games to run over:
