@@ -107,7 +107,7 @@ print(f'Number of Players: {len(pd.unique(players_raw["name_player"]))}')
 print(f'Number of Goals:   {int(goals_total)}')
 print(f'Share of Identified Goals: {np.round(scorer_raw.shape[0] / goals_total,3)}')
 
-print('erling-haaland' in players_raw['name_player'])
+print(players_raw.loc[5,'name_player'])
 print('casemiro' in players_raw['name_player'])
 print(players_raw.head(10))
 sys.exit(-1)
