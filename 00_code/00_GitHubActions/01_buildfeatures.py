@@ -604,7 +604,7 @@ noDATA = 0
 for pp in my_player:
 
   # --- Check if 'pp' is still playing in one of the leagues we're looking at:
-  if pp not in lineup_raw['name_player']:
+  if pp not in lineup_raw['name_player'].to_list():
       print(f'\nNo Observations on: {pp} ...')
       noDATA += 1
       continue
