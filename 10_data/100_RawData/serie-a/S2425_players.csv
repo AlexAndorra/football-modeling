@@ -2,12 +2,12 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,pierluigi-gollini,Tor,1995-03-18 00:00:00,0,7,0,Italien,,
 2024-25,alessandro-vogliacco,Abwehr,1998-09-14 00:00:00,0,1,7,Italien,,
 2024-25,mattia-bani,Abwehr,1993-12-10 00:00:00,0,12,0,Italien,,
-2024-25,koni-de-winter,Abwehr,2002-06-12 00:00:00,1,2,5,Belgien,191,"
+2024-25,koni-de-winter,Abwehr,2002-06-12 00:00:00,1,2,5,Belgien,191.0,"
 <"
 2024-25,alessandro-zanoli,Abwehr,2000-10-03 00:00:00,0,0,11,Italien,,
 2024-25,ruslan-malinovskyi,Mittelfeld,1993-05-04 00:00:00,0,0,2,Ukraine,,
 2024-25,milan-badelj,Mittelfeld,1989-02-25 00:00:00,0,16,0,Kroatien,,
-2024-25,morten-frendrup,Mittelfeld,2001-04-07 00:00:00,9,8,1,Dänemark,178,"
+2024-25,morten-frendrup,Mittelfeld,2001-04-07 00:00:00,9,8,1,Dänemark,178.0,"
 <"
 2024-25,aaron-2,Abwehr,1997-04-22 00:00:00,18,0,0,Spanien,,
 2024-25,junior-messias,Sturm,1991-05-13 00:00:00,0,1,2,Brasilien,,
@@ -56,13 +56,13 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,rolando-mandragora,Mittelfeld,1997-06-29 00:00:00,0,10,1,Italien,,
 2024-25,sofyan-amrabat,Mittelfeld,1996-08-21 00:00:00,0,18,0,Marokko,,
 2024-25,cristiano-biraghi,Abwehr,1992-09-01 00:00:00,8,1,0,Italien,,
-2024-25,andrea-colpani,Mittelfeld,1999-05-11 00:00:00,0,4,13,Italien,184,"
+2024-25,andrea-colpani,Mittelfeld,1999-05-11 00:00:00,0,4,13,Italien,184.0,"
 <"
 2024-25,christian-kouame,Sturm,1997-12-06 00:00:00,1,10,0,Elfenbeinküste,,
 2024-25,moise-kean,Sturm,2000-02-28 00:00:00,0,20,0,Italien,,
 2024-25,fabiano-parisi,Abwehr,2000-11-09 00:00:00,9,0,0,Italien,,
 2024-25,jonathan-ikone,Sturm,1998-05-02 00:00:00,0,0,8,Frankreich,,
-2024-25,michael-kayode,Abwehr,2004-07-10 00:00:00,0,0,6,Italien,179,"
+2024-25,michael-kayode,Abwehr,2004-07-10 00:00:00,0,0,6,Italien,179.0,"
 <"
 2024-25,alessandro-bianco,Mittelfeld,2002-10-01 00:00:00,0,26,0,Italien,,
 2024-25,riccardo-sottil,Sturm,1999-06-03 00:00:00,13,0,0,Italien,,
@@ -77,7 +77,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,giuseppe-pezzella,Abwehr,1997-11-29 00:00:00,16,1,0,Italien,,
 2024-25,lorenzo-colombo,Sturm,2002-03-08 00:00:00,0,16,0,Italien,,
 2024-25,sebastiano-esposito,Sturm,2002-07-02 00:00:00,0,11,0,Italien,,
-2024-25,ola-solbakken,Mittelfeld,1998-09-07 00:00:00,0,6,0,Norwegen,186,"
+2024-25,ola-solbakken,Mittelfeld,1998-09-07 00:00:00,0,6,0,Norwegen,186.0,"
 <"
 2024-25,emmanuel-ekong,Sturm,2002-06-25 00:00:00,0,0,0,Schweden,,
 2024-25,nicolas-haas,Mittelfeld,1996-01-23 00:00:00,0,2,0,Schweiz,,
@@ -89,14 +89,14 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,luca-caldirola,Abwehr,1991-02-01 00:00:00,5,0,1,Italien,,
 2024-25,samuele-birindelli,Abwehr,1999-07-19 00:00:00,0,1,5,Italien,,
 2024-25,matteo-pessina,Mittelfeld,1997-04-21 00:00:00,0,10,0,Italien,,
-2024-25,warren-bondo,Mittelfeld,2003-09-15 00:00:00,0,17,0,Frankreich,177,"
+2024-25,warren-bondo,Mittelfeld,2003-09-15 00:00:00,0,17,0,Frankreich,177.0,"
 <"
 2024-25,georgios-kyriakopoulos,Abwehr,1996-02-05 00:00:00,17,0,0,Griechenland,,
 2024-25,samuele-vignato,Mittelfeld,2004-02-24 00:00:00,0,2,0,Italien,,
 2024-25,daniel-maldini,Sturm,2001-10-11 00:00:00,0,13,0,Italien,,
 2024-25,andrea-petagna,Sturm,1995-06-30 00:00:00,0,2,0,Italien,,
 2024-25,roberto-gagliardini,Mittelfeld,1994-04-07 00:00:00,0,0,0,Italien,,
-2024-25,dany-mota,Sturm,1998-05-02 00:00:00,0,12,0,Portugal,180,"
+2024-25,dany-mota,Sturm,1998-05-02 00:00:00,0,12,0,Portugal,180.0,"
 <"
 2024-25,gianluca-caprari,Sturm,1993-07-30 00:00:00,0,10,0,Italien,,
 2024-25,mike-maignan,Tor,1995-07-03 00:00:00,0,29,0,Frankreich,,
@@ -130,7 +130,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,adrien-tameze,Mittelfeld,1994-02-04 00:00:00,0,2,2,Frankreich,,
 2024-25,yann-karamoh,Sturm,1998-07-08 00:00:00,0,4,0,Frankreich,,
 2024-25,ali-dembele,Abwehr,2004-01-05 00:00:00,0,0,0,Frankreich,,
-2024-25,saba-sazonov,Abwehr,2002-02-01 00:00:00,0,0,0,Georgien,194,"
+2024-25,saba-sazonov,Abwehr,2002-02-01 00:00:00,0,0,0,Georgien,194.0,"
 <"
 2024-25,lukasz-skorupski,Tor,1991-05-05 00:00:00,0,20,0,Polen,,
 2024-25,stefan-posch,Abwehr,1997-05-14 00:00:00,0,2,16,Österreich,,
@@ -151,7 +151,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,maduka-okoye,Tor,1999-08-28 00:00:00,0,14,0,Nigeria,,
 2024-25,nehuen-perez,Abwehr,2000-06-24 00:00:00,0,19,2,Argentinien,,
 2024-25,jaka-bijol,Abwehr,1999-02-05 00:00:00,0,23,0,Slowenien,,
-2024-25,lautaro-daniel-gianetti,Abwehr,1993-11-13 00:00:00,6,2,3,Argentinien,184,"
+2024-25,lautaro-daniel-gianetti,Abwehr,1993-11-13 00:00:00,6,2,3,Argentinien,184.0,"
 <"
 2024-25,kingsley-ehizibue,Abwehr,1995-05-25 00:00:00,0,0,19,Niederlande,,
 2024-25,sandi-lovric,Mittelfeld,1998-03-28 00:00:00,1,4,12,Slowenien,,
@@ -177,7 +177,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,dailon-rocha,Sturm,2001-05-04 00:00:00,3,3,0,Kapverde,,
 2024-25,reda-belahyane,Mittelfeld,2004-06-01 00:00:00,0,14,0,Marokko,,
 2024-25,giangiacomo-magnani,Abwehr,1995-09-04 00:00:00,1,7,2,Italien,,
-2024-25,tomas-suslov,Mittelfeld,2002-06-07 00:00:00,1,4,14,Slowakei,173,"
+2024-25,tomas-suslov,Mittelfeld,2002-06-07 00:00:00,1,4,14,Slowakei,173.0,"
 <"
 2024-25,daniel-mosquera,Sturm,1999-10-20 00:00:00,0,4,0,Kolumbien,,
 2024-25,abdou-harroui,Mittelfeld,1998-01-13 00:00:00,2,3,0,Niederlande,,
@@ -195,7 +195,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,giacomo-raspadori,Sturm,2000-02-18 00:00:00,0,4,0,Italien,,
 2024-25,mathias-olivera,Abwehr,1997-10-31 00:00:00,16,0,0,Uruguay,,
 2024-25,cyril-ngonge,Sturm,2000-05-26 00:00:00,0,0,1,Belgien,,
-2024-25,walid-cheddira,Sturm,1998-01-22 00:00:00,0,5,0,Marokko,187,"
+2024-25,walid-cheddira,Sturm,1998-01-22 00:00:00,0,5,0,Marokko,187.0,"
 <"
 2024-25,simone-scuffet,Tor,1996-05-31 00:00:00,0,13,0,Italien,,
 2024-25,gabriele-zappa,Abwehr,1999-12-22 00:00:00,0,0,19,Italien,,
@@ -221,7 +221,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,matias-soule-malvano,Mittelfeld,2003-04-15 00:00:00,0,6,3,Argentinien,,
 2024-25,lorenzo-pellegrini,Mittelfeld,1996-06-19 00:00:00,4,11,0,Italien,,
 2024-25,nicola-zalewski,Mittelfeld,2002-01-23 00:00:00,11,0,1,Polen,,
-2024-25,artem-dovbyk,Sturm,1997-06-21 00:00:00,0,22,0,Ukraine,185,"
+2024-25,artem-dovbyk,Sturm,1997-06-21 00:00:00,0,22,0,Ukraine,185.0,"
 <"
 2024-25,tommaso-baldanzi,Mittelfeld,2003-03-23 00:00:00,2,3,0,Italien,,
 2024-25,paulo-dybala,Sturm,1993-11-15 00:00:00,0,15,0,Argentinien,,
@@ -257,16 +257,16 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,ridgeciano-haps,Abwehr,1993-06-12 00:00:00,8,0,0,Surinam,,
 2024-25,nicholas-pierini,Sturm,1998-08-06 00:00:00,2,2,2,Italien,,
 2024-25,domen-crnigoj,Mittelfeld,1995-11-18 00:00:00,1,0,0,Slowenien,,
-2024-25,nunzio-lella,Abwehr,2000-07-28 00:00:00,0,2,6,Italien,188,"
+2024-25,nunzio-lella,Abwehr,2000-07-28 00:00:00,0,2,6,Italien,188.0,"
 <"
 2024-25,antonio-raimondo,Sturm,2004-03-18 00:00:00,0,0,0,Italien,,
 2024-25,wladimiro-falcone,Tor,1995-04-12 00:00:00,0,19,0,Italien,,
 2024-25,valentin-gendrey,Abwehr,2000-06-21 00:00:00,0,0,15,Frankreich,,
 2024-25,kialonda-gaspar,Abwehr,1997-09-27 00:00:00,0,15,0,Angola,,
-2024-25,federico-baschirotto,Abwehr,1996-09-20 00:00:00,0,18,1,Italien,187,"
+2024-25,federico-baschirotto,Abwehr,1996-09-20 00:00:00,0,18,1,Italien,187.0,"
 <"
 2024-25,antonino-gallo,Mittelfeld,2000-01-05 00:00:00,15,0,0,Italien,,
-2024-25,ylber-ramadani,Mittelfeld,1996-04-12 00:00:00,1,18,2,Albanien,185,"
+2024-25,ylber-ramadani,Mittelfeld,1996-04-12 00:00:00,1,18,2,Albanien,185.0,"
 <"
 2024-25,balthazar-pierret,Mittelfeld,2000-05-15 00:00:00,2,7,0,Frankreich,,
 2024-25,tete-morente,Mittelfeld,1996-12-04 00:00:00,6,0,3,Spanien,,
@@ -276,9 +276,9 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,lassana-coulibaly,Mittelfeld,1996-04-10 00:00:00,1,7,4,Mali,,
 2024-25,lameck-banda,Sturm,2001-01-29 00:00:00,6,0,0,Sambia,,
 2024-25,santiago-pierotti,Sturm,2001-04-03 00:00:00,1,0,5,Argentinien,,
-2024-25,filip-marchwinski,Mittelfeld,2002-01-10 00:00:00,0,0,0,Polen,187,"
+2024-25,filip-marchwinski,Mittelfeld,2002-01-10 00:00:00,0,0,0,Polen,187.0,"
 <"
-2024-25,medon-berisha,Mittelfeld,2003-10-21 00:00:00,0,3,0,Albanien,186,"
+2024-25,medon-berisha,Mittelfeld,2003-10-21 00:00:00,0,3,0,Albanien,186.0,"
 <"
 2024-25,juan-musso,Tor,1994-05-06 00:00:00,0,2,0,Argentinien,,
 2024-25,marten-de-roon,Mittelfeld,1991-03-29 00:00:00,1,17,4,Niederlande,,
@@ -350,7 +350,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,hans-nicolussi-caviglia,Mittelfeld,2000-06-18 00:00:00,0,14,1,Italien,,
 2024-25,issa-doumbia,Mittelfeld,2003-10-16 00:00:00,0,1,1,Italien,,
 2024-25,borna-sosa,Abwehr,1998-01-21 00:00:00,13,0,0,Kroatien,,
-2024-25,aaron-ciammaglichella,Mittelfeld,2005-01-26 00:00:00,0,0,0,Italien,180,"
+2024-25,aaron-ciammaglichella,Mittelfeld,2005-01-26 00:00:00,0,0,0,Italien,180.0,"
 <"
 2024-25,marco-carnesecchi,Tor,2000-07-01 00:00:00,0,23,0,Italien,,
 2024-25,lazar-samardzic,Mittelfeld,2002-02-24 00:00:00,0,6,3,Serbien,,
@@ -458,9 +458,9 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,guillermo-maripan,Abwehr,1994-05-06 00:00:00,0,8,0,Chile,,
 2024-25,alieu-njie,Sturm,2005-05-14 00:00:00,0,0,0,Schweden,,
 2024-25,elia-caprile,Tor,2001-08-25 00:00:00,0,3,0,Italien,,
-2024-25,michael-folorunsho,Mittelfeld,1998-02-07 00:00:00,0,0,0,Italien,190,"
+2024-25,michael-folorunsho,Mittelfeld,1998-02-07 00:00:00,0,0,0,Italien,190.0,"
 <"
-2024-25,andy-pelmard,Abwehr,2000-03-12 00:00:00,0,0,1,Frankreich,178,"
+2024-25,andy-pelmard,Abwehr,2000-03-12 00:00:00,0,0,1,Frankreich,178.0,"
 <"
 2024-25,mohamed-anas-haj,Sturm,2005-03-26 00:00:00,0,2,0,Tunesien,,
 2024-25,albert-gudmundsson,Sturm,1997-06-15 00:00:00,0,6,0,Island,,
@@ -471,7 +471,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,odilon-kossounou,Abwehr,2001-01-04 00:00:00,0,1,8,Elfenbeinküste,,
 2024-25,juan-cuadrado,Mittelfeld,1988-05-26 00:00:00,0,0,1,Kolumbien,,
 2024-25,vanja-vlahovic,Sturm,2004-03-23 00:00:00,0,0,0,Serbien,,
-2024-25,davide-bartesaghi,Abwehr,2005-12-29 00:00:00,0,0,0,Italien,193,"
+2024-25,davide-bartesaghi,Abwehr,2005-12-29 00:00:00,0,0,0,Italien,193.0,"
 <"
 2024-25,arthur-atta,Mittelfeld,2003-01-14 00:00:00,0,0,0,Frankreich,,
 2024-25,fabio-miretti,Mittelfeld,2003-08-03 00:00:00,8,2,0,Italien,,
@@ -516,13 +516,13 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,adrian-benedyczak,Sturm,2000-11-24 00:00:00,2,0,0,Polen,,
 2024-25,mario-balotelli,Sturm,1990-08-12 00:00:00,0,0,0,Italien,,
 2024-25,giovanni-leoni,Abwehr,2006-12-21 00:00:00,0,3,0,Italien,,
-2024-25,alen-sherri,Tor,1997-12-15 00:00:00,0,8,0,Albanien,200,"
+2024-25,alen-sherri,Tor,1997-12-15 00:00:00,0,8,0,Albanien,200.0,"
 <"
 2024-25,samuel-dahl,Abwehr,2003-03-04 00:00:00,1,0,0,Schweden,,
 2024-25,tajon-buchanan,Sturm,1999-02-08 00:00:00,0,0,0,Kanada,,
 2024-25,giorgio-scalvini,Abwehr,2003-12-11 00:00:00,0,0,0,Italien,,
 2024-25,fellipe-jack,Abwehr,2006-01-12 00:00:00,0,0,0,Brasilien,,
-2024-25,saud-abdulhamid,Abwehr,1999-07-18 00:00:00,0,0,3,Saudi-Arabien,171,"
+2024-25,saud-abdulhamid,Abwehr,1999-07-18 00:00:00,0,0,3,Saudi-Arabien,171.0,"
 <"
 2024-25,bjarki-steinn-bjarkason,Mittelfeld,2000-05-11 00:00:00,0,0,0,Island,,
 2024-25,thorir-johann-helgason,Mittelfeld,2000-09-28 00:00:00,0,0,0,Island,,

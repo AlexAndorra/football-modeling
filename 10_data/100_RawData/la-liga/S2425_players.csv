@@ -43,7 +43,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,rodri-8,Mittelfeld,2000-05-16 00:00:00,0,0,3,Spanien,,
 2024-25,abdessamad-ezzalzouli,Sturm,2001-12-17 00:00:00,19,0,0,Marokko,,
 2024-25,chimy-avila,Sturm,1994-02-06 00:00:00,0,8,5,Argentinien,,
-2024-25,johnny,Mittelfeld,2001-09-20 00:00:00,0,15,0,USA,182,"
+2024-25,johnny,Mittelfeld,2001-09-20 00:00:00,0,15,0,USA,182.0,"
 <"
 2024-25,sergi-altimira,Mittelfeld,2001-08-25 00:00:00,0,18,0,Spanien,,
 2024-25,paulo-gazzaniga,Tor,1992-01-02 00:00:00,0,24,0,Argentinien,,
@@ -74,9 +74,9 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,jonathan-bamba,Sturm,1996-03-26 00:00:00,5,2,2,Elfenbeinküste,,
 2024-25,tassos-douvikas,Sturm,1999-08-02 00:00:00,0,6,0,Griechenland,,
 2024-25,javier-rodriguez,Abwehr,2003-06-26 00:00:00,0,0,11,Spanien,,
-2024-25,williot-swedberg,Mittelfeld,2004-02-01 00:00:00,7,0,0,Schweden,185,"
+2024-25,williot-swedberg,Mittelfeld,2004-02-01 00:00:00,7,0,0,Schweden,185.0,"
 <"
-2024-25,jailson-4,Mittelfeld,1995-09-07 00:00:00,2,2,1,Brasilien,187,"
+2024-25,jailson-4,Mittelfeld,1995-09-07 00:00:00,2,2,1,Brasilien,187.0,"
 <"
 2024-25,ilaix-moriba,Mittelfeld,2003-01-19 00:00:00,1,9,0,Guinea,,
 2024-25,borja-iglesias,Sturm,1993-01-17 00:00:00,0,11,0,Spanien,,
@@ -92,10 +92,10 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,tomas-conechny,Sturm,1998-03-30 00:00:00,6,0,0,Argentinien,,
 2024-25,kike-garcia,Sturm,1989-11-25 00:00:00,0,11,0,Spanien,,
 2024-25,hugo-novoa,Sturm,2003-01-24 00:00:00,0,0,2,Spanien,,
-2024-25,stoichkov,Sturm,1993-11-05 00:00:00,0,6,0,Spanien,178,"
+2024-25,stoichkov,Sturm,1993-11-05 00:00:00,0,6,0,Spanien,178.0,"
 <"
 2024-25,luis-rioja,Sturm,1993-10-16 00:00:00,26,0,6,Spanien,,
-2024-25,carlos-benavidez,Mittelfeld,1998-03-30 00:00:00,0,4,0,Uruguay,185,"
+2024-25,carlos-benavidez,Mittelfeld,1998-03-30 00:00:00,0,4,0,Uruguay,185.0,"
 <"
 2024-25,asier-villalibre,Sturm,1997-09-30 00:00:00,0,2,0,Spanien,,
 2024-25,jasper-cillessen,Tor,1989-04-22 00:00:00,0,16,0,Niederlande,,
@@ -107,7 +107,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,kieran-rodriguez,Mittelfeld,1996-03-05 00:00:00,5,11,1,Spanien,,
 2024-25,jaime-mata,Sturm,1988-10-24 00:00:00,0,1,2,Spanien,,
 2024-25,javi-munoz-2,Mittelfeld,1995-02-28 00:00:00,0,6,6,Spanien,,
-2024-25,alberto-moleiro,Mittelfeld,2003-09-30 00:00:00,13,2,0,Spanien,169,"
+2024-25,alberto-moleiro,Mittelfeld,2003-09-30 00:00:00,13,2,0,Spanien,169.0,"
 <"
 2024-25,oliver-mcburnie,Sturm,1996-06-04 00:00:00,0,7,0,Schottland,,
 2024-25,sandro-4,Sturm,1995-07-09 00:00:00,2,0,10,Spanien,,
@@ -154,7 +154,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,darko-brasanac,Mittelfeld,1992-02-12 00:00:00,0,6,2,Serbien,,
 2024-25,yvan-neyou,Mittelfeld,1997-01-03 00:00:00,0,13,0,Kamerun,,
 2024-25,juan-cruz-3,Sturm,2000-04-25 00:00:00,3,1,7,Spanien,,
-2024-25,seydouba-cisse,Mittelfeld,2001-02-10 00:00:00,3,10,1,Guinea,172,"
+2024-25,seydouba-cisse,Mittelfeld,2001-02-10 00:00:00,3,10,1,Guinea,172.0,"
 <"
 2024-25,enric-franquesa,Abwehr,1997-02-26 00:00:00,7,0,0,Spanien,,
 2024-25,miguel-7,Sturm,1999-09-03 00:00:00,0,12,0,Spanien,,
@@ -166,12 +166,12 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,giorgi-mamardashvili,Tor,2000-09-29 00:00:00,0,20,0,Georgien,,
 2024-25,thierry-correia,Abwehr,1999-03-09 00:00:00,2,0,7,Portugal,,
 2024-25,cristhian-mosquera,Abwehr,2004-06-27 00:00:00,0,18,0,Spanien,,
-2024-25,yarek-gasiorowski,Abwehr,2005-01-12 00:00:00,5,3,0,Spanien,190,"
+2024-25,yarek-gasiorowski,Abwehr,2005-01-12 00:00:00,5,3,0,Spanien,190.0,"
 <"
 2024-25,jesus-vazquez-2,Abwehr,2003-01-02 00:00:00,8,0,0,Spanien,,
 2024-25,rafa-mir,Sturm,1997-06-18 00:00:00,0,1,2,Spanien,,
 2024-25,pepelu-2,Mittelfeld,1998-08-11 00:00:00,0,12,0,Spanien,,
-2024-25,javier-guerra,Mittelfeld,2003-05-13 00:00:00,0,12,0,Spanien,187,"
+2024-25,javier-guerra,Mittelfeld,2003-05-13 00:00:00,0,12,0,Spanien,187.0,"
 <"
 2024-25,diego-lopez-noguerol,Sturm,2002-05-13 00:00:00,6,1,9,Spanien,,
 2024-25,andre-almeida-3,Mittelfeld,2000-05-30 00:00:00,0,8,0,Portugal,,
@@ -214,7 +214,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,jon-aramburu,Abwehr,2002-07-23 00:00:00,1,0,16,Venezuela,,
 2024-25,luka-susic,Mittelfeld,2002-09-08 00:00:00,1,13,3,Kroatien,,
 2024-25,dani-cardenas,Tor,1997-03-28 00:00:00,0,4,0,Spanien,,
-2024-25,andrei-ratiu,Abwehr,1998-06-20 00:00:00,0,0,21,Rumänien,183,"
+2024-25,andrei-ratiu,Abwehr,1998-06-20 00:00:00,0,0,21,Rumänien,183.0,"
 <"
 2024-25,florian-lejeune,Abwehr,1991-05-20 00:00:00,0,18,0,Frankreich,,
 2024-25,abdul-mumin,Abwehr,1998-06-06 00:00:00,0,16,0,Ghana,,
@@ -268,11 +268,11 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,amath,Sturm,1996-07-16 00:00:00,2,0,3,Senegal,,
 2024-25,kike-perez,Mittelfeld,1997-02-14 00:00:00,2,7,3,Spanien,,
 2024-25,eray-coemert,Abwehr,1998-02-04 00:00:00,1,13,1,Schweiz,,
-2024-25,selim-amallah,Mittelfeld,1996-11-15 00:00:00,4,6,0,Marokko,187,"
+2024-25,selim-amallah,Mittelfeld,1996-11-15 00:00:00,4,6,0,Marokko,187.0,"
 <"
 2024-25,raul-moro,Sturm,2002-12-05 00:00:00,8,0,4,Spanien,,
 2024-25,mamadou-sylla,Sturm,1994-03-20 00:00:00,1,8,0,Senegal,,
-2024-25,stanko-juric,Mittelfeld,1996-08-16 00:00:00,0,10,0,Kroatien,189,"
+2024-25,stanko-juric,Mittelfeld,1996-08-16 00:00:00,0,10,0,Kroatien,189.0,"
 <"
 2024-25,ivan-sanchez,Mittelfeld,1992-09-23 00:00:00,0,1,5,Spanien,,
 2024-25,victor-meseguer,Mittelfeld,1999-06-09 00:00:00,0,2,0,Spanien,,
@@ -334,7 +334,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,chidera-ejuke,Sturm,1998-01-02 00:00:00,6,0,0,Nigeria,,
 2024-25,marcao-3,Abwehr,1996-06-05 00:00:00,1,4,0,Brasilien,,
 2024-25,kelechi-iheanacho-2,Sturm,1996-10-03 00:00:00,1,4,0,Nigeria,,
-2024-25,willy-kambwala,Abwehr,2004-08-25 00:00:00,0,2,0,Frankreich,192,"
+2024-25,willy-kambwala,Abwehr,2004-08-25 00:00:00,0,2,0,Frankreich,192.0,"
 <"
 2024-25,thierno-barry-2,Sturm,2002-10-21 00:00:00,0,13,2,Frankreich,,
 2024-25,nacho-vidal,Abwehr,1995-01-14 00:00:00,0,0,1,Spanien,,
@@ -391,7 +391,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,abderrahman-rebbach,Sturm,1998-08-11 00:00:00,4,0,0,Algerien,,
 2024-25,toni-martinez,Sturm,1997-06-30 00:00:00,0,5,0,Spanien,,
 2024-25,fernando-calero,Abwehr,1995-09-14 00:00:00,0,2,0,Spanien,,
-2024-25,walid-cheddira,Sturm,1998-01-22 00:00:00,0,5,0,Marokko,187,"
+2024-25,walid-cheddira,Sturm,1998-01-22 00:00:00,0,5,0,Marokko,187.0,"
 <"
 2024-25,alejandro-frances,Abwehr,2002-08-01 00:00:00,0,0,10,Spanien,,
 2024-25,yaser-asprilla,Mittelfeld,2003-11-19 00:00:00,0,2,6,Kolumbien,,
@@ -410,15 +410,15 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,robert-navarro,Mittelfeld,2002-04-12 00:00:00,0,0,11,Spanien,,
 2024-25,hugo-sotelo,Mittelfeld,2003-12-19 00:00:00,0,7,0,Spanien,,
 2024-25,valentin-barcos,Abwehr,2004-07-23 00:00:00,3,0,0,Argentinien,,
-2024-25,stanis-idumbo-muzambo,Mittelfeld,2005-06-29 00:00:00,3,0,0,Belgien,170,"
+2024-25,stanis-idumbo-muzambo,Mittelfeld,2005-06-29 00:00:00,3,0,0,Belgien,170.0,"
 <"
-2024-25,bertug-yildirim,Sturm,2002-07-12 00:00:00,0,10,0,Türkei,191,"
+2024-25,bertug-yildirim,Sturm,2002-07-12 00:00:00,0,10,0,Türkei,191.0,"
 <"
 2024-25,john-finn,Mittelfeld,2003-09-24 00:00:00,0,0,0,Spanien,,
 2024-25,aihen,Abwehr,1997-08-16 00:00:00,9,0,0,Spanien,,
 2024-25,orri-oskarsson,Sturm,2004-08-29 00:00:00,0,17,0,Island,,
 2024-25,vitor-roque,Sturm,2005-02-28 00:00:00,0,14,0,Brasilien,,
-2024-25,assane-diao,Sturm,2005-09-07 00:00:00,0,2,4,Spanien,185,"
+2024-25,assane-diao,Sturm,2005-09-07 00:00:00,0,2,4,Spanien,185.0,"
 <"
 2024-25,iker-losada,Mittelfeld,2001-08-01 00:00:00,0,3,1,Spanien,,
 2024-25,giovani-lo-celso,Mittelfeld,1996-04-09 00:00:00,0,9,1,Argentinien,,
@@ -429,7 +429,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,joan-jordan,Mittelfeld,1994-07-06 00:00:00,0,5,0,Spanien,,
 2024-25,santiago-mourino,Abwehr,2002-02-13 00:00:00,0,5,2,Uruguay,,
 2024-25,gonzalo-montiel,Abwehr,1997-01-01 00:00:00,0,0,1,Argentinien,,
-2024-25,juan-berrocal,Abwehr,1999-02-05 00:00:00,0,6,0,Spanien,188,"
+2024-25,juan-berrocal,Abwehr,1999-02-05 00:00:00,0,6,0,Spanien,188.0,"
 <"
 2024-25,gorka-rivera,Abwehr,2004-08-01 00:00:00,0,0,0,Spanien,,
 2024-25,nayef-aguerd,Abwehr,1996-03-30 00:00:00,0,17,0,Marokko,,
@@ -467,7 +467,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,abdoulaye-keita-4,Sturm,2002-09-01 00:00:00,0,0,1,Spanien,,
 2024-25,naci-uenuevar,Sturm,2003-06-13 00:00:00,0,0,0,Niederlande,,
 2024-25,pau-navarro-badenes,Abwehr,2005-04-25 00:00:00,0,0,2,Spanien,,
-2024-25,pejino,Mittelfeld,1996-07-29 00:00:00,0,0,0,Spanien,177,"
+2024-25,pejino,Mittelfeld,1996-07-29 00:00:00,0,0,0,Spanien,177.0,"
 <"
 2024-25,raul-chasco,Mittelfeld,2003-09-13 00:00:00,1,0,0,Spanien,,
 2024-25,mario-maroto,Mittelfeld,2003-11-28 00:00:00,0,0,0,Spanien,,
@@ -505,7 +505,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,israel-dominguez,Sturm,2003-05-07 00:00:00,0,0,0,Spanien,,
 2024-25,mihailo-ristic,Abwehr,1995-10-31 00:00:00,2,0,0,Serbien,,
 2024-25,tadeo-allende,Sturm,1999-09-20 00:00:00,0,0,0,Argentinien,,
-2024-25,raul-10,Abwehr,2003-02-12 00:00:00,0,4,0,Spanien,187,"
+2024-25,raul-10,Abwehr,2003-02-12 00:00:00,0,4,0,Spanien,187.0,"
 <"
 2024-25,domingos-duarte,Abwehr,1995-03-10 00:00:00,0,3,0,Portugal,,
 2024-25,ferran-ruiz,Abwehr,2003-04-26 00:00:00,0,0,0,Spanien,,
