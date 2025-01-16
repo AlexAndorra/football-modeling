@@ -1,9 +1,9 @@
 name: Build Features
 
 on:
-  #schedule:
-    # Run at 12:00 AM UTC every Tuesday
-    #- cron: "0 0 * * 2"
+  schedule:
+    # Run at 01:00 AM UTC every Tuesday
+    - cron: "0 1 * * 2"
   workflow_dispatch:
   
 
