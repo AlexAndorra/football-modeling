@@ -755,7 +755,7 @@ print(data.shape)
 # ======================================== Export the data as a csv-file ==================================== #
 
 # --- Specify the directory where you want to export the data to:
-directory_add = '10_data/101_SFM/'
+directory_add = '10_data/101_SFM'
 
 # --- Any ID you want to add to the file name?
 data_ID = 'SFM_data_byPlayer'
@@ -769,4 +769,4 @@ data_existing.to_csv(f'{directory}/{directory_add}/00_vintage/SFM_data_byPlayer_
 
 # --- Export:
 data = pd.concat([data_existing,data],axis=0).drop_duplicates().reset_index(drop=True)
-data.to_csv(f'{directory}/{directory_add}_{data_ID}.csv', index=False)
+data.to_csv(f'{directory}/{directory_add}/{data_ID}.csv', index=False)
