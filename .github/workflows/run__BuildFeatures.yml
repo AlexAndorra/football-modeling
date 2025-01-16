@@ -41,7 +41,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add 10_data/101_SFM/**
-        git commit -a -m "Webscraped Raw Data"
+        git commit -a -m "Added Latest Data"
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
