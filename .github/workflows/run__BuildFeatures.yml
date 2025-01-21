@@ -3,7 +3,7 @@ name: Build Features
 on:
   schedule:
     # Run at 01:00 AM UTC every Tuesday
-    - cron: "0 1 * * 2"
+    - cron: "0 4 * * 2"
   workflow_dispatch:
   
 
