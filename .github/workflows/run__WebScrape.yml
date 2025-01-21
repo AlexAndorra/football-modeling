@@ -40,7 +40,8 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add 10_data/100_RawData/**
-        git commit -a -m "Webscraped Raw Data"
+        git commit -a -m "Webscraped Raw Data" || echo "Nothing to commit"
+        git stash || echo "Nothing to stash"
         git fetch origin
         git pull origin main --rebase
         git push origin main
