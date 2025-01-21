@@ -39,9 +39,11 @@ jobs:
         python -u 00_code/00_GitHubActions/00_webscrap.py
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git fetch origin  # Fetch latest changes
+        git pull origin main --rebase
         git add 10_data/100_RawData/**
         git commit -a -m "Webscraped Raw Data"
-        git push
+        git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
