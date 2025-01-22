@@ -1,0 +1,537 @@
+match_id,name_player,name_team,minute
+S2425_GD1_G1,nico-elvedi,Bor. Mönchengladbach,59
+S2425_GD1_G1,tim-kleindienst,Bor. Mönchengladbach,85
+S2425_GD1_G1,granit-xhaka,Bayer 04 Leverkusen,12
+S2425_GD1_G1,florian-wirtz,Bayer 04 Leverkusen,38
+S2425_GD1_G1,florian-wirtz,Bayer 04 Leverkusen,90
+S2425_GD1_G2,antonio-nusa,RB Leipzig,59
+S2425_GD1_G3,andrej-kramaric,TSG Hoffenheim,6
+S2425_GD1_G3,andrej-kramaric,TSG Hoffenheim,37
+S2425_GD1_G3,andrej-kramaric,TSG Hoffenheim,87
+S2425_GD1_G3,alexander-bernhardsson,Holstein Kiel,63
+S2425_GD1_G3,shuto-machino,Holstein Kiel,89
+S2425_GD1_G4,lukas-kuebler,SC Freiburg,26
+S2425_GD1_G4,ritsu-doan,SC Freiburg,54
+S2425_GD1_G4,lukas-kuebler,SC Freiburg,61
+S2425_GD1_G4,ermedin-demirovic,VfB Stuttgart,2
+S2425_GD1_G5,elvis-rexhbecaj,FC Augsburg,16
+S2425_GD1_G5,samuel-essende,FC Augsburg,35
+S2425_GD1_G5,felix-agu,Werder Bremen,12
+S2425_GD1_G5,justin-njinmah,Werder Bremen,58
+S2425_GD1_G6,nadiem-amiri,1. FSV Mainz 05,53
+S2425_GD1_G6,laszlo-benes,1. FC Union Berlin,74
+S2425_GD1_G7,jamie-bynoe-gittens,Borussia Dortmund,72
+S2425_GD1_G7,jamie-bynoe-gittens,Borussia Dortmund,90
+S2425_GD1_G8,lovro-majer,VfL Wolfsburg,47
+S2425_GD1_G8,lovro-majer,VfL Wolfsburg,55
+S2425_GD1_G8,jamal-musiala,Bayern München,20
+S2425_GD1_G8,jakub-kaminski,Bayern München,65
+S2425_GD1_G8,serge-gnabry,Bayern München,82
+S2425_GD1_G9,paul-wanner,1. FC Heidenheim,66
+S2425_GD1_G9,jan-schoeppner,1. FC Heidenheim,82
+S2425_GD2_G1,benedict-hollerbach,1. FC Union Berlin,34
+S2425_GD2_G2,enzo-millot,VfB Stuttgart,8
+S2425_GD2_G2,jamie-leweling,VfB Stuttgart,15
+S2425_GD2_G2,fabian-rieder,VfB Stuttgart,88
+S2425_GD2_G2,nadiem-amiri,1. FSV Mainz 05,43
+S2425_GD2_G2,jonathan-burkardt,1. FSV Mainz 05,62
+S2425_GD2_G2,maxim-leitsch,1. FSV Mainz 05,90
+S2425_GD2_G3,hugo-ekitike,Eintracht Frankfurt,24
+S2425_GD2_G3,hugo-larsson,Eintracht Frankfurt,33
+S2425_GD2_G3,omar-marmoush,Eintracht Frankfurt,56
+S2425_GD2_G3,andrej-kramaric,TSG Hoffenheim,54
+S2425_GD2_G5,tim-kleindienst,Bor. Mönchengladbach,67
+S2425_GD2_G5,franck-honorat,Bor. Mönchengladbach,78
+S2425_GD2_G6,maximilian-arnold,VfL Wolfsburg,27
+S2425_GD2_G6,sebastiaan-bornauw,VfL Wolfsburg,30
+S2425_GD2_G7,jeremie-frimpong,Bayer 04 Leverkusen,39
+S2425_GD2_G7,alejandro-grimaldo,Bayer 04 Leverkusen,45
+S2425_GD2_G7,kevin-kampl,RB Leipzig,45
+S2425_GD2_G7,lois-openda,RB Leipzig,57
+S2425_GD2_G7,lois-openda,RB Leipzig,80
+S2425_GD2_G8,paul-wanner,1. FC Heidenheim,9
+S2425_GD2_G8,leonardo-weschenfelder-scienza,1. FC Heidenheim,30
+S2425_GD2_G8,adrian-beck,1. FC Heidenheim,69
+S2425_GD2_G8,maximilian-breunig,1. FC Heidenheim,73
+S2425_GD2_G9,harry-kane,Bayern München,38
+S2425_GD2_G9,thomas-mueller,Bayern München,78
+S2425_GD3_G1,donyell-malen,Borussia Dortmund,12
+S2425_GD3_G1,karim-adeyemi,Borussia Dortmund,17
+S2425_GD3_G1,karim-adeyemi,Borussia Dortmund,41
+S2425_GD3_G1,emre-can,Borussia Dortmund,90
+S2425_GD3_G1,marvin-pieringer,1. FC Heidenheim,39
+S2425_GD3_G1,maximilian-breunig,1. FC Heidenheim,74
+S2425_GD3_G3,mergim-berisha,TSG Hoffenheim,37
+S2425_GD3_G3,martin-terrier,Bayer 04 Leverkusen,17
+S2425_GD3_G3,victor-boniface,Bayer 04 Leverkusen,30
+S2425_GD3_G3,florian-wirtz,Bayer 04 Leverkusen,72
+S2425_GD3_G3,victor-boniface,Bayer 04 Leverkusen,75
+S2425_GD3_G4,junior-adamu,SC Freiburg,58
+S2425_GD3_G4,junior-adamu,SC Freiburg,61
+S2425_GD3_G4,myron-boadu,VfL Bochum,45
+S2425_GD3_G5,ridle-baku,VfL Wolfsburg,76
+S2425_GD3_G5,omar-marmoush,Eintracht Frankfurt,30
+S2425_GD3_G5,omar-marmoush,Eintracht Frankfurt,82
+S2425_GD3_G6,alassane-plea,Bor. Mönchengladbach,27
+S2425_GD3_G6,deniz-undav,VfB Stuttgart,21
+S2425_GD3_G6,ermedin-demirovic,VfB Stuttgart,58
+S2425_GD3_G6,ermedin-demirovic,VfB Stuttgart,61
+S2425_GD3_G7,armin-gigovic,Holstein Kiel,82
+S2425_GD3_G7,jamal-musiala,Bayern München,1
+S2425_GD3_G7,harry-kane,Bayern München,7
+S2425_GD3_G7,nicolai-remberg,Bayern München,13
+S2425_GD3_G7,harry-kane,Bayern München,43
+S2425_GD3_G7,michael-olise,Bayern München,65
+S2425_GD3_G7,harry-kane,Bayern München,90
+S2425_GD3_G8,marius-wolf,FC Augsburg,47
+S2425_GD3_G8,phillip-tietz,FC Augsburg,67
+S2425_GD3_G8,yusuf-kabadayi,FC Augsburg,90
+S2425_GD3_G8,carlo-boukhalfa,FC St. Pauli,75
+S2425_GD3_G9,jae-sung-lee,1. FSV Mainz 05,27
+S2425_GD3_G9,marvin-ducksch,Werder Bremen,8
+S2425_GD3_G9,derrick-koehn,Werder Bremen,69
+S2425_GD4_G1,keven-schlotterbeck,FC Augsburg,25
+S2425_GD4_G1,samuel-essende,FC Augsburg,57
+S2425_GD4_G1,armindo-sieb,1. FSV Mainz 05,13
+S2425_GD4_G1,jonathan-burkardt,1. FSV Mainz 05,15
+S2425_GD4_G1,jonathan-burkardt,1. FSV Mainz 05,49
+S2425_GD4_G2,ritsu-doan,SC Freiburg,54
+S2425_GD4_G2,vincenzo-grifo,SC Freiburg,59
+S2425_GD4_G2,vincenzo-grifo,SC Freiburg,65
+S2425_GD4_G3,michael-olise,Bayern München,23
+S2425_GD4_G3,jamal-musiala,Bayern München,32
+S2425_GD4_G3,harry-kane,Bayern München,57
+S2425_GD4_G3,michael-olise,Bayern München,60
+S2425_GD4_G3,serge-gnabry,Bayern München,65
+S2425_GD4_G4,tom-rothe,1. FC Union Berlin,4
+S2425_GD4_G4,woo-yeong-jeong,1. FC Union Berlin,6
+S2425_GD4_G4,marius-buelter,TSG Hoffenheim,67
+S2425_GD4_G5,matus-bero,VfL Bochum,23
+S2425_GD4_G5,lukas-daschner,VfL Bochum,35
+S2425_GD4_G5,benedikt-pichler,Holstein Kiel,15
+S2425_GD4_G5,shuto-machino,Holstein Kiel,89
+S2425_GD4_G6,hugo-larsson,Eintracht Frankfurt,30
+S2425_GD4_G6,omar-marmoush,Eintracht Frankfurt,80
+S2425_GD4_G7,florian-wirtz,Bayer 04 Leverkusen,14
+S2425_GD4_G7,jonathan-tah,Bayer 04 Leverkusen,32
+S2425_GD4_G7,piero-hincapie,Bayer 04 Leverkusen,49
+S2425_GD4_G7,victor-boniface,Bayer 04 Leverkusen,90
+S2425_GD4_G7,nordi-mukiele,VfL Wolfsburg,5
+S2425_GD4_G7,sebastiaan-bornauw,VfL Wolfsburg,37
+S2425_GD4_G7,mattias-svanberg,VfL Wolfsburg,45
+S2425_GD4_G8,deniz-undav,VfB Stuttgart,4
+S2425_GD4_G8,ermedin-demirovic,VfB Stuttgart,21
+S2425_GD4_G8,enzo-millot,VfB Stuttgart,62
+S2425_GD4_G8,el-bilal-toure,VfB Stuttgart,80
+S2425_GD4_G8,deniz-undav,VfB Stuttgart,90
+S2425_GD4_G8,serhou-guirassy,Borussia Dortmund,75
+S2425_GD5_G1,serhou-guirassy,Borussia Dortmund,44
+S2425_GD5_G1,emre-can,Borussia Dortmund,62
+S2425_GD5_G1,serhou-guirassy,Borussia Dortmund,75
+S2425_GD5_G1,felix-nmecha,Borussia Dortmund,81
+S2425_GD5_G1,matus-bero,VfL Bochum,16
+S2425_GD5_G1,dani-de-wit,VfL Bochum,21
+S2425_GD5_G2,benjamin-sesko,RB Leipzig,11
+S2425_GD5_G2,benjamin-sesko,RB Leipzig,15
+S2425_GD5_G2,lois-openda,RB Leipzig,46
+S2425_GD5_G2,xavi-simons,RB Leipzig,57
+S2425_GD5_G3,elias-saad,FC St. Pauli,12
+S2425_GD5_G3,oladapo-afolayan,FC St. Pauli,45
+S2425_GD5_G3,elias-saad,FC St. Pauli,73
+S2425_GD5_G4,jonas-wind,VfL Wolfsburg,20
+S2425_GD5_G4,mohammed-elamine-amoura,VfL Wolfsburg,68
+S2425_GD5_G4,enzo-millot,VfB Stuttgart,32
+S2425_GD5_G4,deniz-undav,VfB Stuttgart,90
+S2425_GD5_G5,marvin-pieringer,1. FC Heidenheim,15
+S2425_GD5_G5,jan-schoeppner,1. FC Heidenheim,86
+S2425_GD5_G6,tomas-cvancara,Bor. Mönchengladbach,90
+S2425_GD5_G7,aleksandar-pavlovic,Bayern München,39
+S2425_GD5_G7,robert-andrich,Bayer 04 Leverkusen,31
+S2425_GD5_G8,shuto-machino,Holstein Kiel,31
+S2425_GD5_G8,shuto-machino,Holstein Kiel,50
+S2425_GD5_G8,omar-marmoush,Eintracht Frankfurt,25
+S2425_GD5_G8,igor-matanovic-2,Eintracht Frankfurt,47
+S2425_GD5_G8,omar-marmoush,Eintracht Frankfurt,65
+S2425_GD5_G8,tuta,Eintracht Frankfurt,74
+S2425_GD5_G9,marius-buelter,TSG Hoffenheim,5
+S2425_GD5_G9,marius-buelter,TSG Hoffenheim,8
+S2425_GD5_G9,adam-hlozek,TSG Hoffenheim,12
+S2425_GD5_G9,julian-malatini,Werder Bremen,21
+S2425_GD5_G9,jens-stage,Werder Bremen,26
+S2425_GD5_G9,jens-stage,Werder Bremen,39
+S2425_GD5_G9,jens-stage,Werder Bremen,49
+S2425_GD6_G1,keven-schlotterbeck,FC Augsburg,38
+S2425_GD6_G1,alexis-claude-maurice,FC Augsburg,65
+S2425_GD6_G1,tim-kleindienst,Bor. Mönchengladbach,72
+S2425_GD6_G2,victor-boniface,Bayer 04 Leverkusen,4
+S2425_GD6_G2,jonas-hofmann,Bayer 04 Leverkusen,8
+S2425_GD6_G2,max-geschwill,Holstein Kiel,45
+S2425_GD6_G2,fiete-arp,Holstein Kiel,69
+S2425_GD6_G3,ritsu-doan,SC Freiburg,75
+S2425_GD6_G4,kevin-vogt,1. FC Union Berlin,26
+S2425_GD6_G4,yorbe-vertessen,1. FC Union Berlin,45
+S2425_GD6_G4,julian-ryerson,Borussia Dortmund,62
+S2425_GD6_G5,myron-boadu,VfL Bochum,72
+S2425_GD6_G5,tiago-tomas,VfL Wolfsburg,21
+S2425_GD6_G5,jonas-wind,VfL Wolfsburg,37
+S2425_GD6_G5,jonas-wind,VfL Wolfsburg,88
+S2425_GD6_G6,jonathan-burkardt,1. FSV Mainz 05,5
+S2425_GD6_G6,armindo-sieb,1. FSV Mainz 05,16
+S2425_GD6_G6,jonathan-burkardt,1. FSV Mainz 05,62
+S2425_GD6_G7,lois-openda,RB Leipzig,59
+S2425_GD6_G8,omar-marmoush,Eintracht Frankfurt,22
+S2425_GD6_G8,hugo-ekitike,Eintracht Frankfurt,35
+S2425_GD6_G8,omar-marmoush,Eintracht Frankfurt,90
+S2425_GD6_G8,min-jae-kim,Bayern München,15
+S2425_GD6_G8,dayot-upamecano,Bayern München,38
+S2425_GD6_G8,michael-olise,Bayern München,53
+S2425_GD6_G9,ermedin-demirovic,VfB Stuttgart,90
+S2425_GD6_G9,valentin-gendrey,TSG Hoffenheim,45
+S2425_GD7_G1,ramy-bensebaini,Borussia Dortmund,43
+S2425_GD7_G1,serhou-guirassy,Borussia Dortmund,83
+S2425_GD7_G1,eric-smith,FC St. Pauli,78
+S2425_GD7_G2,robert-andrich,Bayer 04 Leverkusen,25
+S2425_GD7_G2,victor-boniface,Bayer 04 Leverkusen,72
+S2425_GD7_G2,omar-marmoush,Eintracht Frankfurt,16
+S2425_GD7_G3,andrej-kramaric,TSG Hoffenheim,11
+S2425_GD7_G3,marius-buelter,TSG Hoffenheim,64
+S2425_GD7_G3,haris-tabakovic,TSG Hoffenheim,90
+S2425_GD7_G3,cristian-gamboa,VfL Bochum,76
+S2425_GD7_G4,vincenzo-grifo,SC Freiburg,34
+S2425_GD7_G4,philipp-lienhart,SC Freiburg,37
+S2425_GD7_G4,christian-guenter,SC Freiburg,45
+S2425_GD7_G4,phillip-tietz,FC Augsburg,65
+S2425_GD7_G5,xavi-simons,RB Leipzig,20
+S2425_GD7_G5,willi-orban,RB Leipzig,37
+S2425_GD7_G6,ko-itakura,Bor. Mönchengladbach,22
+S2425_GD7_G6,tim-kleindienst,Bor. Mönchengladbach,62
+S2425_GD7_G6,tim-kleindienst,Bor. Mönchengladbach,75
+S2425_GD7_G6,leonardo-weschenfelder-scienza,1. FC Heidenheim,12
+S2425_GD7_G6,marvin-pieringer,1. FC Heidenheim,80
+S2425_GD7_G7,harry-kane,Bayern München,57
+S2425_GD7_G7,harry-kane,Bayern München,61
+S2425_GD7_G7,harry-kane,Bayern München,80
+S2425_GD7_G7,kingsley-coman,Bayern München,89
+S2425_GD7_G8,aljoscha-kemlein,1. FC Union Berlin,18
+S2425_GD7_G8,tom-rothe,1. FC Union Berlin,89
+S2425_GD7_G9,tiago-tomas,VfL Wolfsburg,19
+S2425_GD7_G9,joakim-maehle,VfL Wolfsburg,79
+S2425_GD7_G9,mitchell-weiser,Werder Bremen,45
+S2425_GD7_G9,felix-agu,Werder Bremen,51
+S2425_GD7_G9,marvin-ducksch,Werder Bremen,67
+S2425_GD7_G9,marco-gruell,Werder Bremen,72
+S2425_GD8_G1,stefan-lainer,1. FSV Mainz 05,55
+S2425_GD8_G1,tim-kleindienst,Bor. Mönchengladbach,57
+S2425_GD8_G2,deniz-undav,VfB Stuttgart,19
+S2425_GD8_G2,el-bilal-toure,VfB Stuttgart,61
+S2425_GD8_G2,armin-gigovic,Holstein Kiel,84
+S2425_GD8_G3,willi-orban,RB Leipzig,47
+S2425_GD8_G3,lutsharel-geertruida-2,RB Leipzig,58
+S2425_GD8_G3,lois-openda,RB Leipzig,79
+S2425_GD8_G3,ritsu-doan,SC Freiburg,15
+S2425_GD8_G4,alexis-claude-maurice,FC Augsburg,25
+S2425_GD8_G4,alexis-claude-maurice,FC Augsburg,50
+S2425_GD8_G4,donyell-malen,Borussia Dortmund,5
+S2425_GD8_G6,marvin-ducksch,Werder Bremen,74
+S2425_GD8_G6,romano-schmid,Werder Bremen,90
+S2425_GD8_G6,victor-boniface,Bayer 04 Leverkusen,30
+S2425_GD8_G6,felix-agu,Bayer 04 Leverkusen,78
+S2425_GD8_G7,michael-olise,Bayern München,16
+S2425_GD8_G7,jamal-musiala,Bayern München,26
+S2425_GD8_G7,harry-kane,Bayern München,57
+S2425_GD8_G7,leroy-sane,Bayern München,65
+S2425_GD8_G7,kingsley-coman,Bayern München,71
+S2425_GD8_G8,benedict-hollerbach,1. FC Union Berlin,66
+S2425_GD8_G8,mario-goetze,Eintracht Frankfurt,14
+S2425_GD9_G2,harry-kane,Bayern München,15
+S2425_GD9_G2,kingsley-coman,Bayern München,43
+S2425_GD9_G2,harry-kane,Bayern München,51
+S2425_GD9_G3,hugo-ekitike,Eintracht Frankfurt,9
+S2425_GD9_G3,omar-marmoush,Eintracht Frankfurt,18
+S2425_GD9_G3,ansgar-knauff,Eintracht Frankfurt,20
+S2425_GD9_G3,nathaniel-brown,Eintracht Frankfurt,32
+S2425_GD9_G3,mahmoud-dahoud-2,Eintracht Frankfurt,61
+S2425_GD9_G3,can-uzun,Eintracht Frankfurt,66
+S2425_GD9_G3,hugo-ekitike,Eintracht Frankfurt,69
+S2425_GD9_G3,dani-de-wit,VfL Bochum,35
+S2425_GD9_G3,philipp-hofmann,VfL Bochum,51
+S2425_GD9_G4,oladapo-afolayan,FC St. Pauli,20
+S2425_GD9_G4,andreas-albers,FC St. Pauli,90
+S2425_GD9_G5,mohammed-elamine-amoura,VfL Wolfsburg,82
+S2425_GD9_G5,phillip-tietz,FC Augsburg,34
+S2425_GD9_G6,patrick-erras,Holstein Kiel,28
+S2425_GD9_G7,maximilian-beier,Borussia Dortmund,30
+S2425_GD9_G7,serhou-guirassy,Borussia Dortmund,65
+S2425_GD9_G7,benjamin-sesko,RB Leipzig,27
+S2425_GD9_G9,alassane-plea,Bor. Mönchengladbach,11
+S2425_GD9_G9,marco-friedl-2,Bor. Mönchengladbach,12
+S2425_GD9_G9,franck-honorat,Bor. Mönchengladbach,45
+S2425_GD9_G9,kevin-stoeger,Bor. Mönchengladbach,67
+S2425_GD9_G9,keke-maximilian-topp,Werder Bremen,75
+S2425_GD10_G2,jens-stage,Werder Bremen,36
+S2425_GD10_G2,oliver-burke,Werder Bremen,89
+S2425_GD10_G2,phil-harres,Holstein Kiel,48
+S2425_GD10_G3,jae-sung-lee,1. FSV Mainz 05,36
+S2425_GD10_G3,jonathan-burkardt,1. FSV Mainz 05,45
+S2425_GD10_G3,paul-nebel,1. FSV Mainz 05,54
+S2425_GD10_G3,serhou-guirassy,Borussia Dortmund,40
+S2425_GD10_G4,koji-miyoshi,VfL Bochum,89
+S2425_GD10_G4,patrik-schick,Bayer 04 Leverkusen,18
+S2425_GD10_G5,jamal-musiala,Bayern München,22
+S2425_GD10_G8,josha-vagnoman,VfB Stuttgart,86
+S2425_GD10_G8,nick-woltemade,VfB Stuttgart,90
+S2425_GD10_G8,hugo-ekitike,Eintracht Frankfurt,45
+S2425_GD10_G8,nathaniel-brown,Eintracht Frankfurt,55
+S2425_GD10_G8,omar-marmoush,Eintracht Frankfurt,62
+S2425_GD10_G9,marvin-pieringer,1. FC Heidenheim,64
+S2425_GD10_G9,yannick-gerhardt,VfL Wolfsburg,3
+S2425_GD10_G9,bence-dardai,VfL Wolfsburg,42
+S2425_GD10_G9,tiago-tomas,VfL Wolfsburg,90
+S2425_GD11_G1,harry-kane,Bayern München,63
+S2425_GD11_G1,harry-kane,Bayern München,90
+S2425_GD11_G1,harry-kane,Bayern München,90
+S2425_GD11_G2,exequiel-palacios,Bayer 04 Leverkusen,30
+S2425_GD11_G2,patrik-schick,Bayer 04 Leverkusen,32
+S2425_GD11_G2,patrik-schick,Bayer 04 Leverkusen,52
+S2425_GD11_G2,patrik-schick,Bayer 04 Leverkusen,71
+S2425_GD11_G2,granit-xhaka,Bayer 04 Leverkusen,82
+S2425_GD11_G2,niklas-dorsch,1. FC Heidenheim,10
+S2425_GD11_G2,mathias-honsak,1. FC Heidenheim,21
+S2425_GD11_G3,chris-fuehrich,VfB Stuttgart,53
+S2425_GD11_G3,justin-diehl,VfB Stuttgart,78
+S2425_GD11_G4,maximilian-beier,Borussia Dortmund,7
+S2425_GD11_G4,felix-nmecha,Borussia Dortmund,40
+S2425_GD11_G4,julian-brandt,Borussia Dortmund,66
+S2425_GD11_G4,jamie-bynoe-gittens,Borussia Dortmund,77
+S2425_GD11_G5,adam-hlozek,TSG Hoffenheim,17
+S2425_GD11_G5,tom-bischof,TSG Hoffenheim,50
+S2425_GD11_G5,adam-hlozek,TSG Hoffenheim,82
+S2425_GD11_G5,jacob-bruun-larsen,TSG Hoffenheim,87
+S2425_GD11_G5,willi-orban,RB Leipzig,15
+S2425_GD11_G5,antonio-nusa,RB Leipzig,19
+S2425_GD11_G5,stanley-nsoki,RB Leipzig,67
+S2425_GD11_G6,ridle-baku,VfL Wolfsburg,71
+S2425_GD11_G7,mario-goetze,Eintracht Frankfurt,45
+S2425_GD11_G8,nadiem-amiri,1. FSV Mainz 05,11
+S2425_GD11_G8,jonathan-burkardt,1. FSV Mainz 05,37
+S2425_GD11_G8,jae-sung-lee,1. FSV Mainz 05,53
+S2425_GD11_G9,alassane-plea,Bor. Mönchengladbach,13
+S2425_GD11_G9,tim-kleindienst,Bor. Mönchengladbach,44
+S2425_GD12_G1,manolis-saliakas,FC St. Pauli,25
+S2425_GD12_G1,morgan-guilavogui,FC St. Pauli,56
+S2425_GD12_G1,johannes-eggestein,FC St. Pauli,85
+S2425_GD12_G1,phil-harres,Holstein Kiel,90
+S2425_GD12_G2,willi-orban,RB Leipzig,82
+S2425_GD12_G2,mohammed-elamine-amoura,VfL Wolfsburg,4
+S2425_GD12_G2,tiago-tomas,VfL Wolfsburg,5
+S2425_GD12_G2,mohammed-elamine-amoura,VfL Wolfsburg,16
+S2425_GD12_G2,joakim-maehle,VfL Wolfsburg,64
+S2425_GD12_G2,kevin-behrens,VfL Wolfsburg,90
+S2425_GD12_G3,justin-njinmah,Werder Bremen,6
+S2425_GD12_G3,jens-stage,Werder Bremen,77
+S2425_GD12_G3,ermedin-demirovic,VfB Stuttgart,20
+S2425_GD12_G3,ermedin-demirovic,VfB Stuttgart,85
+S2425_GD12_G4,lucas-hoeler,SC Freiburg,41
+S2425_GD12_G4,ritsu-doan,SC Freiburg,49
+S2425_GD12_G4,lucas-hoeler,SC Freiburg,62
+S2425_GD12_G4,tim-kleindienst,Bor. Mönchengladbach,61
+S2425_GD12_G5,phillip-tietz,FC Augsburg,38
+S2425_GD12_G6,woo-yeong-jeong,1. FC Union Berlin,29
+S2425_GD12_G6,jeremie-frimpong,Bayer 04 Leverkusen,2
+S2425_GD12_G6,patrik-schick,Bayer 04 Leverkusen,71
+S2425_GD12_G7,jamie-bynoe-gittens,Borussia Dortmund,27
+S2425_GD12_G7,jamal-musiala,Bayern München,85
+S2425_GD12_G8,jonathan-burkardt,1. FSV Mainz 05,4
+S2425_GD12_G8,jonathan-burkardt,1. FSV Mainz 05,24
+S2425_GD12_G9,omar-marmoush,Eintracht Frankfurt,22
+S2425_GD12_G9,fares-chaibi,Eintracht Frankfurt,49
+S2425_GD12_G9,omar-marmoush,Eintracht Frankfurt,58
+S2425_GD12_G9,hugo-ekitike,Eintracht Frankfurt,90
+S2425_GD13_G1,nick-woltemade,VfB Stuttgart,51
+S2425_GD13_G1,nick-woltemade,VfB Stuttgart,59
+S2425_GD13_G1,atakan-karazor,VfB Stuttgart,69
+S2425_GD13_G1,danilho-doekhi,1. FC Union Berlin,37
+S2425_GD13_G1,robert-skov,1. FC Union Berlin,48
+S2425_GD13_G2,florian-wirtz,Bayer 04 Leverkusen,6
+S2425_GD13_G2,jonathan-tah,Bayer 04 Leverkusen,21
+S2425_GD13_G2,morgan-guilavogui,FC St. Pauli,84
+S2425_GD13_G3,dayot-upamecano,Bayern München,18
+S2425_GD13_G3,jamal-musiala,Bayern München,56
+S2425_GD13_G3,leon-goretzka,Bayern München,84
+S2425_GD13_G3,jamal-musiala,Bayern München,90
+S2425_GD13_G3,mathias-honsak,1. FC Heidenheim,50
+S2425_GD13_G3,niklas-dorsch,1. FC Heidenheim,85
+S2425_GD13_G4,hugo-ekitike,Eintracht Frankfurt,55
+S2425_GD13_G4,can-uzun,Eintracht Frankfurt,74
+S2425_GD13_G4,phillip-tietz,FC Augsburg,60
+S2425_GD13_G4,samuel-essende,FC Augsburg,71
+S2425_GD13_G5,jens-stage,Werder Bremen,56
+S2425_GD13_G6,benjamin-sesko,RB Leipzig,27
+S2425_GD13_G6,andre-silva,RB Leipzig,69
+S2425_GD13_G7,kevin-stoeger,Bor. Mönchengladbach,71
+S2425_GD13_G7,jamie-bynoe-gittens,Borussia Dortmund,64
+S2425_GD13_G8,mohammed-elamine-amoura,VfL Wolfsburg,19
+S2425_GD13_G8,tiago-tomas,VfL Wolfsburg,57
+S2425_GD13_G8,jonas-wind,VfL Wolfsburg,84
+S2425_GD13_G8,jonas-wind,VfL Wolfsburg,90
+S2425_GD13_G8,paul-nebel,1. FSV Mainz 05,11
+S2425_GD13_G8,jonathan-burkardt,1. FSV Mainz 05,39
+S2425_GD13_G8,paul-nebel,1. FSV Mainz 05,66
+S2425_GD13_G9,tom-bischof,TSG Hoffenheim,73
+S2425_GD13_G9,matthias-ginter,SC Freiburg,68
+S2425_GD14_G1,lukas-kuebler,SC Freiburg,42
+S2425_GD14_G1,lukas-kuebler,SC Freiburg,51
+S2425_GD14_G1,michael-gregoritsch,SC Freiburg,61
+S2425_GD14_G1,jonas-wind,VfL Wolfsburg,75
+S2425_GD14_G1,mattias-svanberg,VfL Wolfsburg,83
+S2425_GD14_G2,martin-terrier,Bayer 04 Leverkusen,14
+S2425_GD14_G2,florian-wirtz,Bayer 04 Leverkusen,40
+S2425_GD14_G3,jae-sung-lee,1. FSV Mainz 05,41
+S2425_GD14_G3,jae-sung-lee,1. FSV Mainz 05,60
+S2425_GD14_G3,leroy-sane,Bayern München,87
+S2425_GD14_G4,tim-kleindienst,Bor. Mönchengladbach,1
+S2425_GD14_G4,robin-hack,Bor. Mönchengladbach,26
+S2425_GD14_G4,alassane-plea,Bor. Mönchengladbach,43
+S2425_GD14_G4,alassane-plea,Bor. Mönchengladbach,79
+S2425_GD14_G4,armin-gigovic,Holstein Kiel,30
+S2425_GD14_G5,benedict-hollerbach,1. FC Union Berlin,33
+S2425_GD14_G5,ibrahima-sissoko,VfL Bochum,23
+S2425_GD14_G6,derrick-koehn,Werder Bremen,24
+S2425_GD14_G6,marvin-ducksch,Werder Bremen,54
+S2425_GD14_G7,paul-wanner,1. FC Heidenheim,41
+S2425_GD14_G7,maximilian-mittelstaedt,VfB Stuttgart,20
+S2425_GD14_G7,enzo-millot,VfB Stuttgart,45
+S2425_GD14_G7,nick-woltemade,VfB Stuttgart,85
+S2425_GD14_G8,giovanni-reyna,Borussia Dortmund,46
+S2425_GD14_G8,jacob-bruun-larsen,TSG Hoffenheim,90
+S2425_GD14_G9,benjamin-sesko,RB Leipzig,19
+S2425_GD14_G9,lois-openda,RB Leipzig,51
+S2425_GD14_G9,nathaniel-brown,Eintracht Frankfurt,40
+S2425_GD15_G1,jamal-musiala,Bayern München,1
+S2425_GD15_G1,konrad-laimer,Bayern München,25
+S2425_GD15_G1,joshua-kimmich,Bayern München,36
+S2425_GD15_G1,leroy-sane,Bayern München,75
+S2425_GD15_G1,alphonso-davies,Bayern München,78
+S2425_GD15_G1,benjamin-sesko,RB Leipzig,2
+S2425_GD15_G2,johannes-eggestein,FC St. Pauli,21
+S2425_GD15_G3,rasmus-kristensen,Eintracht Frankfurt,75
+S2425_GD15_G3,kaua-santos,1. FSV Mainz 05,16
+S2425_GD15_G3,paul-nebel,1. FSV Mainz 05,27
+S2425_GD15_G3,paul-nebel,1. FSV Mainz 05,58
+S2425_GD15_G4,andrej-kramaric,TSG Hoffenheim,59
+S2425_GD15_G4,philipp-sander,Bor. Mönchengladbach,23
+S2425_GD15_G4,alassane-plea,Bor. Mönchengladbach,61
+S2425_GD15_G5,marco-gruell,Werder Bremen,13
+S2425_GD15_G5,marco-gruell,Werder Bremen,17
+S2425_GD15_G5,mitchell-weiser,Werder Bremen,45
+S2425_GD15_G5,jens-stage,Werder Bremen,87
+S2425_GD15_G5,andras-schaefer,1. FC Union Berlin,23
+S2425_GD15_G6,lasse-rosenboom,Holstein Kiel,12
+S2425_GD15_G6,phil-harres,Holstein Kiel,32
+S2425_GD15_G6,phil-harres,Holstein Kiel,35
+S2425_GD15_G6,shuto-machino,Holstein Kiel,39
+S2425_GD15_G6,shuto-machino,Holstein Kiel,90
+S2425_GD15_G6,alexis-claude-maurice,FC Augsburg,5
+S2425_GD15_G7,patrik-schick,Bayer 04 Leverkusen,45
+S2425_GD15_G7,florian-wirtz,Bayer 04 Leverkusen,51
+S2425_GD15_G7,patrik-schick,Bayer 04 Leverkusen,67
+S2425_GD15_G7,patrik-schick,Bayer 04 Leverkusen,74
+S2425_GD15_G7,patrik-schick,Bayer 04 Leverkusen,77
+S2425_GD15_G7,vincenzo-grifo,SC Freiburg,55
+S2425_GD15_G8,moritz-broschinski,VfL Bochum,6
+S2425_GD15_G8,matus-bero,VfL Bochum,38
+S2425_GD15_G9,denis-vavro,VfL Wolfsburg,58
+S2425_GD15_G9,donyell-malen,Borussia Dortmund,25
+S2425_GD15_G9,maximilian-beier,Borussia Dortmund,28
+S2425_GD15_G9,julian-brandt,Borussia Dortmund,30
+S2425_GD16_G1,jamie-bynoe-gittens,Borussia Dortmund,12
+S2425_GD16_G1,serhou-guirassy,Borussia Dortmund,79
+S2425_GD16_G1,nathan-tella,Bayer 04 Leverkusen,1
+S2425_GD16_G1,patrik-schick,Bayer 04 Leverkusen,8
+S2425_GD16_G1,patrik-schick,Bayer 04 Leverkusen,19
+S2425_GD16_G2,mohammed-elamine-amoura,VfL Wolfsburg,29
+S2425_GD16_G3,frans-kraetzig,1. FC Heidenheim,17
+S2425_GD16_G3,adrian-beck,1. FC Heidenheim,83
+S2425_GD16_G4,nicolai-remberg,SC Freiburg,23
+S2425_GD16_G4,christian-guenter,SC Freiburg,38
+S2425_GD16_G4,vincenzo-grifo,SC Freiburg,74
+S2425_GD16_G4,phil-harres,Holstein Kiel,85
+S2425_GD16_G4,phil-harres,Holstein Kiel,90
+S2425_GD16_G5,jonathan-burkardt,1. FSV Mainz 05,23
+S2425_GD16_G5,jonathan-burkardt,1. FSV Mainz 05,69
+S2425_GD16_G6,omar-marmoush,Eintracht Frankfurt,32
+S2425_GD16_G7,harry-kane,Bayern München,68
+S2425_GD16_G8,xavi-simons,RB Leipzig,24
+S2425_GD16_G8,xavi-simons,RB Leipzig,35
+S2425_GD16_G8,benjamin-sesko,RB Leipzig,47
+S2425_GD16_G8,christoph-baumgartner,RB Leipzig,90
+S2425_GD16_G8,mitchell-weiser,Werder Bremen,26
+S2425_GD16_G8,oliver-burke,Werder Bremen,90
+S2425_GD16_G9,deniz-undav,VfB Stuttgart,65
+S2425_GD17_G1,shuto-machino,Holstein Kiel,27
+S2425_GD17_G1,phil-harres,Holstein Kiel,32
+S2425_GD17_G1,alexander-bernhardsson,Holstein Kiel,45
+S2425_GD17_G1,fiete-arp,Holstein Kiel,90
+S2425_GD17_G1,giovanni-reyna,Borussia Dortmund,71
+S2425_GD17_G1,jamie-bynoe-gittens,Borussia Dortmund,77
+S2425_GD17_G2,alejandro-grimaldo,Bayer 04 Leverkusen,48
+S2425_GD17_G3,robin-koch,Eintracht Frankfurt,43
+S2425_GD17_G3,omar-marmoush,Eintracht Frankfurt,65
+S2425_GD17_G3,hugo-ekitike,Eintracht Frankfurt,71
+S2425_GD17_G3,nnamdi-collins,Eintracht Frankfurt,81
+S2425_GD17_G3,ritsu-doan,SC Freiburg,37
+S2425_GD17_G4,jonas-wind,VfL Wolfsburg,3
+S2425_GD17_G4,joakim-maehle,VfL Wolfsburg,60
+S2425_GD17_G4,maximilian-arnold,VfL Wolfsburg,75
+S2425_GD17_G4,lukas-nmecha,VfL Wolfsburg,84
+S2425_GD17_G4,lukas-nmecha,VfL Wolfsburg,87
+S2425_GD17_G4,shio-fukuda,Bor. Mönchengladbach,89
+S2425_GD17_G5,philipp-hofmann,VfL Bochum,67
+S2425_GD17_G6,jacob-bruun-larsen,VfB Stuttgart,50
+S2425_GD17_G6,nick-woltemade,VfB Stuttgart,60
+S2425_GD17_G6,benjamin-sesko,RB Leipzig,10
+S2425_GD17_G7,leroy-sane,Bayern München,7
+S2425_GD17_G7,raphael-guerreiro,Bayern München,12
+S2425_GD17_G7,harry-kane,Bayern München,26
+S2425_GD17_G7,leroy-sane,Bayern München,48
+S2425_GD17_G7,serge-gnabry,Bayern München,66
+S2425_GD17_G8,marco-gruell,Werder Bremen,1
+S2425_GD17_G8,marvin-ducksch,Werder Bremen,56
+S2425_GD17_G8,marco-gruell,Werder Bremen,79
+S2425_GD17_G8,jan-schoeppner,1. FC Heidenheim,30
+S2425_GD17_G8,luca-kerber,1. FC Heidenheim,61
+S2425_GD17_G8,leonardo-weschenfelder-scienza,1. FC Heidenheim,90
+S2425_GD17_G9,alexis-claude-maurice,FC Augsburg,9
+S2425_GD17_G9,alexis-claude-maurice,FC Augsburg,30
+S2425_GD18_G1,hugo-ekitike,Eintracht Frankfurt,18
+S2425_GD18_G1,oscar-hoejlund,Eintracht Frankfurt,90
+S2425_GD18_G2,anthony-rouault,VfB Stuttgart,3
+S2425_GD18_G2,ermedin-demirovic,VfB Stuttgart,17
+S2425_GD18_G2,nick-woltemade,VfB Stuttgart,45
+S2425_GD18_G2,deniz-undav,VfB Stuttgart,80
+S2425_GD18_G3,leon-goretzka,Bayern München,20
+S2425_GD18_G3,michael-olise,Bayern München,39
+S2425_GD18_G3,leon-goretzka,Bayern München,62
+S2425_GD18_G3,mohammed-elamine-amoura,VfL Wolfsburg,24
+S2425_GD18_G3,mohammed-elamine-amoura,VfL Wolfsburg,88
+S2425_GD18_G4,johannes-eggestein,FC St. Pauli,25
+S2425_GD18_G4,morgan-guilavogui,FC St. Pauli,90
+S2425_GD18_G5,myron-boadu,VfL Bochum,48
+S2425_GD18_G5,myron-boadu,VfL Bochum,57
+S2425_GD18_G5,myron-boadu,VfL Bochum,61
+S2425_GD18_G5,willi-orban,RB Leipzig,10
+S2425_GD18_G5,antonio-nusa,RB Leipzig,13
+S2425_GD18_G5,christoph-baumgartner,RB Leipzig,21
+S2425_GD18_G6,andu-yobel-kelati,Holstein Kiel,84
+S2425_GD18_G6,adam-hlozek,TSG Hoffenheim,26
+S2425_GD18_G6,andrej-kramaric,TSG Hoffenheim,45
+S2425_GD18_G6,adam-hlozek,TSG Hoffenheim,56
+S2425_GD18_G7,florian-wirtz,Bayer 04 Leverkusen,32
+S2425_GD18_G7,florian-wirtz,Bayer 04 Leverkusen,62
+S2425_GD18_G7,patrik-schick,Bayer 04 Leverkusen,74
+S2425_GD18_G7,tim-kleindienst,Bor. Mönchengladbach,90
+S2425_GD18_G8,benedict-hollerbach,1. FC Union Berlin,1
+S2425_GD18_G8,robert-skov,1. FC Union Berlin,24
+S2425_GD18_G8,nadiem-amiri,1. FSV Mainz 05,5
+S2425_GD18_G9,samuel-essende,FC Augsburg,5
+S2425_GD18_G9,samuel-essende,FC Augsburg,45
