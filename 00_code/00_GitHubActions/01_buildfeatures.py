@@ -502,8 +502,17 @@ def get_player_stats(dict_data):
         gameday_rr = CR7.loc[rr,'gameday']
         kickoff_rr = CR7.loc[rr,'kick_off']
 
+        # --- --- Available match_days:
+        match_days_AVAILABLE = np.array(list(Ladder[ll][season_rr].keys()))
+          
+
         # --- Get the PREVIOUS match_day
         gameday_rr1 = gameday_rr - 1
+
+        # --- --- Is the Ladder for the previous match_day available...?
+        if gameday_rr1 not in match_days_AVAILABLE:
+          gameday_rr1 = match_days_AVAILABLE[match_days_AVAILABLE < gameday_rr][-1]
+
 
         # --- Extract the ladder of the PREVIOUS match day:
         ladder_df = Ladder[ll][season_rr][gameday_rr1]
