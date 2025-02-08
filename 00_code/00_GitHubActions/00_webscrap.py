@@ -521,7 +521,8 @@ for ll in N_leagues:
         games_final = pd.concat([games_existing,games_final],axis=0)
         scorer_final = pd.concat([scorer_existing,scorer_final],axis=0)
         lineup_final = pd.concat([lineup_existing,lineup_final],axis=0)
-        players_final = pd.concat([players_existing,players_final],axis=0)
+        # --- --- --- Only keep the Latest Observation by Player!
+        players_final = pd.concat([players_existing,players_final],axis=0).drop_duplicates('name_player',keep='last').reset_index(drop=True)
 
       
     print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
