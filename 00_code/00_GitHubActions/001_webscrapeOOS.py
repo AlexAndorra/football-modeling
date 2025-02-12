@@ -96,7 +96,7 @@ for ll in N_leagues:
         # --- Extract the latest matchday:
         matchday_done = int(str(games_done.iloc[-1,0]).split('GD')[1].split('_')[0])
         # --- Adjust the Number of Games to run over:
-        N_gamedays[N_leagues.index(ll)] = range(matchday_done+1,N_gamedays[N_leagues.index(ll)][-1])
+        N_gamedays[N_leagues.index(ll)] = range(matchday_done+1,N_gamedays[N_leagues.index(ll)][-1]+1)
         
             
 
