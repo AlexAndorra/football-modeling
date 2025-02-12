@@ -36,7 +36,7 @@ jobs:
 
     - name: Run Python Script, Commit and Push Changes
       run: |
-        python -u 00_code/00_GitHubActions/00_webscrap.py
+        python -u 00_code/00_GitHubActions/00_webscrape.py
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add 10_data/100_RawData/**
