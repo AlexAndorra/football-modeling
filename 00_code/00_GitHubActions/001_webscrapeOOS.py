@@ -193,12 +193,12 @@ for ll in N_leagues:
     ss_abreviation = ss.replace('-','')[2:]
 
     # --- --- Check if we're in the midst of the season, and just run over the matchdays not yet done
-    if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games__OOS.csv'):
+    #if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games__OOS.csv'):
         # --- --- --- Load the already existing files and concatenate:
-        games_existing = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games__OOS.csv')
+    #    games_existing = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games__OOS.csv')
 
         # --- --- --- Concatenate the existing data with the just scraped data:
-        games_final = pd.concat([games_existing,games_final],axis=0)
+    #    games_final = pd.concat([games_existing,games_final],axis=0)
 
       
     print(f'Exporting to directory: {directory}/10_data/100_RawData/{ll}/')
