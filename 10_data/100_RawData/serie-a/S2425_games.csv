@@ -1,243 +1,243 @@
 match_id,kick_off,team_home,team_away,score_home_full,score_away_full,score_home_half,score_away_half
-S2425_GD1_G1,8/17/2024,CFC Genua 1893,Inter Mailand,2,2,1,1
-S2425_GD1_G2,8/17/2024,Parma Calcio,AC Florenz,1,1,1,0
-S2425_GD1_G3,8/17/2024,FC Empoli,AC Monza,0,0,0,0
-S2425_GD1_G4,8/17/2024,AC Mailand,FC Turin,2,2,0,1
-S2425_GD1_G5,8/18/2024,FC Bologna,Udinese Calcio,1,1,0,0
-S2425_GD1_G6,8/18/2024,Hellas Verona,SSC Neapel,3,0,0,0
-S2425_GD1_G7,8/18/2024,Cagliari Calcio,AS Rom,0,0,0,0
-S2425_GD1_G8,8/18/2024,Lazio Rom,FC Venedig,3,1,2,1
-S2425_GD1_G9,8/19/2024,US Lecce,Atalanta Bergamo,0,4,0,2
-S2425_GD1_G10,8/19/2024,Juventus Turin,Como 1907,3,0,2,0
-S2425_GD2_G1,8/24/2024,Parma Calcio,AC Mailand,2,1,1,0
-S2425_GD2_G2,8/24/2024,Udinese Calcio,Lazio Rom,2,1,1,0
-S2425_GD2_G3,8/24/2024,Inter Mailand,US Lecce,2,0,1,0
-S2425_GD2_G4,8/24/2024,AC Monza,CFC Genua 1893,0,1,0,1
-S2425_GD2_G5,8/25/2024,AC Florenz,FC Venedig,0,0,0,0
-S2425_GD2_G6,8/25/2024,FC Turin,Atalanta Bergamo,2,1,1,1
-S2425_GD2_G7,8/25/2024,SSC Neapel,FC Bologna,3,0,1,0
-S2425_GD2_G8,8/25/2024,AS Rom,FC Empoli,1,2,0,1
-S2425_GD2_G9,8/26/2024,Cagliari Calcio,Como 1907,1,1,1,0
-S2425_GD2_G10,8/26/2024,Hellas Verona,Juventus Turin,0,3,0,2
-S2425_GD3_G1,8/30/2024,FC Venedig,FC Turin,0,1,0,0
-S2425_GD3_G2,8/30/2024,Inter Mailand,Atalanta Bergamo,4,0,2,0
-S2425_GD3_G3,8/31/2024,FC Bologna,FC Empoli,1,1,1,1
-S2425_GD3_G4,8/31/2024,US Lecce,Cagliari Calcio,1,0,1,0
-S2425_GD3_G5,8/31/2024,Lazio Rom,AC Mailand,2,2,0,1
-S2425_GD3_G6,8/31/2024,SSC Neapel,Parma Calcio,2,1,0,1
-S2425_GD3_G7,9/1/2024,AC Florenz,AC Monza,2,2,1,2
-S2425_GD3_G8,9/1/2024,CFC Genua 1893,Hellas Verona,0,2,0,0
-S2425_GD3_G9,9/1/2024,Juventus Turin,AS Rom,0,0,0,0
-S2425_GD3_G10,9/1/2024,Udinese Calcio,Como 1907,1,0,1,0
-S2425_GD4_G1,9/14/2024,Como 1907,FC Bologna,2,2,1,0
-S2425_GD4_G2,9/14/2024,FC Empoli,Juventus Turin,0,0,0,0
-S2425_GD4_G3,9/14/2024,AC Mailand,FC Venedig,4,0,4,0
-S2425_GD4_G4,9/15/2024,CFC Genua 1893,AS Rom,1,1,0,1
-S2425_GD4_G5,9/15/2024,FC Turin,US Lecce,0,0,0,0
-S2425_GD4_G6,9/15/2024,Atalanta Bergamo,AC Florenz,3,2,3,2
-S2425_GD4_G7,9/15/2024,Cagliari Calcio,SSC Neapel,0,4,0,1
-S2425_GD4_G8,9/15/2024,AC Monza,Inter Mailand,1,1,0,0
-S2425_GD4_G9,9/16/2024,Parma Calcio,Udinese Calcio,2,3,2,0
-S2425_GD4_G10,9/16/2024,Lazio Rom,Hellas Verona,2,1,2,1
-S2425_GD5_G1,9/20/2024,Cagliari Calcio,FC Empoli,0,2,0,1
-S2425_GD5_G2,9/20/2024,Hellas Verona,FC Turin,2,3,1,2
-S2425_GD5_G3,9/21/2024,FC Venedig,CFC Genua 1893,2,0,0,0
-S2425_GD5_G4,9/21/2024,Juventus Turin,SSC Neapel,0,0,0,0
-S2425_GD5_G5,9/21/2024,US Lecce,Parma Calcio,2,2,1,0
-S2425_GD5_G6,9/22/2024,AC Florenz,Lazio Rom,2,1,0,1
-S2425_GD5_G7,9/22/2024,AC Monza,FC Bologna,1,2,1,1
-S2425_GD5_G8,9/22/2024,AS Rom,Udinese Calcio,3,0,1,0
-S2425_GD5_G9,9/22/2024,Inter Mailand,AC Mailand,1,2,1,1
-S2425_GD5_G10,9/24/2024,Atalanta Bergamo,Como 1907,2,3,1,0
-S2425_GD6_G1,9/27/2024,AC Mailand,US Lecce,3,0,3,0
-S2425_GD6_G2,9/28/2024,Udinese Calcio,Inter Mailand,2,3,1,2
-S2425_GD6_G3,9/28/2024,CFC Genua 1893,Juventus Turin,0,3,0,0
-S2425_GD6_G4,9/28/2024,FC Bologna,Atalanta Bergamo,1,1,0,0
-S2425_GD6_G5,9/29/2024,FC Turin,Lazio Rom,2,3,0,1
-S2425_GD6_G6,9/29/2024,Como 1907,Hellas Verona,3,2,1,0
-S2425_GD6_G7,9/29/2024,AS Rom,FC Venedig,2,1,0,1
-S2425_GD6_G8,9/29/2024,FC Empoli,AC Florenz,0,0,0,0
-S2425_GD6_G9,9/29/2024,SSC Neapel,AC Monza,2,0,2,0
-S2425_GD6_G10,9/30/2024,Parma Calcio,Cagliari Calcio,2,3,0,1
-S2425_GD7_G1,10/4/2024,SSC Neapel,Como 1907,3,1,1,1
-S2425_GD7_G2,10/4/2024,Hellas Verona,FC Venedig,2,1,1,1
-S2425_GD7_G3,10/5/2024,Udinese Calcio,US Lecce,1,0,0,0
-S2425_GD7_G4,10/5/2024,Atalanta Bergamo,CFC Genua 1893,5,1,1,0
-S2425_GD7_G5,10/5/2024,Inter Mailand,FC Turin,3,2,2,1
-S2425_GD7_G6,10/6/2024,Juventus Turin,Cagliari Calcio,1,1,1,0
-S2425_GD7_G7,10/6/2024,FC Bologna,Parma Calcio,0,0,0,0
-S2425_GD7_G8,10/6/2024,Lazio Rom,FC Empoli,2,1,1,1
-S2425_GD7_G9,10/6/2024,AC Monza,AS Rom,1,1,0,0
-S2425_GD7_G10,10/6/2024,AC Florenz,AC Mailand,2,1,1,0
-S2425_GD8_G1,10/19/2024,Como 1907,Parma Calcio,1,1,1,1
-S2425_GD8_G2,10/19/2024,CFC Genua 1893,FC Bologna,2,2,0,1
-S2425_GD8_G3,10/19/2024,AC Mailand,Udinese Calcio,1,0,1,0
-S2425_GD8_G4,10/19/2024,Juventus Turin,Lazio Rom,1,0,0,0
-S2425_GD8_G5,10/20/2024,FC Empoli,SSC Neapel,0,1,0,0
-S2425_GD8_G6,10/20/2024,US Lecce,AC Florenz,0,6,0,3
-S2425_GD8_G7,10/20/2024,FC Venedig,Atalanta Bergamo,0,2,0,1
-S2425_GD8_G8,10/20/2024,Cagliari Calcio,FC Turin,3,2,1,1
-S2425_GD8_G9,10/20/2024,AS Rom,Inter Mailand,0,1,0,0
-S2425_GD8_G10,10/21/2024,Hellas Verona,AC Monza,0,3,0,1
-S2425_GD9_G1,10/25/2024,Udinese Calcio,Cagliari Calcio,2,0,1,0
-S2425_GD9_G2,10/25/2024,FC Turin,Como 1907,1,0,0,0
-S2425_GD9_G3,10/26/2024,SSC Neapel,US Lecce,1,0,0,0
-S2425_GD9_G5,10/26/2024,Atalanta Bergamo,Hellas Verona,6,1,5,1
-S2425_GD9_G6,10/27/2024,Parma Calcio,FC Empoli,1,1,0,1
-S2425_GD9_G7,10/27/2024,Lazio Rom,CFC Genua 1893,3,0,1,0
-S2425_GD9_G8,10/27/2024,AC Monza,FC Venedig,2,2,2,2
-S2425_GD9_G9,10/27/2024,Inter Mailand,Juventus Turin,4,4,3,2
-S2425_GD9_G10,10/27/2024,AC Florenz,AS Rom,5,1,3,1
-S2425_GD10_G1,10/29/2024,Cagliari Calcio,FC Bologna,0,2,0,1
-S2425_GD10_G2,10/29/2024,US Lecce,Hellas Verona,1,0,0,0
-S2425_GD10_G3,10/29/2024,AC Mailand,SSC Neapel,0,2,0,2
-S2425_GD10_G4,10/30/2024,FC Empoli,Inter Mailand,0,3,0,0
-S2425_GD10_G5,10/30/2024,FC Venedig,Udinese Calcio,3,2,1,2
-S2425_GD10_G6,10/30/2024,Atalanta Bergamo,AC Monza,2,0,0,0
-S2425_GD10_G7,10/30/2024,Juventus Turin,Parma Calcio,2,2,1,2
-S2425_GD10_G8,10/31/2024,CFC Genua 1893,AC Florenz,0,1,0,0
-S2425_GD10_G9,10/31/2024,Como 1907,Lazio Rom,1,5,0,2
-S2425_GD10_G10,10/31/2024,AS Rom,FC Turin,1,0,1,0
-S2425_GD11_G1,11/2/2024,FC Bologna,US Lecce,1,0,0,0
-S2425_GD11_G2,11/2/2024,Udinese Calcio,Juventus Turin,0,2,0,2
-S2425_GD11_G3,11/2/2024,AC Monza,AC Mailand,0,1,0,1
-S2425_GD11_G4,11/3/2024,SSC Neapel,Atalanta Bergamo,0,3,0,2
-S2425_GD11_G5,11/3/2024,FC Turin,AC Florenz,0,1,0,1
-S2425_GD11_G6,11/3/2024,Hellas Verona,AS Rom,3,2,2,1
-S2425_GD11_G7,11/3/2024,Inter Mailand,FC Venedig,1,0,0,0
-S2425_GD11_G8,11/4/2024,FC Empoli,Como 1907,1,0,0,0
-S2425_GD11_G9,11/4/2024,Parma Calcio,CFC Genua 1893,0,1,0,0
-S2425_GD11_G10,11/4/2024,Lazio Rom,Cagliari Calcio,2,1,1,1
-S2425_GD12_G1,11/7/2024,CFC Genua 1893,Como 1907,1,1,0,1
-S2425_GD12_G2,11/8/2024,US Lecce,FC Empoli,1,1,0,1
-S2425_GD12_G3,11/9/2024,FC Venedig,Parma Calcio,1,2,1,1
-S2425_GD12_G4,11/9/2024,Cagliari Calcio,AC Mailand,3,3,1,2
-S2425_GD12_G5,11/9/2024,Juventus Turin,FC Turin,2,0,1,0
-S2425_GD12_G6,11/10/2024,Atalanta Bergamo,Udinese Calcio,2,1,0,1
-S2425_GD12_G7,11/10/2024,AC Florenz,Hellas Verona,3,1,1,1
-S2425_GD12_G8,11/10/2024,AS Rom,FC Bologna,2,3,0,1
-S2425_GD12_G9,11/10/2024,AC Monza,Lazio Rom,0,1,0,1
-S2425_GD12_G10,11/10/2024,Inter Mailand,SSC Neapel,1,1,1,1
-S2425_GD13_G1,11/23/2024,Hellas Verona,Inter Mailand,0,5,0,5
-S2425_GD13_G2,11/23/2024,AC Mailand,Juventus Turin,0,0,0,0
-S2425_GD13_G3,11/23/2024,Parma Calcio,Atalanta Bergamo,1,3,0,2
-S2425_GD13_G4,11/24/2024,CFC Genua 1893,Cagliari Calcio,2,2,1,1
-S2425_GD13_G5,11/24/2024,Como 1907,AC Florenz,0,2,0,1
-S2425_GD13_G6,11/24/2024,FC Turin,AC Monza,1,1,0,0
-S2425_GD13_G7,11/24/2024,SSC Neapel,AS Rom,1,0,0,0
-S2425_GD13_G8,11/24/2024,Lazio Rom,FC Bologna,3,0,0,0
-S2425_GD13_G9,11/25/2024,FC Empoli,Udinese Calcio,1,1,1,0
-S2425_GD13_G10,11/25/2024,FC Venedig,US Lecce,0,1,0,0
-S2425_GD14_G1,11/29/2024,Cagliari Calcio,Hellas Verona,1,0,0,0
-S2425_GD14_G2,11/30/2024,Como 1907,AC Monza,1,1,1,0
-S2425_GD14_G3,11/30/2024,AC Mailand,FC Empoli,3,0,2,0
-S2425_GD14_G4,11/30/2024,FC Bologna,FC Venedig,3,0,1,0
-S2425_GD14_G5,12/1/2024,Udinese Calcio,CFC Genua 1893,0,2,0,1
-S2425_GD14_G6,12/1/2024,Parma Calcio,Lazio Rom,3,1,1,0
-S2425_GD14_G7,12/1/2024,FC Turin,SSC Neapel,0,1,0,1
-S2425_GD14_G9,12/1/2024,US Lecce,Juventus Turin,1,1,0,0
-S2425_GD14_G10,12/2/2024,AS Rom,Atalanta Bergamo,0,2,0,0
-S2425_GD15_G1,12/6/2024,Inter Mailand,Parma Calcio,3,1,1,0
-S2425_GD15_G2,12/6/2024,Atalanta Bergamo,AC Mailand,2,1,1,1
-S2425_GD15_G3,12/7/2024,CFC Genua 1893,FC Turin,0,0,0,0
-S2425_GD15_G4,12/7/2024,Juventus Turin,FC Bologna,2,2,0,1
-S2425_GD15_G5,12/7/2024,AS Rom,US Lecce,4,1,1,1
-S2425_GD15_G6,12/8/2024,AC Florenz,Cagliari Calcio,1,0,1,0
-S2425_GD15_G7,12/8/2024,Hellas Verona,FC Empoli,1,4,1,4
-S2425_GD15_G8,12/8/2024,FC Venedig,Como 1907,2,2,1,0
-S2425_GD15_G9,12/8/2024,SSC Neapel,Lazio Rom,0,1,0,0
-S2425_GD15_G10,12/9/2024,AC Monza,Udinese Calcio,1,2,0,1
-S2425_GD16_G1,12/13/2024,FC Empoli,FC Turin,0,1,0,0
-S2425_GD16_G2,12/14/2024,Cagliari Calcio,Atalanta Bergamo,0,1,0,0
-S2425_GD16_G3,12/14/2024,Udinese Calcio,SSC Neapel,1,3,1,0
-S2425_GD16_G4,12/14/2024,Juventus Turin,FC Venedig,2,2,1,0
-S2425_GD16_G5,12/15/2024,US Lecce,AC Monza,2,1,2,1
-S2425_GD16_G6,12/15/2024,FC Bologna,AC Florenz,1,0,0,0
-S2425_GD16_G7,12/15/2024,Parma Calcio,Hellas Verona,2,3,1,1
-S2425_GD16_G8,12/15/2024,Como 1907,AS Rom,2,0,0,0
-S2425_GD16_G9,12/15/2024,AC Mailand,CFC Genua 1893,0,0,0,0
-S2425_GD16_G10,12/16/2024,Lazio Rom,Inter Mailand,0,6,0,2
-S2425_GD17_G1,12/20/2024,Hellas Verona,AC Mailand,0,1,0,0
-S2425_GD17_G2,12/21/2024,FC Turin,FC Bologna,0,2,0,0
-S2425_GD17_G3,12/21/2024,CFC Genua 1893,SSC Neapel,1,2,0,2
-S2425_GD17_G4,12/21/2024,US Lecce,Lazio Rom,1,2,0,1
-S2425_GD17_G5,12/22/2024,AS Rom,Parma Calcio,5,0,2,0
-S2425_GD17_G6,12/22/2024,FC Venedig,Cagliari Calcio,2,1,1,0
-S2425_GD17_G7,12/22/2024,Atalanta Bergamo,FC Empoli,3,2,2,1
-S2425_GD17_G8,12/22/2024,AC Monza,Juventus Turin,1,2,1,2
-S2425_GD17_G9,12/23/2024,AC Florenz,Udinese Calcio,1,2,1,0
-S2425_GD17_G10,12/23/2024,Inter Mailand,Como 1907,2,0,0,0
-S2425_GD18_G1,12/28/2024,FC Empoli,CFC Genua 1893,1,2,0,0
-S2425_GD18_G2,12/28/2024,Parma Calcio,AC Monza,2,1,0,0
-S2425_GD18_G3,12/28/2024,Cagliari Calcio,Inter Mailand,0,3,0,0
-S2425_GD18_G4,12/28/2024,Lazio Rom,Atalanta Bergamo,1,1,1,0
-S2425_GD18_G5,12/29/2024,Udinese Calcio,FC Turin,2,2,1,0
-S2425_GD18_G6,12/29/2024,SSC Neapel,FC Venedig,1,0,0,0
-S2425_GD18_G7,12/29/2024,Juventus Turin,AC Florenz,2,2,1,1
-S2425_GD18_G8,12/29/2024,AC Mailand,AS Rom,1,1,1,1
-S2425_GD18_G9,12/30/2024,Como 1907,US Lecce,2,0,0,0
-S2425_GD18_G10,12/30/2024,FC Bologna,Hellas Verona,2,3,1,2
-S2425_GD19_G1,1/4/2025,FC Venedig,FC Empoli,1,1,1,1
-S2425_GD19_G2,1/4/2025,AC Florenz,SSC Neapel,0,3,0,1
-S2425_GD19_G3,1/4/2025,Hellas Verona,Udinese Calcio,0,0,0,0
-S2425_GD19_G4,1/5/2025,AC Monza,Cagliari Calcio,1,2,1,1
-S2425_GD19_G5,1/5/2025,US Lecce,CFC Genua 1893,0,0,0,0
-S2425_GD19_G6,1/5/2025,FC Turin,Parma Calcio,0,0,0,0
-S2425_GD19_G7,1/5/2025,AS Rom,Lazio Rom,2,0,2,0
-S2425_GD20_G1,1/10/2025,Lazio Rom,Como 1907,1,1,1,0
-S2425_GD20_G2,1/11/2025,FC Empoli,US Lecce,1,3,0,2
-S2425_GD20_G3,1/11/2025,Udinese Calcio,Atalanta Bergamo,0,0,0,0
-S2425_GD20_G4,1/11/2025,FC Turin,Juventus Turin,1,1,1,1
-S2425_GD20_G5,1/11/2025,AC Mailand,Cagliari Calcio,1,1,0,0
-S2425_GD20_G6,1/12/2025,CFC Genua 1893,Parma Calcio,1,0,0,0
-S2425_GD20_G7,1/12/2025,FC Venedig,Inter Mailand,0,1,0,1
-S2425_GD20_G8,1/12/2025,FC Bologna,AS Rom,2,2,0,0
-S2425_GD20_G9,1/12/2025,SSC Neapel,Hellas Verona,2,0,1,0
-S2425_GD20_G10,1/13/2025,AC Monza,AC Florenz,2,1,1,0
-S2425_GD20_G11,1/14/2025,Como 1907,AC Mailand,1,2,0,0
-S2425_GD20_G12,1/14/2025,Atalanta Bergamo,Juventus Turin,1,1,0,0
-S2425_GD20_G13,1/15/2025,Inter Mailand,FC Bologna,2,2,2,1
-S2425_GD21_G1,1/17/2025,AS Rom,CFC Genua 1893,3,1,1,1
-S2425_GD21_G2,1/18/2025,FC Bologna,AC Monza,3,1,2,1
-S2425_GD21_G3,1/18/2025,Juventus Turin,AC Mailand,2,0,0,0
-S2425_GD21_G4,1/18/2025,Atalanta Bergamo,SSC Neapel,2,3,1,2
-S2425_GD21_G5,1/19/2025,AC Florenz,FC Turin,1,1,1,0
-S2425_GD21_G6,1/19/2025,Cagliari Calcio,US Lecce,4,1,0,1
-S2425_GD21_G7,1/19/2025,Parma Calcio,FC Venedig,1,1,0,1
-S2425_GD21_G8,1/19/2025,Hellas Verona,Lazio Rom,0,3,0,2
-S2425_GD21_G9,1/19/2025,Inter Mailand,FC Empoli,3,1,0,0
-S2425_GD21_G10,1/20/2025,Como 1907,Udinese Calcio,4,1,2,0
-S2425_GD22_G1,1/24/2025,FC Turin,Cagliari Calcio,2,0,1,0
-S2425_GD22_G2,1/25/2025,Como 1907,Atalanta Bergamo,1,2,1,0
-S2425_GD22_G3,1/25/2025,SSC Neapel,Juventus Turin,2,1,0,1
-S2425_GD22_G4,1/25/2025,FC Empoli,FC Bologna,1,1,1,1
-S2425_GD22_G5,1/26/2025,AC Mailand,Parma Calcio,3,2,1,1
-S2425_GD22_G6,1/26/2025,Udinese Calcio,AS Rom,1,2,1,0
-S2425_GD22_G7,1/26/2025,US Lecce,Inter Mailand,0,4,0,2
-S2425_GD22_G8,1/26/2025,Lazio Rom,AC Florenz,1,2,0,2
-S2425_GD22_G9,1/27/2025,FC Venedig,Hellas Verona,1,1,1,0
-S2425_GD22_G10,1/27/2025,CFC Genua 1893,AC Monza,2,0,0,0
-S2425_GD23_G1,1/31/2025,Parma Calcio,US Lecce,1,3,1,1
-S2425_GD23_G2,2/1/2025,AC Monza,Hellas Verona,0,1,0,1
-S2425_GD23_G3,2/1/2025,Udinese Calcio,FC Venedig,3,2,0,0
-S2425_GD23_G4,2/1/2025,Atalanta Bergamo,FC Turin,1,1,1,1
-S2425_GD23_G5,2/1/2025,FC Bologna,Como 1907,2,0,1,0
-S2425_GD23_G6,2/2/2025,Juventus Turin,FC Empoli,4,1,0,1
-S2425_GD23_G7,2/2/2025,AC Florenz,CFC Genua 1893,2,1,2,0
-S2425_GD23_G8,2/2/2025,AC Mailand,Inter Mailand,1,1,1,0
-S2425_GD23_G9,2/2/2025,AS Rom,SSC Neapel,1,1,0,1
-S2425_GD23_G10,2/3/2025,Cagliari Calcio,Lazio Rom,1,2,0,1
-S2425_GD24_G1,2/7/2025,Como 1907,Juventus Turin,1,2,1,1
-S2425_GD24_G2,2/8/2025,Hellas Verona,Atalanta Bergamo,0,5,0,4
-S2425_GD24_G3,2/8/2025,FC Empoli,AC Mailand,0,2,0,0
-S2425_GD24_G4,2/8/2025,FC Turin,CFC Genua 1893,1,1,1,0
-S2425_GD24_G5,2/9/2025,FC Venedig,AS Rom,0,1,0,0
-S2425_GD24_G6,2/9/2025,Cagliari Calcio,Parma Calcio,2,1,0,0
-S2425_GD24_G7,2/9/2025,Lazio Rom,AC Monza,5,1,1,0
-S2425_GD24_G8,2/9/2025,US Lecce,FC Bologna,0,0,0,0
-S2425_GD24_G9,2/9/2025,SSC Neapel,Udinese Calcio,1,1,1,1
-S2425_GD24_G10,2/10/2025,Inter Mailand,AC Florenz,2,1,1,1
-S2425_GD24_G11,2/6/2025,AC Florenz,Inter Mailand,3,0,0,0
+S2425_GD1_G1,2024-08-17,CFC Genua 1893,Inter Mailand,2,2,1,1
+S2425_GD1_G2,2024-08-17,Parma Calcio,AC Florenz,1,1,1,0
+S2425_GD1_G3,2024-08-17,FC Empoli,AC Monza,0,0,0,0
+S2425_GD1_G4,2024-08-17,AC Mailand,FC Turin,2,2,0,1
+S2425_GD1_G5,2024-08-18,FC Bologna,Udinese Calcio,1,1,0,0
+S2425_GD1_G6,2024-08-18,Hellas Verona,SSC Neapel,3,0,0,0
+S2425_GD1_G7,2024-08-18,Cagliari Calcio,AS Rom,0,0,0,0
+S2425_GD1_G8,2024-08-18,Lazio Rom,FC Venedig,3,1,2,1
+S2425_GD1_G9,2024-08-19,US Lecce,Atalanta Bergamo,0,4,0,2
+S2425_GD1_G10,2024-08-19,Juventus Turin,Como 1907,3,0,2,0
+S2425_GD2_G1,2024-08-24,Parma Calcio,AC Mailand,2,1,1,0
+S2425_GD2_G2,2024-08-24,Udinese Calcio,Lazio Rom,2,1,1,0
+S2425_GD2_G3,2024-08-24,Inter Mailand,US Lecce,2,0,1,0
+S2425_GD2_G4,2024-08-24,AC Monza,CFC Genua 1893,0,1,0,1
+S2425_GD2_G5,2024-08-25,AC Florenz,FC Venedig,0,0,0,0
+S2425_GD2_G6,2024-08-25,FC Turin,Atalanta Bergamo,2,1,1,1
+S2425_GD2_G7,2024-08-25,SSC Neapel,FC Bologna,3,0,1,0
+S2425_GD2_G8,2024-08-25,AS Rom,FC Empoli,1,2,0,1
+S2425_GD2_G9,2024-08-26,Cagliari Calcio,Como 1907,1,1,1,0
+S2425_GD2_G10,2024-08-26,Hellas Verona,Juventus Turin,0,3,0,2
+S2425_GD3_G1,2024-08-30,FC Venedig,FC Turin,0,1,0,0
+S2425_GD3_G2,2024-08-30,Inter Mailand,Atalanta Bergamo,4,0,2,0
+S2425_GD3_G3,2024-08-31,FC Bologna,FC Empoli,1,1,1,1
+S2425_GD3_G4,2024-08-31,US Lecce,Cagliari Calcio,1,0,1,0
+S2425_GD3_G5,2024-08-31,Lazio Rom,AC Mailand,2,2,0,1
+S2425_GD3_G6,2024-08-31,SSC Neapel,Parma Calcio,2,1,0,1
+S2425_GD3_G7,2024-09-01,AC Florenz,AC Monza,2,2,1,2
+S2425_GD3_G8,2024-09-01,CFC Genua 1893,Hellas Verona,0,2,0,0
+S2425_GD3_G9,2024-09-01,Juventus Turin,AS Rom,0,0,0,0
+S2425_GD3_G10,2024-09-01,Udinese Calcio,Como 1907,1,0,1,0
+S2425_GD4_G1,2024-09-14,Como 1907,FC Bologna,2,2,1,0
+S2425_GD4_G2,2024-09-14,FC Empoli,Juventus Turin,0,0,0,0
+S2425_GD4_G3,2024-09-14,AC Mailand,FC Venedig,4,0,4,0
+S2425_GD4_G4,2024-09-15,CFC Genua 1893,AS Rom,1,1,0,1
+S2425_GD4_G5,2024-09-15,FC Turin,US Lecce,0,0,0,0
+S2425_GD4_G6,2024-09-15,Atalanta Bergamo,AC Florenz,3,2,3,2
+S2425_GD4_G7,2024-09-15,Cagliari Calcio,SSC Neapel,0,4,0,1
+S2425_GD4_G8,2024-09-15,AC Monza,Inter Mailand,1,1,0,0
+S2425_GD4_G9,2024-09-16,Parma Calcio,Udinese Calcio,2,3,2,0
+S2425_GD4_G10,2024-09-16,Lazio Rom,Hellas Verona,2,1,2,1
+S2425_GD5_G1,2024-09-20,Cagliari Calcio,FC Empoli,0,2,0,1
+S2425_GD5_G2,2024-09-20,Hellas Verona,FC Turin,2,3,1,2
+S2425_GD5_G3,2024-09-21,FC Venedig,CFC Genua 1893,2,0,0,0
+S2425_GD5_G4,2024-09-21,Juventus Turin,SSC Neapel,0,0,0,0
+S2425_GD5_G5,2024-09-21,US Lecce,Parma Calcio,2,2,1,0
+S2425_GD5_G6,2024-09-22,AC Florenz,Lazio Rom,2,1,0,1
+S2425_GD5_G7,2024-09-22,AC Monza,FC Bologna,1,2,1,1
+S2425_GD5_G8,2024-09-22,AS Rom,Udinese Calcio,3,0,1,0
+S2425_GD5_G9,2024-09-22,Inter Mailand,AC Mailand,1,2,1,1
+S2425_GD5_G10,2024-09-24,Atalanta Bergamo,Como 1907,2,3,1,0
+S2425_GD6_G1,2024-09-27,AC Mailand,US Lecce,3,0,3,0
+S2425_GD6_G2,2024-09-28,Udinese Calcio,Inter Mailand,2,3,1,2
+S2425_GD6_G3,2024-09-28,CFC Genua 1893,Juventus Turin,0,3,0,0
+S2425_GD6_G4,2024-09-28,FC Bologna,Atalanta Bergamo,1,1,0,0
+S2425_GD6_G5,2024-09-29,FC Turin,Lazio Rom,2,3,0,1
+S2425_GD6_G6,2024-09-29,Como 1907,Hellas Verona,3,2,1,0
+S2425_GD6_G7,2024-09-29,AS Rom,FC Venedig,2,1,0,1
+S2425_GD6_G8,2024-09-29,FC Empoli,AC Florenz,0,0,0,0
+S2425_GD6_G9,2024-09-29,SSC Neapel,AC Monza,2,0,2,0
+S2425_GD6_G10,2024-09-30,Parma Calcio,Cagliari Calcio,2,3,0,1
+S2425_GD7_G1,2024-10-04,SSC Neapel,Como 1907,3,1,1,1
+S2425_GD7_G2,2024-10-04,Hellas Verona,FC Venedig,2,1,1,1
+S2425_GD7_G3,2024-10-05,Udinese Calcio,US Lecce,1,0,0,0
+S2425_GD7_G4,2024-10-05,Atalanta Bergamo,CFC Genua 1893,5,1,1,0
+S2425_GD7_G5,2024-10-05,Inter Mailand,FC Turin,3,2,2,1
+S2425_GD7_G6,2024-10-06,Juventus Turin,Cagliari Calcio,1,1,1,0
+S2425_GD7_G7,2024-10-06,FC Bologna,Parma Calcio,0,0,0,0
+S2425_GD7_G8,2024-10-06,Lazio Rom,FC Empoli,2,1,1,1
+S2425_GD7_G9,2024-10-06,AC Monza,AS Rom,1,1,0,0
+S2425_GD7_G10,2024-10-06,AC Florenz,AC Mailand,2,1,1,0
+S2425_GD8_G1,2024-10-19,Como 1907,Parma Calcio,1,1,1,1
+S2425_GD8_G2,2024-10-19,CFC Genua 1893,FC Bologna,2,2,0,1
+S2425_GD8_G3,2024-10-19,AC Mailand,Udinese Calcio,1,0,1,0
+S2425_GD8_G4,2024-10-19,Juventus Turin,Lazio Rom,1,0,0,0
+S2425_GD8_G5,2024-10-20,FC Empoli,SSC Neapel,0,1,0,0
+S2425_GD8_G6,2024-10-20,US Lecce,AC Florenz,0,6,0,3
+S2425_GD8_G7,2024-10-20,FC Venedig,Atalanta Bergamo,0,2,0,1
+S2425_GD8_G8,2024-10-20,Cagliari Calcio,FC Turin,3,2,1,1
+S2425_GD8_G9,2024-10-20,AS Rom,Inter Mailand,0,1,0,0
+S2425_GD8_G10,2024-10-21,Hellas Verona,AC Monza,0,3,0,1
+S2425_GD9_G1,2024-10-25,Udinese Calcio,Cagliari Calcio,2,0,1,0
+S2425_GD9_G2,2024-10-25,FC Turin,Como 1907,1,0,0,0
+S2425_GD9_G3,2024-10-26,SSC Neapel,US Lecce,1,0,0,0
+S2425_GD9_G5,2024-10-26,Atalanta Bergamo,Hellas Verona,6,1,5,1
+S2425_GD9_G6,2024-10-27,Parma Calcio,FC Empoli,1,1,0,1
+S2425_GD9_G7,2024-10-27,Lazio Rom,CFC Genua 1893,3,0,1,0
+S2425_GD9_G8,2024-10-27,AC Monza,FC Venedig,2,2,2,2
+S2425_GD9_G9,2024-10-27,Inter Mailand,Juventus Turin,4,4,3,2
+S2425_GD9_G10,2024-10-27,AC Florenz,AS Rom,5,1,3,1
+S2425_GD10_G1,2024-10-29,Cagliari Calcio,FC Bologna,0,2,0,1
+S2425_GD10_G2,2024-10-29,US Lecce,Hellas Verona,1,0,0,0
+S2425_GD10_G3,2024-10-29,AC Mailand,SSC Neapel,0,2,0,2
+S2425_GD10_G4,2024-10-30,FC Empoli,Inter Mailand,0,3,0,0
+S2425_GD10_G5,2024-10-30,FC Venedig,Udinese Calcio,3,2,1,2
+S2425_GD10_G6,2024-10-30,Atalanta Bergamo,AC Monza,2,0,0,0
+S2425_GD10_G7,2024-10-30,Juventus Turin,Parma Calcio,2,2,1,2
+S2425_GD10_G8,2024-10-31,CFC Genua 1893,AC Florenz,0,1,0,0
+S2425_GD10_G9,2024-10-31,Como 1907,Lazio Rom,1,5,0,2
+S2425_GD10_G10,2024-10-31,AS Rom,FC Turin,1,0,1,0
+S2425_GD11_G1,2024-11-02,FC Bologna,US Lecce,1,0,0,0
+S2425_GD11_G2,2024-11-02,Udinese Calcio,Juventus Turin,0,2,0,2
+S2425_GD11_G3,2024-11-02,AC Monza,AC Mailand,0,1,0,1
+S2425_GD11_G4,2024-11-03,SSC Neapel,Atalanta Bergamo,0,3,0,2
+S2425_GD11_G5,2024-11-03,FC Turin,AC Florenz,0,1,0,1
+S2425_GD11_G6,2024-11-03,Hellas Verona,AS Rom,3,2,2,1
+S2425_GD11_G7,2024-11-03,Inter Mailand,FC Venedig,1,0,0,0
+S2425_GD11_G8,2024-11-04,FC Empoli,Como 1907,1,0,0,0
+S2425_GD11_G9,2024-11-04,Parma Calcio,CFC Genua 1893,0,1,0,0
+S2425_GD11_G10,2024-11-04,Lazio Rom,Cagliari Calcio,2,1,1,1
+S2425_GD12_G1,2024-11-07,CFC Genua 1893,Como 1907,1,1,0,1
+S2425_GD12_G2,2024-11-08,US Lecce,FC Empoli,1,1,0,1
+S2425_GD12_G3,2024-11-09,FC Venedig,Parma Calcio,1,2,1,1
+S2425_GD12_G4,2024-11-09,Cagliari Calcio,AC Mailand,3,3,1,2
+S2425_GD12_G5,2024-11-09,Juventus Turin,FC Turin,2,0,1,0
+S2425_GD12_G6,2024-11-10,Atalanta Bergamo,Udinese Calcio,2,1,0,1
+S2425_GD12_G7,2024-11-10,AC Florenz,Hellas Verona,3,1,1,1
+S2425_GD12_G8,2024-11-10,AS Rom,FC Bologna,2,3,0,1
+S2425_GD12_G9,2024-11-10,AC Monza,Lazio Rom,0,1,0,1
+S2425_GD12_G10,2024-11-10,Inter Mailand,SSC Neapel,1,1,1,1
+S2425_GD13_G1,2024-11-23,Hellas Verona,Inter Mailand,0,5,0,5
+S2425_GD13_G2,2024-11-23,AC Mailand,Juventus Turin,0,0,0,0
+S2425_GD13_G3,2024-11-23,Parma Calcio,Atalanta Bergamo,1,3,0,2
+S2425_GD13_G4,2024-11-24,CFC Genua 1893,Cagliari Calcio,2,2,1,1
+S2425_GD13_G5,2024-11-24,Como 1907,AC Florenz,0,2,0,1
+S2425_GD13_G6,2024-11-24,FC Turin,AC Monza,1,1,0,0
+S2425_GD13_G7,2024-11-24,SSC Neapel,AS Rom,1,0,0,0
+S2425_GD13_G8,2024-11-24,Lazio Rom,FC Bologna,3,0,0,0
+S2425_GD13_G9,2024-11-25,FC Empoli,Udinese Calcio,1,1,1,0
+S2425_GD13_G10,2024-11-25,FC Venedig,US Lecce,0,1,0,0
+S2425_GD14_G1,2024-11-29,Cagliari Calcio,Hellas Verona,1,0,0,0
+S2425_GD14_G2,2024-11-30,Como 1907,AC Monza,1,1,1,0
+S2425_GD14_G3,2024-11-30,AC Mailand,FC Empoli,3,0,2,0
+S2425_GD14_G4,2024-11-30,FC Bologna,FC Venedig,3,0,1,0
+S2425_GD14_G5,2024-12-01,Udinese Calcio,CFC Genua 1893,0,2,0,1
+S2425_GD14_G6,2024-12-01,Parma Calcio,Lazio Rom,3,1,1,0
+S2425_GD14_G7,2024-12-01,FC Turin,SSC Neapel,0,1,0,1
+S2425_GD14_G9,2024-12-01,US Lecce,Juventus Turin,1,1,0,0
+S2425_GD14_G10,2024-12-02,AS Rom,Atalanta Bergamo,0,2,0,0
+S2425_GD15_G1,2024-12-06,Inter Mailand,Parma Calcio,3,1,1,0
+S2425_GD15_G2,2024-12-06,Atalanta Bergamo,AC Mailand,2,1,1,1
+S2425_GD15_G3,2024-12-07,CFC Genua 1893,FC Turin,0,0,0,0
+S2425_GD15_G4,2024-12-07,Juventus Turin,FC Bologna,2,2,0,1
+S2425_GD15_G5,2024-12-07,AS Rom,US Lecce,4,1,1,1
+S2425_GD15_G6,2024-12-08,AC Florenz,Cagliari Calcio,1,0,1,0
+S2425_GD15_G7,2024-12-08,Hellas Verona,FC Empoli,1,4,1,4
+S2425_GD15_G8,2024-12-08,FC Venedig,Como 1907,2,2,1,0
+S2425_GD15_G9,2024-12-08,SSC Neapel,Lazio Rom,0,1,0,0
+S2425_GD15_G10,2024-12-09,AC Monza,Udinese Calcio,1,2,0,1
+S2425_GD16_G1,2024-12-13,FC Empoli,FC Turin,0,1,0,0
+S2425_GD16_G2,2024-12-14,Cagliari Calcio,Atalanta Bergamo,0,1,0,0
+S2425_GD16_G3,2024-12-14,Udinese Calcio,SSC Neapel,1,3,1,0
+S2425_GD16_G4,2024-12-14,Juventus Turin,FC Venedig,2,2,1,0
+S2425_GD16_G5,2024-12-15,US Lecce,AC Monza,2,1,2,1
+S2425_GD16_G6,2024-12-15,FC Bologna,AC Florenz,1,0,0,0
+S2425_GD16_G7,2024-12-15,Parma Calcio,Hellas Verona,2,3,1,1
+S2425_GD16_G8,2024-12-15,Como 1907,AS Rom,2,0,0,0
+S2425_GD16_G9,2024-12-15,AC Mailand,CFC Genua 1893,0,0,0,0
+S2425_GD16_G10,2024-12-16,Lazio Rom,Inter Mailand,0,6,0,2
+S2425_GD17_G1,2024-12-20,Hellas Verona,AC Mailand,0,1,0,0
+S2425_GD17_G2,2024-12-21,FC Turin,FC Bologna,0,2,0,0
+S2425_GD17_G3,2024-12-21,CFC Genua 1893,SSC Neapel,1,2,0,2
+S2425_GD17_G4,2024-12-21,US Lecce,Lazio Rom,1,2,0,1
+S2425_GD17_G5,2024-12-22,AS Rom,Parma Calcio,5,0,2,0
+S2425_GD17_G6,2024-12-22,FC Venedig,Cagliari Calcio,2,1,1,0
+S2425_GD17_G7,2024-12-22,Atalanta Bergamo,FC Empoli,3,2,2,1
+S2425_GD17_G8,2024-12-22,AC Monza,Juventus Turin,1,2,1,2
+S2425_GD17_G9,2024-12-23,AC Florenz,Udinese Calcio,1,2,1,0
+S2425_GD17_G10,2024-12-23,Inter Mailand,Como 1907,2,0,0,0
+S2425_GD18_G1,2024-12-28,FC Empoli,CFC Genua 1893,1,2,0,0
+S2425_GD18_G2,2024-12-28,Parma Calcio,AC Monza,2,1,0,0
+S2425_GD18_G3,2024-12-28,Cagliari Calcio,Inter Mailand,0,3,0,0
+S2425_GD18_G4,2024-12-28,Lazio Rom,Atalanta Bergamo,1,1,1,0
+S2425_GD18_G5,2024-12-29,Udinese Calcio,FC Turin,2,2,1,0
+S2425_GD18_G6,2024-12-29,SSC Neapel,FC Venedig,1,0,0,0
+S2425_GD18_G7,2024-12-29,Juventus Turin,AC Florenz,2,2,1,1
+S2425_GD18_G8,2024-12-29,AC Mailand,AS Rom,1,1,1,1
+S2425_GD18_G9,2024-12-30,Como 1907,US Lecce,2,0,0,0
+S2425_GD18_G10,2024-12-30,FC Bologna,Hellas Verona,2,3,1,2
+S2425_GD19_G1,2025-01-04,FC Venedig,FC Empoli,1,1,1,1
+S2425_GD19_G2,2025-01-04,AC Florenz,SSC Neapel,0,3,0,1
+S2425_GD19_G3,2025-01-04,Hellas Verona,Udinese Calcio,0,0,0,0
+S2425_GD19_G4,2025-01-05,AC Monza,Cagliari Calcio,1,2,1,1
+S2425_GD19_G5,2025-01-05,US Lecce,CFC Genua 1893,0,0,0,0
+S2425_GD19_G6,2025-01-05,FC Turin,Parma Calcio,0,0,0,0
+S2425_GD19_G7,2025-01-05,AS Rom,Lazio Rom,2,0,2,0
+S2425_GD20_G1,2025-01-10,Lazio Rom,Como 1907,1,1,1,0
+S2425_GD20_G2,2025-01-11,FC Empoli,US Lecce,1,3,0,2
+S2425_GD20_G3,2025-01-11,Udinese Calcio,Atalanta Bergamo,0,0,0,0
+S2425_GD20_G4,2025-01-11,FC Turin,Juventus Turin,1,1,1,1
+S2425_GD20_G5,2025-01-11,AC Mailand,Cagliari Calcio,1,1,0,0
+S2425_GD20_G6,2025-01-12,CFC Genua 1893,Parma Calcio,1,0,0,0
+S2425_GD20_G7,2025-01-12,FC Venedig,Inter Mailand,0,1,0,1
+S2425_GD20_G8,2025-01-12,FC Bologna,AS Rom,2,2,0,0
+S2425_GD20_G9,2025-01-12,SSC Neapel,Hellas Verona,2,0,1,0
+S2425_GD20_G10,2025-01-13,AC Monza,AC Florenz,2,1,1,0
+S2425_GD20_G11,2025-01-14,Como 1907,AC Mailand,1,2,0,0
+S2425_GD20_G12,2025-01-14,Atalanta Bergamo,Juventus Turin,1,1,0,0
+S2425_GD20_G13,2025-01-15,Inter Mailand,FC Bologna,2,2,2,1
+S2425_GD21_G1,2025-01-17,AS Rom,CFC Genua 1893,3,1,1,1
+S2425_GD21_G2,2025-01-18,FC Bologna,AC Monza,3,1,2,1
+S2425_GD21_G3,2025-01-18,Juventus Turin,AC Mailand,2,0,0,0
+S2425_GD21_G4,2025-01-18,Atalanta Bergamo,SSC Neapel,2,3,1,2
+S2425_GD21_G5,2025-01-19,AC Florenz,FC Turin,1,1,1,0
+S2425_GD21_G6,2025-01-19,Cagliari Calcio,US Lecce,4,1,0,1
+S2425_GD21_G7,2025-01-19,Parma Calcio,FC Venedig,1,1,0,1
+S2425_GD21_G8,2025-01-19,Hellas Verona,Lazio Rom,0,3,0,2
+S2425_GD21_G9,2025-01-19,Inter Mailand,FC Empoli,3,1,0,0
+S2425_GD21_G10,2025-01-20,Como 1907,Udinese Calcio,4,1,2,0
+S2425_GD22_G1,2025-01-24,FC Turin,Cagliari Calcio,2,0,1,0
+S2425_GD22_G2,2025-01-25,Como 1907,Atalanta Bergamo,1,2,1,0
+S2425_GD22_G3,2025-01-25,SSC Neapel,Juventus Turin,2,1,0,1
+S2425_GD22_G4,2025-01-25,FC Empoli,FC Bologna,1,1,1,1
+S2425_GD22_G5,2025-01-26,AC Mailand,Parma Calcio,3,2,1,1
+S2425_GD22_G6,2025-01-26,Udinese Calcio,AS Rom,1,2,1,0
+S2425_GD22_G7,2025-01-26,US Lecce,Inter Mailand,0,4,0,2
+S2425_GD22_G8,2025-01-26,Lazio Rom,AC Florenz,1,2,0,2
+S2425_GD22_G9,2025-01-27,FC Venedig,Hellas Verona,1,1,1,0
+S2425_GD22_G10,2025-01-27,CFC Genua 1893,AC Monza,2,0,0,0
+S2425_GD23_G1,2025-01-31,Parma Calcio,US Lecce,1,3,1,1
+S2425_GD23_G2,2025-02-01,AC Monza,Hellas Verona,0,1,0,1
+S2425_GD23_G3,2025-02-01,Udinese Calcio,FC Venedig,3,2,0,0
+S2425_GD23_G4,2025-02-01,Atalanta Bergamo,FC Turin,1,1,1,1
+S2425_GD23_G5,2025-02-01,FC Bologna,Como 1907,2,0,1,0
+S2425_GD23_G6,2025-02-02,Juventus Turin,FC Empoli,4,1,0,1
+S2425_GD23_G7,2025-02-02,AC Florenz,CFC Genua 1893,2,1,2,0
+S2425_GD23_G8,2025-02-02,AC Mailand,Inter Mailand,1,1,1,0
+S2425_GD23_G9,2025-02-02,AS Rom,SSC Neapel,1,1,0,1
+S2425_GD23_G10,2025-02-03,Cagliari Calcio,Lazio Rom,1,2,0,1
+S2425_GD24_G1,2025-02-07,Como 1907,Juventus Turin,1,2,1,1
+S2425_GD24_G2,2025-02-08,Hellas Verona,Atalanta Bergamo,0,5,0,4
+S2425_GD24_G3,2025-02-08,FC Empoli,AC Mailand,0,2,0,0
+S2425_GD24_G4,2025-02-08,FC Turin,CFC Genua 1893,1,1,1,0
+S2425_GD24_G5,2025-02-09,FC Venedig,AS Rom,0,1,0,0
+S2425_GD24_G6,2025-02-09,Cagliari Calcio,Parma Calcio,2,1,0,0
+S2425_GD24_G7,2025-02-09,Lazio Rom,AC Monza,5,1,1,0
+S2425_GD24_G8,2025-02-09,US Lecce,FC Bologna,0,0,0,0
+S2425_GD24_G9,2025-02-09,SSC Neapel,Udinese Calcio,1,1,1,1
+S2425_GD24_G10,2025-02-10,Inter Mailand,AC Florenz,2,1,1,1
+S2425_GD24_G11,2025-02-06,AC Florenz,Inter Mailand,3,0,0,0
 S2425_GD25_G1,2025-02-14,FC Bologna,FC Turin,3,2,1,1
 S2425_GD25_G2,2025-02-15,Atalanta Bergamo,Cagliari Calcio,0,0,0,0
 S2425_GD25_G3,2025-02-15,Lazio Rom,SSC Neapel,2,2,1,1
