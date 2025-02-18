@@ -118,7 +118,7 @@ for ll in N_leagues:
 
 
       # --- 1.3.3 Download the current gameday:
-      response = .get(url_gameday, headers=headers_scraping)
+      response = requests.get(url_gameday, headers=headers_scraping)
       soup = bs(response.text, features="html.parser")
       response.close()
 
