@@ -28,7 +28,8 @@ import os
 # --- Set your directory to the main folder:
 directory = '.'
 
-
+# --- For webscraping purposes:
+headers_scraping = {'User-Agent':'Safari/537.36'}
 
 if 1==2:
     games_final = pd.DataFrame({'test': [0,1,2]})
@@ -117,7 +118,7 @@ for ll in N_leagues:
 
 
       # --- 1.3.3 Download the current gameday:
-      response = requests.get(url_gameday)
+      response = .get(url_gameday, headers=headers_scraping)
       soup = bs(response.text, features="html.parser")
       response.close()
 
