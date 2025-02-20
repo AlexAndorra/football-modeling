@@ -777,5 +777,6 @@ data_existing.to_csv(f'{directory}/{directory_add}/00_vintage/SFM_data_byPlayer_
 
 
 # --- Export:
-data = pd.concat([data_existing,data],axis=0).drop_duplicates().reset_index(drop=True)
+data = pd.concat([data_existing,data],axis=0)
+data = data.drop_duplicates(subset=data.columns.difference(['N_games_left','N_games_right','N_games_center']), keep='last').reset_index(drop=True)
 data.to_csv(f'{directory}/{directory_add}/{data_ID}.csv', index=False)
