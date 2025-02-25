@@ -1,13 +1,4 @@
 match_id,kick_off,team_home,team_away,score_home_full,score_away_full,score_home_half,score_away_half
-S2425_GD23_G1,2025-02-21,SC Freiburg,Werder Bremen,,,,
-S2425_GD23_G2,2025-02-22,VfL Wolfsburg,VfL Bochum,,,,
-S2425_GD23_G3,2025-02-22,1. FSV Mainz 05,FC St. Pauli,,,,
-S2425_GD23_G4,2025-02-22,Bor. Mönchengladbach,FC Augsburg,,,,
-S2425_GD23_G5,2025-02-22,Holstein Kiel,Bayer 04 Leverkusen,,,,
-S2425_GD23_G6,2025-02-22,Borussia Dortmund,1. FC Union Berlin,,,,
-S2425_GD23_G7,2025-02-23,RB Leipzig,1. FC Heidenheim,,,,
-S2425_GD23_G8,2025-02-23,Bayern München,Eintracht Frankfurt,,,,
-S2425_GD23_G9,2025-02-23,TSG Hoffenheim,VfB Stuttgart,,,,
 S2425_GD24_G1,2025-02-28,VfB Stuttgart,Bayern München,,,,
 S2425_GD24_G2,2025-03-01,RB Leipzig,1. FSV Mainz 05,,,,
 S2425_GD24_G3,2025-03-01,1. FC Heidenheim,Bor. Mönchengladbach,,,,
