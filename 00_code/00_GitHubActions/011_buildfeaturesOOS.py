@@ -26,7 +26,6 @@ import requests
 
 # --- Set your directory to the main folder:
 directory = '.'
-directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
 
 # --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
 # --- --- a sample of leagues: ['premier-league','bundesliga','2-bundesliga','la-liga','serie-a','ligue-1','a-league','champions-league']
