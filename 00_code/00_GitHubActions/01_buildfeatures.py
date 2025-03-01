@@ -48,7 +48,7 @@ N_seasons = ['2024-25']
 
 
 # --- How many match-days shall be discarded at the beginning of the season? (Motivation: claculate meaningful team-/player-statistics)
-match_elim = 3
+match_elim = 0
 
 
 # ====================================== USER INTERACTION ============================================== #
