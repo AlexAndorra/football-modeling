@@ -111,14 +111,24 @@ for ll in N_leagues:
 
     # --- Check if we're in the midst of the season, and just run over the matchdays not yet done
     if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv'):
+        # ------------------- Deprecated Procedure ------------------- #
         # --- Load the file to get the latest matchday for which you have data:
-        games_done = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv')
+        #games_done = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv')
         # --- Extract the latest matchday:
-        matchday_done = int(str(games_done.iloc[-1,0]).split('GD')[1].split('_')[0])
+        #matchday_done = int(str(games_done.iloc[-1,0]).split('GD')[1].split('_')[0])
         # --- Adjust the Number of Games to run over:
-        N_gamedays[N_leagues.index(ll)] = range(matchday_done+1,N_gamedays[N_leagues.index(ll)][-1])
-        
-            
+        #N_gamedays[N_leagues.index(ll)] = range(matchday_done+1,N_gamedays[N_leagues.index(ll)][-1])
+
+        # ------------------- NEW Procedure ------------------- #
+        # --- Scrape the 'landing page' of your desired league 'll'
+        response_player = requests.get(f'https://www.kicker.de/{ll}/spieltag', headers=headers_scraping)
+        soup_player = bs(response_player.text)
+        response_player.close()
+        # --- Get the number of the current matchday:
+        matchday_done = int(str(soup_player.find_all('div', {'class':'kick__head-dropdown'})).split('<div class="kick__head-dropdown">')[2].split('<span class="kick__icon-DropDown">')[0].split(' ')[0][6:-1])
+        # --- Adjust the Number of Games to run over:
+        N_gamedays[N_leagues.index(ll)] = range(matchday_done + 1, N_gamedays[N_leagues.index(ll)][-1])
+
 
     
     

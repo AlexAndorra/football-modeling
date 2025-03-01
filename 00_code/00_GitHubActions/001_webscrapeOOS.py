@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import pyarrow.feather as feather
 from tqdm import tqdm
-import time
+import sys
 
 
 # --- Libraries for Webscraping
@@ -27,9 +27,11 @@ import os
 
 # --- Set your directory to the main folder:
 directory = '.'
+directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
 
 # --- For webscraping purposes:
 headers_scraping = {'User-Agent':'Safari/537.36'}
+
 
 if 1==2:
     games_final = pd.DataFrame({'test': [0,1,2]})
@@ -76,6 +78,7 @@ assert len(N_leagues) == len(N_gamedays), 'ERROR: \'len(N_leagues)\' must equal 
 
 # -------------------------------------- Start the Loop -------------------------------------- #
 
+
 # --- 1.1 Run across all leagues:
 for ll in N_leagues:
 
@@ -92,17 +95,27 @@ for ll in N_leagues:
 
     # --- Check if we're in the midst of the season, and just run over the matchdays STILL TO COME
     if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv'):
+        # ------------------- Deprecated Procedure ------------------- #
         # --- Load the file to get the latest matchday for which you have data:
-        games_done = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv')
+        #games_done = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss.replace("-","")[2:]}_games.csv')
         # --- Extract the latest matchday:
-        matchday_done = int(str(games_done.iloc[-1,0]).split('GD')[1].split('_')[0])
+        #matchday_done = int(str(games_done.iloc[-1,0]).split('GD')[1].split('_')[0])
         # --- Adjust the Number of Games to run over:
-        N_gamedays[N_leagues.index(ll)] = range(matchday_done+1,N_gamedays[N_leagues.index(ll)][-1]+1)
-        
-            
+        #N_gamedays[N_leagues.index(ll)] = range(matchday_done+1,N_gamedays[N_leagues.index(ll)][-1]+1)
 
-    
-    
+        # ------------------- NEW Procedure ------------------- #
+        # --- Scrape the 'landing page' of your desired league 'll'
+        response_player = requests.get(f'https://www.kicker.de/{ll}/spieltag', headers=headers_scraping)
+        soup_player = bs(response_player.text)
+        response_player.close()
+        # --- Get the number of the current matchday:
+        matchday_done = int(str(soup_player.find_all('div', {'class': 'kick__head-dropdown'})).split('<div class="kick__head-dropdown">')[2].split('<span class="kick__icon-DropDown">')[0].split(' ')[0][6:-1])
+        # --- Adjust the Number of Games to run over:
+        N_gamedays[N_leagues.index(ll)] = range(matchday_done + 1, N_gamedays[N_leagues.index(ll)][-1] + 1)
+
+
+    #print(N_gamedays[N_leagues.index(ll)])
+    #sys.exit(-1)
 
 
     # --- 1.3 Run across all game days:
@@ -116,6 +129,8 @@ for ll in N_leagues:
       # --- 1.3.2 Build the url for the current gameday:
       url_gameday = f'https://www.kicker.de/{ll}/spieltag/{ss}/{gd}'
 
+      #print(url_gameday)
+      #sys.exit(-1)
 
       # --- 1.3.3 Download the current gameday:
       response = requests.get(url_gameday, headers=headers_scraping)
@@ -125,6 +140,8 @@ for ll in N_leagues:
 
       # --- 1.3.4 Run across all games:
       gd_games = soup.find_all('div',{'class':['kick__v100-gameCell__team__name']})
+
+
 
       # --- --- Since each match requires two teams, this is a sequence of even numbers:
       gd_games_seq = list(range(0,len(soup.find_all('div',{'class':['kick__v100-gameCell__team__name']})), 2))
@@ -148,6 +165,11 @@ for ll in N_leagues:
         # --- --- Extract the string date:
         game_kickoff_date = game_kickoff.strftime('%Y-%m-%d')
 
+
+        # --- --- Check if game was already played!!! If so, SKIP, and go on to the next game!
+        # (Can happen since some games might have been played already, but still listed on the corresponding site. See e.g. Premier League, 2024/25, Gameday 29)
+        if game_kickoff_date < pd.to_datetime('today').strftime('%Y-%m-%d'):
+            continue
 
         # --- 1.3.8 Create 'match_id': 'S[SEASON]_GD[GAMEDAY]_G[GAME]'
         match_id = 'S' + ss.replace('-','')[2:] + f'_GD{gd}' + f'_G{gd_games_seq.index(gg)+1}'
@@ -183,7 +205,6 @@ for ll in N_leagues:
 
 
 
-
     # --- 1.8 Export the data '/[LEAGUE]'/S[SEASON]_['games'].csv'
 
     # --- --- Check if directory exists:
@@ -195,10 +216,10 @@ for ll in N_leagues:
 
     # --- --- Check if we're in the midst of the season, and just run over the matchdays not yet done
     #if os.path.exists(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games__OOS.csv'):
-        # --- --- --- Load the already existing files and concatenate:
+    #    # --- --- --- Load the already existing files and concatenate:
     #    games_existing = pd.read_csv(f'{directory}/10_data/100_RawData/{ll}/S{ss_abreviation}_games__OOS.csv')
 
-        # --- --- --- Concatenate the existing data with the just scraped data:
+    #    # --- --- --- Concatenate the existing data with the just scraped data:
     #    games_final = pd.concat([games_existing,games_final],axis=0)
 
       

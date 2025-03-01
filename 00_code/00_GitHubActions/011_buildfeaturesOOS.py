@@ -26,6 +26,7 @@ import requests
 
 # --- Set your directory to the main folder:
 directory = '.'
+directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
 
 # --- Which leage do you want to webscarp? [format: [strings]; e.g. ['premier-league','bundesliga']]
 # --- --- a sample of leagues: ['premier-league','bundesliga','2-bundesliga','la-liga','serie-a','ligue-1','a-league','champions-league']
@@ -592,6 +593,8 @@ MY_PLAYER = {}
 # --- Allocate a Dictionary to store information on the Team that the Player is Currently Playing for:
 PLAYERS_currentTEAM = {}
 
+
+
 for pp in my_player:
 
     
@@ -785,18 +788,24 @@ print(data.shape)
 # ======================================== Export the data as a csv-file ==================================== #
 
 # --- Specify the directory where you want to export the data to:
-directory_add = '10_data/101_SFM'
+directory_data = '10_data/101_SFM'
+directory_dashboard = '00_code/004_Dashboards/0043_SFM/0043_10_data'
 
 # --- Any ID you want to add to the file name?
 data_ID = 'SFM_data_byPlayer__OOS'
 
 # --- Load the Existing Data:
-if os.path.exists(f'{directory}/{directory_add}/SFM_data_byPlayer__OOS.csv'):
-    data_existing = pd.read_csv(f'{directory}/{directory_add}/SFM_data_byPlayer__OOS.csv')
+if os.path.exists(f'{directory}/{directory_data}/SFM_data_byPlayer__OOS.csv'):
+    data_existing = pd.read_csv(f'{directory}/{directory_data}/SFM_data_byPlayer__OOS.csv')
 
     # --- --- Place a hard-copy of the existing data in folder '00_vintage':
-    data_existing.to_csv(f'{directory}/{directory_add}/00_vintage/SFM_data_byPlayer__OOS__{pd.to_datetime("today").strftime("%Y-%m-%d")}.csv')
+    data_existing.to_csv(f'{directory}/{directory_data}/00_vintage/SFM_data_byPlayer__OOS__{pd.to_datetime("today").strftime("%Y-%m-%d")}.csv')
 
-# --- Export:
-data.to_csv(f'{directory}/{directory_add}/{data_ID}.csv', index=False)
-pd.DataFrame.from_dict(PLAYERS_currentTEAM, orient='index').to_csv(f'{directory}/{directory_add}/{data_ID}__currentTEAM.csv', index=True)
+# ----------------------------------- Export: ----------------------------------- #
+# --- Data Folder:
+data.to_csv(f'{directory}/{directory_data}/{data_ID}.csv', index=False)
+pd.DataFrame.from_dict(PLAYERS_currentTEAM, orient='index').to_csv(f'{directory}/{directory_data}/{data_ID}__currentTEAM.csv', index=True)
+
+# --- Dashboard Folder:
+data.to_csv(f'{directory}/{directory_dashboard}/{data_ID}.csv', index=False)
+pd.DataFrame.from_dict(PLAYERS_currentTEAM, orient='index').to_csv(f'{directory}/{directory_dashboard}/{data_ID}__currentTEAM.csv', index=True)
