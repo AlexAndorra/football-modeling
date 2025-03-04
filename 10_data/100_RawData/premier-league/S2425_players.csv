@@ -241,23 +241,23 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,goncalo-guedes,Sturm,1996-11-29 00:00:00,0,6,1,Portugal,,
 2024-25,ben-davies,Abwehr,1993-04-24 00:00:00,6,14,0,Wales,,
 2024-25,pape-sarr-2,Mittelfeld,2002-09-14 00:00:00,5,5,9,Senegal,,
-2024-25,mads-hermansen,Tor,2000-07-11 00:00:00,0,19,0,Dänemark,187,"
+2024-25,mads-hermansen,Tor,2000-07-11 00:00:00,0,19,0,Dänemark,187.0,"
 <"
 2024-25,woyo-coulibaly,Abwehr,1999-05-26 00:00:00,4,0,9,Frankreich,,
 2024-25,wout-faes,Abwehr,1998-04-03 00:00:00,1,23,1,Belgien,,
-2024-25,caleb-okoli,Abwehr,2001-07-13 00:00:00,1,10,0,Italien,191,"
+2024-25,caleb-okoli,Abwehr,2001-07-13 00:00:00,1,10,0,Italien,191.0,"
 <"
 2024-25,victor-kristiansen,Abwehr,2002-12-16 00:00:00,28,0,0,Dänemark,,
 2024-25,wilfred-ndidi,Mittelfeld,1996-12-16 00:00:00,1,16,0,Nigeria,,
 2024-25,boubakary-soumare,Mittelfeld,1999-02-27 00:00:00,0,14,1,Frankreich,,
 2024-25,bobby-de-cordova-reid,Sturm,1993-02-02 00:00:00,4,0,2,Jamaika,,
-2024-25,bilal-el-khannous,Mittelfeld,2004-05-10 00:00:00,2,15,0,Marokko,180,"
+2024-25,bilal-el-khannous,Mittelfeld,2004-05-10 00:00:00,2,15,0,Marokko,180.0,"
 <"
 2024-25,jordan-ayew,Sturm,1991-09-11 00:00:00,4,3,8,Ghana,,
 2024-25,jamie-vardy,Sturm,1987-01-11 00:00:00,0,24,0,England,,
 2024-25,jannik-vestergaard,Abwehr,1992-08-03 00:00:00,0,21,0,Dänemark,,
 2024-25,stephy-mavididi,Sturm,1998-05-31 00:00:00,14,0,0,England,,
-2024-25,facundo-buonanotte,Mittelfeld,2004-12-23 00:00:00,0,5,7,Argentinien,174,"
+2024-25,facundo-buonanotte,Mittelfeld,2004-12-23 00:00:00,0,5,7,Argentinien,174.0,"
 <"
 2024-25,oliver-skipp,Mittelfeld,2000-09-16 00:00:00,0,7,0,England,,
 2024-25,conor-coady,Abwehr,1993-02-25 00:00:00,0,8,0,England,,
@@ -265,7 +265,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,kristoffer-ajer,Abwehr,1998-04-17 00:00:00,5,1,8,Norwegen,,
 2024-25,nathan-collins,Abwehr,2001-04-30 00:00:00,3,29,0,Irland,,
 2024-25,ethan-pinnock,Abwehr,1993-05-29 00:00:00,1,16,0,Jamaika,,
-2024-25,keane-lewis-potter,Sturm,2001-02-22 00:00:00,24,0,0,England,170,"
+2024-25,keane-lewis-potter,Sturm,2001-02-22 00:00:00,24,0,0,England,170.0,"
 <"
 2024-25,christian-noergaard,Mittelfeld,1994-03-10 00:00:00,0,21,4,Dänemark,,
 2024-25,vitaly-janelt,Mittelfeld,1998-05-10 00:00:00,4,16,2,Deutschland,,
@@ -275,11 +275,11 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,yoane-wissa,Sturm,1996-09-03 00:00:00,0,22,0,Kongo,,
 2024-25,yegor-yarmolyuk,Mittelfeld,2004-03-01 00:00:00,2,1,3,Ukraine,,
 2024-25,fabio-carvalho-2,Mittelfeld,2002-08-30 00:00:00,0,3,0,Portugal,,
-2024-25,paris-maghoma,Mittelfeld,2001-05-08 00:00:00,0,0,0,England,178,"
+2024-25,paris-maghoma,Mittelfeld,2001-05-08 00:00:00,0,0,0,England,178.0,"
 <"
-2024-25,michael-kayode,Abwehr,2004-07-10 00:00:00,0,0,6,Italien,179,"
+2024-25,michael-kayode,Abwehr,2004-07-10 00:00:00,0,0,6,Italien,179.0,"
 <"
-2024-25,yunus-emre-konak,Mittelfeld,2006-01-10 00:00:00,0,0,0,Türkei,181,"
+2024-25,yunus-emre-konak,Mittelfeld,2006-01-10 00:00:00,0,0,0,Türkei,181.0,"
 <"
 2024-25,jordan-pickford,Tor,1994-03-07 00:00:00,0,31,0,England,,
 2024-25,jake-o-brien,Abwehr,2001-05-15 00:00:00,0,0,6,Irland,,
@@ -307,42 +307,42 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,bruno-fernandes-2,Mittelfeld,1994-09-08 00:00:00,3,33,1,Portugal,,
 2024-25,rasmus-hoejlund,Sturm,2003-02-04 00:00:00,0,21,0,Dänemark,,
 2024-25,alejandro-garnacho,Sturm,2004-07-01 00:00:00,8,6,4,Argentinien,,
-2024-25,leny-yoro,Abwehr,2005-11-13 00:00:00,1,0,5,Frankreich,190,"
+2024-25,leny-yoro,Abwehr,2005-11-13 00:00:00,1,0,5,Frankreich,190.0,"
 <"
 2024-25,chido-obi-martin,Sturm,2007-11-29 00:00:00,0,0,0,Dänemark,,
 2024-25,kepa-2,Tor,1994-10-03 00:00:00,0,19,0,Spanien,,
 2024-25,james-hill,Abwehr,2002-01-10 00:00:00,0,0,4,England,,
 2024-25,illya-zabarnyi,Abwehr,2002-09-01 00:00:00,0,32,0,Ukraine,,
-2024-25,dean-huijsen,Abwehr,2005-04-14 00:00:00,0,15,0,Spanien,195,"
+2024-25,dean-huijsen,Abwehr,2005-04-14 00:00:00,0,15,0,Spanien,195.0,"
 <"
 2024-25,milos-kerkez,Abwehr,2003-11-07 00:00:00,27,0,0,Ungarn,,
 2024-25,lewis-cook,Mittelfeld,1997-02-03 00:00:00,0,19,4,England,,
 2024-25,ryan-christie,Mittelfeld,1995-02-22 00:00:00,3,23,2,Schottland,,
 2024-25,marcus-tavernier,Mittelfeld,1999-03-22 00:00:00,8,3,3,England,,
 2024-25,justin-kluivert,Sturm,1999-05-05 00:00:00,1,20,1,Niederlande,,
-2024-25,antoine-semenyo,Sturm,2000-01-07 00:00:00,11,1,13,Ghana,178,"
+2024-25,antoine-semenyo,Sturm,2000-01-07 00:00:00,11,1,13,Ghana,178.0,"
 <"
 2024-25,dango-ouattara,Sturm,2002-02-11 00:00:00,5,6,3,Faso,,
 2024-25,david-brooks-2,Mittelfeld,1997-07-08 00:00:00,0,0,8,Wales,,
 2024-25,tyler-adams,Mittelfeld,1999-02-14 00:00:00,0,10,0,USA,,
 2024-25,alex-scott-3,Mittelfeld,2003-08-21 00:00:00,0,2,0,England,,
-2024-25,daniel-jebbison,Sturm,2003-07-11 00:00:00,0,0,0,Kanada,190,"
+2024-25,daniel-jebbison,Sturm,2003-07-11 00:00:00,0,0,0,Kanada,190.0,"
 <"
 2024-25,jose-sa,Tor,1993-01-17 00:00:00,0,20,0,Portugal,,
 2024-25,matt-doherty,Abwehr,1992-01-16 00:00:00,0,0,17,Irland,,
-2024-25,santi-bueno,Abwehr,1998-11-09 00:00:00,1,11,4,Uruguay,192,"
+2024-25,santi-bueno,Abwehr,1998-11-09 00:00:00,1,11,4,Uruguay,192.0,"
 <"
 2024-25,toti-2,Abwehr,1999-01-16 00:00:00,12,6,0,Portugal,,
 2024-25,nelson-semedo,Abwehr,1993-11-16 00:00:00,0,0,23,Portugal,,
-2024-25,andre-4,Mittelfeld,2001-07-16 00:00:00,0,19,0,Brasilien,176,"
+2024-25,andre-4,Mittelfeld,2001-07-16 00:00:00,0,19,0,Brasilien,176.0,"
 <"
-2024-25,joao-victor-5,Mittelfeld,2001-02-12 00:00:00,0,23,1,Brasilien,176,"
+2024-25,joao-victor-5,Mittelfeld,2001-02-12 00:00:00,0,23,1,Brasilien,176.0,"
 <"
 2024-25,rayan-ait-nouri,Abwehr,2001-06-06 00:00:00,25,0,0,Algerien,,
 2024-25,jean-ricner-bellegarde,Sturm,1998-06-27 00:00:00,3,6,3,Frankreich,,
 2024-25,matheus-cunha,Sturm,1999-05-27 00:00:00,3,19,1,Brasilien,,
 2024-25,marshall-munetsi,Mittelfeld,1996-06-22 00:00:00,4,11,5,Simbabwe,,
-2024-25,joergen-strand-larsen,Sturm,2000-02-06 00:00:00,0,22,0,Norwegen,193,"
+2024-25,joergen-strand-larsen,Sturm,2000-02-06 00:00:00,0,22,0,Norwegen,193.0,"
 <"
 2024-25,yacouba-nasser-djiga,Abwehr,2002-11-15 00:00:00,2,8,0,Faso,,
 2024-25,pedro-lima-2,Abwehr,2006-07-01 00:00:00,0,0,1,Brasilien,,
@@ -375,7 +375,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,jarrod-bowen,Sturm,1996-01-01 00:00:00,0,7,15,England,,
 2024-25,mohammed-kudus,Mittelfeld,2000-08-02 00:00:00,11,6,4,Ghana,,
 2024-25,konstantinos-mavropanos,Abwehr,1997-12-11 00:00:00,0,19,3,Griechenland,,
-2024-25,evan-ferguson,Sturm,2004-10-19 00:00:00,0,6,0,Irland,188,"
+2024-25,evan-ferguson,Sturm,2004-10-19 00:00:00,0,6,0,Irland,188.0,"
 <"
 2024-25,carlos-soler,Mittelfeld,1997-01-02 00:00:00,2,9,1,Spanien,,
 2024-25,bernd-leno,Tor,1992-03-04 00:00:00,0,26,0,Deutschland,,
@@ -398,7 +398,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,chris-richards,Abwehr,2000-03-28 00:00:00,3,0,10,USA,,
 2024-25,maxence-lacroix,Abwehr,2000-04-06 00:00:00,1,19,4,Frankreich,,
 2024-25,marc-guehi,Abwehr,2000-07-13 00:00:00,18,11,0,England,,
-2024-25,daniel-munoz,Abwehr,1996-05-25 00:00:00,0,0,25,Kolumbien,183,"
+2024-25,daniel-munoz,Abwehr,1996-05-25 00:00:00,0,0,25,Kolumbien,183.0,"
 <"
 2024-25,will-hughes,Mittelfeld,1995-04-17 00:00:00,0,18,0,England,,
 2024-25,jefferson-lerma,Mittelfeld,1994-10-25 00:00:00,1,16,0,Kolumbien,,
@@ -407,7 +407,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,eberechi-eze,Mittelfeld,1998-06-29 00:00:00,2,18,0,England,,
 2024-25,jean-philippe-mateta,Sturm,1997-06-28 00:00:00,0,24,0,Frankreich,,
 2024-25,daichi-kamada,Mittelfeld,1996-08-05 00:00:00,0,10,0,Japan,,
-2024-25,adam-wharton,Mittelfeld,2004-06-02 00:00:00,0,8,0,England,183,"
+2024-25,adam-wharton,Mittelfeld,2004-06-02 00:00:00,0,8,0,England,183.0,"
 <"
 2024-25,justin-devenny,Mittelfeld,2003-10-11 00:00:00,0,3,0,Nordirland,,
 2024-25,ben-chilwell,Abwehr,1996-12-21 00:00:00,0,0,0,England,,
@@ -435,7 +435,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,dejan-kulusevski,Mittelfeld,2000-04-25 00:00:00,0,10,22,Schweden,,
 2024-25,rodrigo-bentancur,Mittelfeld,1997-06-25 00:00:00,0,18,0,Uruguay,,
 2024-25,lucas-bergvall,Mittelfeld,2006-02-02 00:00:00,5,4,4,Schweden,,
-2024-25,brennan-johnson,Sturm,2001-05-23 00:00:00,1,0,24,Wales,179,"
+2024-25,brennan-johnson,Sturm,2001-05-23 00:00:00,1,0,24,Wales,179.0,"
 <"
 2024-25,mathys-tel,Mittelfeld,2005-04-27 00:00:00,4,2,0,Frankreich,,
 2024-25,heung-min-son,Sturm,1992-07-08 00:00:00,23,4,0,Südkorea,,
@@ -445,7 +445,7 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,wilson-odobert,Sturm,2004-11-28 00:00:00,1,0,1,Frankreich,,
 2024-25,yves-bissouma,Mittelfeld,1996-08-30 00:00:00,0,16,0,Mali,,
 2024-25,aaron-ramsdale,Tor,1998-05-14 00:00:00,0,18,0,England,,
-2024-25,james-bree,Abwehr,1997-12-11 00:00:00,0,0,10,England,178,"
+2024-25,james-bree,Abwehr,1997-12-11 00:00:00,0,0,10,England,178.0,"
 <"
 2024-25,jan-bednarek,Abwehr,1996-04-12 00:00:00,0,26,1,Polen,,
 2024-25,joe-aribo,Mittelfeld,1996-07-21 00:00:00,4,10,3,Nigeria,,
@@ -457,15 +457,15 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,cameron-archer,Sturm,2001-07-21 00:00:00,0,11,0,England,,
 2024-25,kamaldeen-sulemana,Mittelfeld,2002-02-15 00:00:00,2,3,0,Ghana,,
 2024-25,armel-bella-kotchap,Abwehr,2001-12-11 00:00:00,0,0,0,Deutschland,,
-2024-25,yukinari-sugawara,Abwehr,2000-06-28 00:00:00,0,0,13,Japan,179,"
+2024-25,yukinari-sugawara,Abwehr,2000-06-28 00:00:00,0,0,13,Japan,179.0,"
 <"
 2024-25,will-smallbone,Mittelfeld,2000-02-21 00:00:00,0,3,3,Irland,,
 2024-25,paul-onuachu,Sturm,1994-05-28 00:00:00,0,7,0,Nigeria,,
-2024-25,albert-groenbaek-erlykke,Mittelfeld,2001-05-23 00:00:00,5,9,1,Dänemark,176,"
+2024-25,albert-groenbaek-erlykke,Mittelfeld,2001-05-23 00:00:00,5,9,1,Dänemark,176.0,"
 <"
-2024-25,bart-verbruggen,Tor,2002-08-18 00:00:00,0,0,0,Niederlande,193,"
+2024-25,bart-verbruggen,Tor,2002-08-18 00:00:00,0,0,0,Niederlande,193.0,"
 <"
-2024-25,jack-hinshelwood,Mittelfeld,2005-04-11 00:00:00,0,0,0,England,181,"
+2024-25,jack-hinshelwood,Mittelfeld,2005-04-11 00:00:00,0,0,0,England,181.0,"
 <"
 2024-25,jan-paul-van-hecke,Abwehr,2000-06-08 00:00:00,0,0,0,Niederlande,,
 2024-25,adam-webster,Abwehr,1995-01-04 00:00:00,0,0,0,England,,
@@ -479,25 +479,11 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,estupinan,Abwehr,1998-01-21 00:00:00,0,0,0,Ecuador,,
 2024-25,diego-gomez,Mittelfeld,2003-03-27 00:00:00,0,0,0,Paraguay,,
 2024-25,brajan-gruda,Mittelfeld,2004-05-31 00:00:00,0,0,0,Deutschland,,
-2024-25,simon-adingra,Sturm,2002-01-01 00:00:00,0,0,0,Elfenbeinküste,175,"
+2024-25,simon-adingra,Sturm,2002-01-01 00:00:00,0,0,0,Elfenbeinküste,175.0,"
 <"
 2024-25,mats-wieffer-2,Mittelfeld,1999-11-16 00:00:00,0,0,0,Niederlande,,
-2024-25,emiliano-martinez,Tor,1992-09-02 00:00:00,0,35,0,Argentinien,,
-2024-25,matthew-cash,Abwehr,1997-08-07 00:00:00,0,0,20,Polen,,
 2024-25,ezri-konsa,Abwehr,1997-10-23 00:00:00,0,22,10,England,,
-2024-25,tyrone-mings,Abwehr,1993-03-13 00:00:00,0,9,0,England,,
-2024-25,ian-maatsen,Abwehr,2002-03-10 00:00:00,6,0,0,Niederlande,,
-2024-25,john-mcginn,Mittelfeld,1994-10-18 00:00:00,10,10,8,Schottland,,
-2024-25,youri-tielemans,Mittelfeld,1997-05-07 00:00:00,0,39,0,Belgien,,
-2024-25,morgan-rogers,Mittelfeld,2002-07-26 00:00:00,7,22,5,England,,
-2024-25,marco-asensio,Mittelfeld,1996-01-21 00:00:00,1,11,0,Spanien,,
-2024-25,jacob-ramsey,Mittelfeld,2001-05-28 00:00:00,16,0,0,England,,
-2024-25,ollie-watkins,Sturm,1995-12-30 00:00:00,0,31,0,England,,
-2024-25,marcus-rashford,Sturm,1997-10-31 00:00:00,12,2,3,England,,
-2024-25,lamare-bogarde,Abwehr,2004-01-05 00:00:00,0,2,4,Niederlande,,
-2024-25,andres-garcia-robledo,Abwehr,2003-02-07 00:00:00,0,0,25,Spanien,,
 2024-25,leon-bailey,Mittelfeld,1997-08-09 00:00:00,0,0,18,Jamaika,,
-2024-25,donyell-malen,Mittelfeld,1999-01-19 00:00:00,1,1,10,Niederlande,,
 2024-25,filip-joergensen-2,Tor,2002-04-16 00:00:00,0,13,0,Dänemark,,
 2024-25,malo-gusto,Abwehr,2003-05-19 00:00:00,2,0,14,Frankreich,,
 2024-25,trevoh-chalobah,Abwehr,1999-07-05 00:00:00,1,4,11,England,,
@@ -553,24 +539,38 @@ season,name_player,position_player,date_of_birth,N_games_left,N_games_center,N_g
 2024-25,ruben-5,Abwehr,1997-05-14 00:00:00,0,22,0,Portugal,,
 2024-25,mateo-kovacic,Mittelfeld,1994-05-06 00:00:00,0,25,0,Kroatien,,
 2024-25,ilkay-guendogan,Mittelfeld,1990-10-24 00:00:00,2,20,0,Deutschland,,
-2024-25,alisson,Tor,1992-10-02 00:00:00,0,23,0,Brasilien,,
-2024-25,trent-alexander-arnold,Abwehr,1998-10-07 00:00:00,1,0,32,England,,
-2024-25,ibrahima-konate,Abwehr,1999-05-25 00:00:00,0,30,0,Frankreich,,
-2024-25,virgil-van-dijk,Abwehr,1991-07-08 00:00:00,0,38,0,Niederlande,,
-2024-25,andrew-robertson,Abwehr,1994-03-11 00:00:00,33,1,0,Schottland,,
-2024-25,ryan-gravenberch,Mittelfeld,2002-05-16 00:00:00,1,36,2,Niederlande,,
-2024-25,alexis-mac-allister,Mittelfeld,1998-12-24 00:00:00,3,26,0,Argentinien,,
-2024-25,mohamed-salah,Sturm,1992-06-15 00:00:00,0,0,34,Ägypten,,
-2024-25,luis-diaz-3,Sturm,1997-01-13 00:00:00,14,11,0,Kolumbien,,
-2024-25,curtis-jones,Mittelfeld,2001-01-30 00:00:00,3,12,3,England,,
-2024-25,dominik-szoboszlai,Mittelfeld,2000-10-25 00:00:00,4,23,4,Ungarn,,
 2024-25,wataru-endo,Mittelfeld,1993-02-09 00:00:00,0,1,0,Japan,,
 2024-25,kostas-tsimikas,Abwehr,1996-05-12 00:00:00,12,0,0,Griechenland,,
 2024-25,cody-gakpo,Sturm,1999-05-07 00:00:00,25,0,0,Niederlande,,
 2024-25,harvey-elliott,Mittelfeld,2003-04-04 00:00:00,0,0,1,England,,
-2024-25,jarell-quansah,Abwehr,2003-01-29 00:00:00,0,3,1,England,,
-2024-25,axel-disasi,Abwehr,1998-03-11 00:00:00,2,4,8,Frankreich,,
-2024-25,lucas-digne,Abwehr,1993-07-20 00:00:00,32,0,0,Frankreich,,
-2024-25,diogo-jota,Sturm,1996-12-04 00:00:00,1,11,0,Portugal,,
+2024-25,emiliano-martinez,Tor,1992-09-02 00:00:00,0,36,0,Argentinien,,
+2024-25,andres-garcia-robledo,Abwehr,2003-02-07 00:00:00,0,0,26,Spanien,,
+2024-25,axel-disasi,Abwehr,1998-03-11 00:00:00,2,4,9,Frankreich,,
+2024-25,tyrone-mings,Abwehr,1993-03-13 00:00:00,0,9,0,England,,
+2024-25,lucas-digne,Abwehr,1993-07-20 00:00:00,33,0,0,Frankreich,,
+2024-25,john-mcginn,Mittelfeld,1994-10-18 00:00:00,10,11,8,Schottland,,
+2024-25,youri-tielemans,Mittelfeld,1997-05-07 00:00:00,0,40,0,Belgien,,
+2024-25,morgan-rogers,Mittelfeld,2002-07-26 00:00:00,7,22,6,England,,
+2024-25,marco-asensio,Mittelfeld,1996-01-21 00:00:00,1,11,0,Spanien,,
+2024-25,marcus-rashford,Sturm,1997-10-31 00:00:00,12,2,3,England,,
+2024-25,ollie-watkins,Sturm,1995-12-30 00:00:00,0,32,0,England,,
+2024-25,matthew-cash,Abwehr,1997-08-07 00:00:00,0,0,20,Polen,,
+2024-25,donyell-malen,Mittelfeld,1999-01-19 00:00:00,1,1,10,Niederlande,,
+2024-25,jacob-ramsey,Mittelfeld,2001-05-28 00:00:00,17,0,0,England,,
+2024-25,ian-maatsen,Abwehr,2002-03-10 00:00:00,6,0,0,Niederlande,,
+2024-25,lamare-bogarde,Abwehr,2004-01-05 00:00:00,1,2,4,Niederlande,,
+2024-25,alisson,Tor,1992-10-02 00:00:00,0,24,0,Brasilien,,
+2024-25,trent-alexander-arnold,Abwehr,1998-10-07 00:00:00,1,0,33,England,,
+2024-25,ibrahima-konate,Abwehr,1999-05-25 00:00:00,0,31,0,Frankreich,,
+2024-25,virgil-van-dijk,Abwehr,1991-07-08 00:00:00,0,39,0,Niederlande,,
+2024-25,andrew-robertson,Abwehr,1994-03-11 00:00:00,33,1,0,Schottland,,
+2024-25,ryan-gravenberch,Mittelfeld,2002-05-16 00:00:00,1,37,2,Niederlande,,
+2024-25,alexis-mac-allister,Mittelfeld,1998-12-24 00:00:00,3,27,0,Argentinien,,
+2024-25,mohamed-salah,Sturm,1992-06-15 00:00:00,0,0,35,Ägypten,,
+2024-25,dominik-szoboszlai,Mittelfeld,2000-10-25 00:00:00,4,24,4,Ungarn,,
+2024-25,curtis-jones,Mittelfeld,2001-01-30 00:00:00,3,12,3,England,,
+2024-25,diogo-jota,Sturm,1996-12-04 00:00:00,1,12,0,Portugal,,
 2024-25,conor-bradley-2,Abwehr,2003-07-09 00:00:00,0,0,11,Nordirland,,
 2024-25,darwin-nunez,Sturm,1999-06-24 00:00:00,0,12,0,Uruguay,,
+2024-25,luis-diaz-3,Sturm,1997-01-13 00:00:00,15,11,0,Kolumbien,,
+2024-25,jarell-quansah,Abwehr,2003-01-29 00:00:00,0,3,1,England,,
