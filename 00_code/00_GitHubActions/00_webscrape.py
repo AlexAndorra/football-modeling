@@ -127,7 +127,7 @@ for ll in N_leagues:
         # --- Get the number of the current matchday:
         matchday_done = int(str(soup_gameday.find_all('div', {'class':'kick__head-dropdown'})).split('<div class="kick__head-dropdown">')[2].split('<span class="kick__icon-DropDown">')[0].split(' ')[0][6:-1])
         # --- Adjust the Number of Games to run over:
-        N_gamedays[N_leagues.index(ll)] = range(matchday_done + 1, N_gamedays[N_leagues.index(ll)][-1])
+        N_gamedays[N_leagues.index(ll)] = range(matchday_done, N_gamedays[N_leagues.index(ll)][-1])
 
 
     
