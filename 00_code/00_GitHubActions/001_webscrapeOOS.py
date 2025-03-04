@@ -27,7 +27,7 @@ import os
 
 # --- Set your directory to the main folder:
 directory = '.'
-directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
+
 
 # --- For webscraping purposes:
 headers_scraping = {'User-Agent':'Safari/537.36'}
