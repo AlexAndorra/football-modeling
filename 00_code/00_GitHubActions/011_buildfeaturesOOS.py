@@ -804,7 +804,3 @@ if os.path.exists(f'{directory}/{directory_data}/SFM_data_byPlayer__OOS.csv'):
 # --- Data Folder:
 data.to_csv(f'{directory}/{directory_data}/{data_ID}.csv', index=False)
 pd.DataFrame.from_dict(PLAYERS_currentTEAM, orient='index').to_csv(f'{directory}/{directory_data}/{data_ID}__currentTEAM.csv', index=True)
-
-# --- Dashboard Folder:
-data.to_csv(f'{directory}/{directory_dashboard}/{data_ID}.csv', index=False)
-pd.DataFrame.from_dict(PLAYERS_currentTEAM, orient='index').to_csv(f'{directory}/{directory_dashboard}/{data_ID}__currentTEAM.csv', index=True)
