@@ -619,7 +619,7 @@ for pp in my_player:
   url_player = f'https://www.kicker.de/{pp}/spieler'
   # --- --- Scrape the Player's Info:
   response_player = requests.get(url_player, headers=headers_scraping)
-  soup_player = bs(response_player.text,features="lxml")
+  soup_player = bs(response_player.text) #,features="lxml")
   response_player.close()
   # --- --- Extract the Current Team:
   pp_teamCURRENT = str(soup_player.find_all('div', {'class': 'kick__vita__header__team-name'})[0]).split('>')[2].split('<')[0]
