@@ -105,11 +105,11 @@ for ll in N_leagues:
 
         # ------------------- NEW Procedure ------------------- #
         # --- Scrape the 'landing page' of your desired league 'll'
-        response_player = requests.get(f'https://www.kicker.de/{ll}/spieltag', headers=headers_scraping)
-        soup_player = bs(response_player.text)
-        response_player.close()
+        response_gameday = requests.get(f'https://www.kicker.de/{ll}/spieltag', headers=headers_scraping)
+        soup_gameday = bs(response_gameday.text)
+        response_gameday.close()
         # --- Get the number of the current matchday:
-        matchday_done = int(str(soup_player.find_all('div', {'class': 'kick__head-dropdown'})).split('<div class="kick__head-dropdown">')[2].split('<span class="kick__icon-DropDown">')[0].split(' ')[0][6:-1])
+        matchday_done = int(str(soup_gameday.find_all('div', {'class': 'kick__head-dropdown'})).split('<div class="kick__head-dropdown">')[2].split('<span class="kick__icon-DropDown">')[0].split(' ')[0][6:-1])
         # --- Adjust the Number of Games to run over:
         N_gamedays[N_leagues.index(ll)] = range(matchday_done + 1, N_gamedays[N_leagues.index(ll)][-1] + 1)
 
