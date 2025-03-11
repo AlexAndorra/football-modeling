@@ -259,13 +259,24 @@ S2425_GD26_G8,2025-02-22,Aston Villa,FC Chelsea,2.0,1.0,0.0,1.0
 S2425_GD26_G9,2025-02-23,Newcastle United,Nottingham Forest,4.0,3.0,4.0,1.0
 S2425_GD26_G10,2025-02-23,Manchester City,FC Liverpool,0.0,2.0,0.0,2.0
 S2425_GD29_G1,2025-02-19,Aston Villa,FC Liverpool,2.0,2.0,2.0,1.0
-S2425_GD27_G1,2025-02-25,Brighton &amp; Hove Albion,AFC Bournemouth,2,1,1,0
-S2425_GD27_G2,2025-02-25,Wolverhampton Wanderers,FC Fulham,1,2,1,1
-S2425_GD27_G3,2025-02-25,Crystal Palace,Aston Villa,4,1,1,0
-S2425_GD27_G4,2025-02-25,FC Chelsea,FC Southampton,4,0,3,0
-S2425_GD27_G5,2025-02-26,FC Brentford,FC Everton,1,1,1,0
-S2425_GD27_G6,2025-02-26,Nottingham Forest,FC Arsenal,0,0,0,0
-S2425_GD27_G7,2025-02-26,Tottenham Hotspur,Manchester City,0,1,0,1
-S2425_GD27_G8,2025-02-26,Manchester United,Ipswich Town,3,2,2,2
-S2425_GD27_G9,2025-02-26,FC Liverpool,Newcastle United,2,0,1,0
-S2425_GD27_G10,2025-02-27,West Ham United,Leicester City,2,0,2,0
+S2425_GD27_G1,2025-02-25,Brighton &amp; Hove Albion,AFC Bournemouth,2.0,1.0,1.0,0.0
+S2425_GD27_G2,2025-02-25,Wolverhampton Wanderers,FC Fulham,1.0,2.0,1.0,1.0
+S2425_GD27_G3,2025-02-25,Crystal Palace,Aston Villa,4.0,1.0,1.0,0.0
+S2425_GD27_G4,2025-02-25,FC Chelsea,FC Southampton,4.0,0.0,3.0,0.0
+S2425_GD27_G5,2025-02-26,FC Brentford,FC Everton,1.0,1.0,1.0,0.0
+S2425_GD27_G6,2025-02-26,Nottingham Forest,FC Arsenal,0.0,0.0,0.0,0.0
+S2425_GD27_G7,2025-02-26,Tottenham Hotspur,Manchester City,0.0,1.0,0.0,1.0
+S2425_GD27_G8,2025-02-26,Manchester United,Ipswich Town,3.0,2.0,2.0,2.0
+S2425_GD27_G9,2025-02-26,FC Liverpool,Newcastle United,2.0,0.0,1.0,0.0
+S2425_GD27_G10,2025-02-27,West Ham United,Leicester City,2.0,0.0,2.0,0.0
+S2425_GD28_G1,2025-03-08,Nottingham Forest,Manchester City,1,0,0,0
+S2425_GD28_G2,2025-03-08,Brighton &amp; Hove Albion,FC Fulham,2,1,1,1
+S2425_GD28_G3,2025-03-08,Crystal Palace,Ipswich Town,1,0,0,0
+S2425_GD28_G4,2025-03-08,FC Liverpool,FC Southampton,3,1,0,1
+S2425_GD28_G5,2025-03-08,FC Brentford,Aston Villa,0,1,0,0
+S2425_GD28_G6,2025-03-08,Wolverhampton Wanderers,FC Everton,1,1,1,1
+S2425_GD28_G7,2025-03-09,FC Chelsea,Leicester City,1,0,0,0
+S2425_GD28_G8,2025-03-09,Tottenham Hotspur,AFC Bournemouth,2,2,0,1
+S2425_GD28_G9,2025-03-09,Manchester United,FC Arsenal,1,1,1,0
+S2425_GD28_G10,2025-03-10,West Ham United,Newcastle United,0,1,0,0
+S2425_GD29_G1,2025-02-19,Aston Villa,FC Liverpool,2,2,2,1
