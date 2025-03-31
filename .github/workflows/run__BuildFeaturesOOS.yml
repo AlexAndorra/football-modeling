@@ -1,9 +1,9 @@
 name: Build Features OOS
 
 on:
-  #schedule:
+  schedule:
     # Run at 04:00 AM UTC every Tuesday
-    #- cron: "0 5 * * 2"
+    - cron: "0 5 * * 2"
   workflow_dispatch:
   
 
