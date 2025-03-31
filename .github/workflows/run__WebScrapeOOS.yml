@@ -1,9 +1,9 @@
 name: Web Scrape OOS
 
 on:
-  #schedule:
+  schedule:
     # Run at 3:00 AM UTC every Tuesday
-    #- cron: "0 3 * * 2"
+    - cron: "0 3 * * 2"
   workflow_dispatch:
   
 
