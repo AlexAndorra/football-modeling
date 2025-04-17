@@ -124,6 +124,9 @@ for ll in N_leagues:
         response_gameday = requests.get(f'https://www.kicker.de/{ll}/spieltag', headers=headers_scraping)
         soup_gameday = bs(response_gameday.text)
         response_gameday.close()
+
+        print(soup_gameday)
+        
         # --- Get the number of the current matchday:
         matchday_done = int(str(soup_gameday.find_all('div', {'class':'kick__head-dropdown'})).split('<div class="kick__head-dropdown">')[2].split('<span class="kick__icon-DropDown">')[0].split(' ')[0][6:-1])
         # --- Adjust the Number of Games to run over:
