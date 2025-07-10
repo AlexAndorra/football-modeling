@@ -1,0 +1,24 @@
+name: soccer_sub
+channels:
+  - conda-forge
+dependencies:
+  - black
+  - ipywidgets
+  - isort
+  - jax
+  - jupyter
+  - jupyterlab
+  - matplotlib
+  - nbqa
+  - numba
+  - numpy
+  - numpyro
+  - nutpie
+  - pandas
+  - preliz
+  - pymc
+  - pytorch
+  - scikit-learn
+  - scipy
+  - seaborn
+  - watermark
