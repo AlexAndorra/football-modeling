@@ -15,10 +15,15 @@ dependencies:
   - numpyro
   - nutpie
   - pandas
+  - pip
+  - pre-commit
   - preliz
   - pymc
   - pytorch
   - scikit-learn
   - scipy
   - seaborn
+  - ruff
   - watermark
+  - pip:
+    - -e .

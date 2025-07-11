@@ -1,5 +1,4 @@
-"""soccer_substitution_eda.py
-
+"""
 Exploratory Data Analysis (EDA) for the synthetic soccer substitution
 simulation dataset.  This script pairs with `soccer_substitution_simulation.py`
 from the same project.
@@ -58,15 +57,39 @@ except ImportError as e:  # pragma: no cover
 
 def parse_args() -> argparse.Namespace:
     """CLI argument parser."""
-    parser = argparse.ArgumentParser(description="EDA for soccer substitution simulation")
-    parser.add_argument("--csv", type=pathlib.Path, default=None, help="Path to an existing CSV to load instead of simulating.")
-    parser.add_argument("--n", type=int, default=10000, help="Number of matches to simulate if --csv is not provided.")
-    parser.add_argument("--seed", type=int, default=0, help="Random seed for reproducibility when simulating.")
-    parser.add_argument("--outdir", type=pathlib.Path, default=pathlib.Path("eda_outputs"), help="Directory to save figures and summaries.")
+    parser = argparse.ArgumentParser(
+        description="EDA for soccer substitution simulation"
+    )
+    parser.add_argument(
+        "--csv",
+        type=pathlib.Path,
+        default=None,
+        help="Path to an existing CSV to load instead of simulating.",
+    )
+    parser.add_argument(
+        "--n",
+        type=int,
+        default=10000,
+        help="Number of matches to simulate if --csv is not provided.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Random seed for reproducibility when simulating.",
+    )
+    parser.add_argument(
+        "--outdir",
+        type=pathlib.Path,
+        default=pathlib.Path("eda_outputs"),
+        help="Directory to save figures and summaries.",
+    )
     return parser.parse_args()
 
 
-def load_or_simulate(n: int, seed: int, csv_path: Optional[pathlib.Path] = None) -> pd.DataFrame:
+def load_or_simulate(
+    n: int, seed: int, csv_path: Optional[pathlib.Path] = None
+) -> pd.DataFrame:
     """Load a dataset from CSV or simulate a fresh one."""
     if csv_path and csv_path.exists():
         print(f"Loading data from {csv_path}")
@@ -124,7 +147,6 @@ def plot_naive_vs_adjusted(df: pd.DataFrame, outdir: pathlib.Path) -> None:
         plt.text(idx, diff + 0.02, f"{diff:.2f}", ha="center")
     plt.savefig(outdir / "naive_vs_adjusted_shots.png", dpi=300)
     plt.close()
-
 
 
 def main() -> None:

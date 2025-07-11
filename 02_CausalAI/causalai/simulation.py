@@ -1,5 +1,4 @@
-"""soccer_substitution_simulation.py
-
+"""
 Generate a synthetic dataset of soccer match scenarios to study the causal
 impact of player substitutions on team performance in the final 30 minutes
 of a match.
@@ -13,11 +12,13 @@ The simulation follows the causal structure described in the project design:
 
 Author: Alexandre Andorra (2025‑07‑09)
 """
+
 from __future__ import annotations
+
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
-from typing import Tuple
 
 __all__ = [
     "simulate_matches",
@@ -26,6 +27,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # Core simulation
 # ---------------------------------------------------------------------------
+
 
 def simulate_matches(
     n_matches: int = 10_000,
@@ -138,25 +140,27 @@ def simulate_matches(
     # ---------------------------------------------------------------------
     # Assemble tidy DataFrame
     # ---------------------------------------------------------------------
-    data = pd.DataFrame({
-        "off_old": off_old,
-        "def_old": def_old,
-        "score_diff": score_diff,
-        "sub": T,
-        "off_new": off_new,
-        "def_new": def_new,
-        "shots": shots,
-        "goals": goals,
-        "passes": passes,
-        "tackles": tackles,
-        "clearances": clearances,
-        "blocks": blocks,
-        "pressures": pressures,
-        "dribbles": dribbles,
-        "saves": saves,
-        "fouls": fouls,
-        "cards": cards,
-    })
+    data = pd.DataFrame(
+        {
+            "off_old": off_old,
+            "def_old": def_old,
+            "score_diff": score_diff,
+            "sub": T,
+            "off_new": off_new,
+            "def_new": def_new,
+            "shots": shots,
+            "goals": goals,
+            "passes": passes,
+            "tackles": tackles,
+            "clearances": clearances,
+            "blocks": blocks,
+            "pressures": pressures,
+            "dribbles": dribbles,
+            "saves": saves,
+            "fouls": fouls,
+            "cards": cards,
+        }
+    )
 
     return data
 
