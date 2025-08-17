@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - black
+  - dowhy
   - ipywidgets
   - isort
   - jax
@@ -15,10 +16,12 @@ dependencies:
   - numpyro
   - nutpie
   - pandas
+  - pgmpy
   - pip
   - pre-commit
   - preliz
   - pymc
+  - pyro-ppl
   - pytorch
   - scikit-learn
   - scipy
