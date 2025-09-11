@@ -66,7 +66,7 @@ def analyze_heterogeneous_effects(df,var_outcome: str, save_fig=False):
             )
 
     # Treatment effects by team strength
-    print("\n2. Treatment Effects by Initial Team Strength:")
+    print("\n2. Treatment Effects by Initial Team Strength Differential\n (Lower Quartiles --> Offense Weaker than in Higher Quartiles realtive to Defense):")
     strength_effects = []
     strength_labels = []
 
@@ -98,7 +98,7 @@ def analyze_heterogeneous_effects(df,var_outcome: str, save_fig=False):
     #axes[1].axhline(y=0, color="red", linestyle="--", alpha=0.5)
     axes[1].set_xlabel("Team Strength Quartile")
     axes[1].set_ylabel(f"Average Treatment Effect ({var_outcome.capitalize()})")
-    axes[1].set_title("Treatment Effects by Initial Team Strength")
+    axes[1].set_title("Treatment Effects by Initial Team Strength Differential\n (Lower Quartiles --> Offense Weaker than in Higher Quartiles realtive to Defense)")
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
@@ -117,7 +117,8 @@ def plot_naive_vs_adjusted(df: pd.DataFrame, outdir: pathlib.Path, var_outcome: 
         var_confounder:   the name of the variable that could be a potential confounder if not controlled for (e.g. score_diff)
         var_outcome:      the name of the variable you want to analyze the treatment's effect on (e.g. shots, goals, passes etc.)
     """
-    outdir.mkdir(parents=True, exist_ok=True)
+    if save_fig:
+        outdir.mkdir(parents=True, exist_ok=True)
 
     # --- Naïve difference:
     mean_sub = df.loc[df["sub"] == 1, var_outcome].mean()
