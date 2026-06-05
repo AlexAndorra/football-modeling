@@ -1,0 +1,4 @@
+*.nc
+
+# Bulky per-draw calibration tables (~130 KB each); regenerate via run_sfmmo.py
+draw_calibration_*.csv
