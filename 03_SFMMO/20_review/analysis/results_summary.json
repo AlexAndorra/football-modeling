@@ -1,0 +1,45 @@
+{
+  "seed": 1678,
+  "train_seasons": [
+    "WMQ2014",
+    "WM2014",
+    "WMQ2018",
+    "WM2018",
+    "WMQ2022",
+    "WM2022"
+  ],
+  "n_obs": 2988,
+  "n_matches": 1494,
+  "goal_mean": 1.4069611780455153,
+  "goal_var": 2.323111887344042,
+  "prior_pred": {
+    "mean": 8.563393574297189,
+    "p95": 20.0,
+    "p_gt10": 0.09554886211512717,
+    "max": 303719.0
+  },
+  "poisson": {
+    "rhat_max": 1.03,
+    "ess_bulk_min": 201.0,
+    "divergences": 0,
+    "draw_obs": 0.19678714859437751,
+    "draw_pred": 0.20548177499833462
+  },
+  "nbinom": {
+    "rhat_max": 1.02,
+    "ess_bulk_min": 190.0,
+    "divergences": 0,
+    "draw_obs": 0.19678714859437751,
+    "draw_pred": 0.20556771169164836
+  },
+  "identifiability": {
+    "corr_alpha_delta": 0.2976558875565884,
+    "mean_delta_post": -0.007904128666605682,
+    "mean_alpha_post": 3.8953500701517703e-19
+  },
+  "loo_compare": {
+    "best": "poisson",
+    "elpd_diff": 0.8097401968322027,
+    "dse": 0.5015345070011977
+  }
+}
