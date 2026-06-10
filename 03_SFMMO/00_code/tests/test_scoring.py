@@ -1,7 +1,6 @@
 """Tests for foresight_scoring.scoring — proper scoring rules (vendored from foresight).
 
-The log score is the load-bearing primitive: it is both the headline metric
-(Act 1) and, unchanged, the RL reward (Act 2). So it gets pinned hard.
+The log score is the load-bearing scoring primitive, so it gets pinned hard.
 """
 
 import numpy as np
@@ -40,7 +39,7 @@ def test_log_score_vectorizes_over_a_batch():
 
 def test_log_score_floors_zero_probability_to_stay_finite():
     # a forecast that put 0 on the realized outcome must score very negative but
-    # FINITE -- a -inf reward would blow up the Act-2 RL training.
+    # FINITE -- a -inf score would be unusable downstream.
     score = log_score(np.array([1.0, 0.0]), 1)
     assert np.isfinite(score)
     assert score < -20.0

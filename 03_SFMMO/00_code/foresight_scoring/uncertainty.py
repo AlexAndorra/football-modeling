@@ -1,11 +1,11 @@
-# Vendored verbatim from the foresight package (github.com/AlexAndorra/foresight, MIT).
-# Do not edit here — keep in sync with the upstream module. See foresight_scoring/__init__.py.
+# Vendored from the foresight package (github.com/AlexAndorra/foresight, MIT). The functions
+# are unchanged from upstream; the docstrings are genericized for this repo.
 """Bayesian uncertainty for forecast scores.
 
 Two orthogonal sources, both Bayesian:
 
 - **Bayesian bootstrap** (Rubin) over the held-out matches — model-agnostic, so it
-  works for every forecaster including the LLMs (which have no posterior). Dirichlet
+  works for every forecaster (including those with no posterior). Dirichlet
   weights over the per-match scores give a posterior over the mean, and over pairwise
   differences -> P(A beats B).
 - **Posterior propagation** — push a Bayesian forecaster's own posterior draws

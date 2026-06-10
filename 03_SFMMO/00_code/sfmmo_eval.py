@@ -52,6 +52,15 @@ ALL_FOLDS = ["WMQ2018", "WM2018", "WMQ2022", "WM2022", "WMQ2026"]
 CLASSES = ["away win", "draw", "home win"]
 
 
+def competition(fold):
+    """Classify a fold as 'qualifiers' (WMQ*) or 'finals' (the actual World Cup, WM*).
+
+    The two are different populations: the qualifiers are full of mismatches; the finals are
+    the event being forecast. The model-vs-market comparison is reported per competition.
+    """
+    return "qualifiers" if fold.startswith("WMQ") else "finals"
+
+
 # ----------------------------------------------------------------------------- model preds
 def load_dict_preds(dev):
     path = os.path.join(DATA, f"Evaluation__SFMMOwm_Dev{dev}__scaleCS__EW.pkl")

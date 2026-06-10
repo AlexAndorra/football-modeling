@@ -1,18 +1,17 @@
-# Vendored verbatim from the foresight package (github.com/AlexAndorra/foresight, MIT).
-# Do not edit here — keep in sync with the upstream module. See foresight_scoring/__init__.py.
+# Vendored from the foresight package (github.com/AlexAndorra/foresight, MIT). The scoring
+# functions are unchanged from upstream; the docstrings are genericized for this repo.
 """Proper scoring rules and sharpness for categorical forecasts.
 
-`log_score` is the load-bearing primitive: it is the headline metric in Act 1
-*and*, imported unchanged, the RL reward in Act 2 — so the module stays
-dependency-free (numpy only) and free of any model coupling. Every function
+`log_score` is the load-bearing scoring primitive, kept dependency-free (numpy only)
+and free of any model coupling. Every function
 accepts a single forecast (``probs`` shape ``(K,)``) or a batch (``probs`` shape
 ``(N, K)`` with ``outcome``/``outcomes`` shape ``(N,)``).
 """
 
 import numpy as np
 
-# Floor on the realized-outcome probability so log_score (and the Act-2 RL
-# reward) stays finite when a forecast assigns ~0 to what actually happened.
+# Floor on the realized-outcome probability so log_score stays finite when a
+# forecast assigns ~0 to what actually happened.
 _PROB_FLOOR = 1e-12
 
 

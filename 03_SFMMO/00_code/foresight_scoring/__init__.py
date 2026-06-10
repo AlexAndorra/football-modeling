@@ -1,8 +1,8 @@
 """Vendored proper-scoring / calibration / uncertainty from the foresight package.
 
-Kept byte-for-byte in sync with github.com/AlexAndorra/foresight (MIT). Vendored
-(not depended-on) so this SFMMO evaluation reproduces standalone for reviewers
-without the foresight repo. Swap for ``import foresight`` once it is published.
+Kept in sync with github.com/AlexAndorra/foresight (MIT) — functions unchanged upstream,
+docstrings genericized for this repo. Vendored (not depended-on) so this SFMMO evaluation
+reproduces standalone without the foresight repo.
 """
 
 from .calibration import randomized_pit, reliability_table
