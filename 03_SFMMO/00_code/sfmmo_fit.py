@@ -39,7 +39,6 @@
 # are provided by the `model` uv group (pyproject.toml).
 
 # ===== cell 3 =====
-from typing import List, Union
 
 import os                                    # PATH: needed for repo-relative path resolution
 import json                                  # PATH: needed for the per-fold diagnostics dump
@@ -55,8 +54,6 @@ from tqdm import tqdm
 import pymc as pm
 import pytensor.tensor as pt
 import arviz as az
-import xarray as xr
-import copy
 
 # RUN-BLOCKER: the following cell-3 imports are absent from the `model` uv group
 # and are NOT used anywhere on the DevK fit path (BART is the dead devVersion=='Z'
@@ -82,7 +79,7 @@ except Exception:
 
 
 # --- Stats
-from scipy.stats import norm, nbinom, poisson
+from scipy.stats import nbinom, poisson
 try:
     from sklearn.preprocessing import StandardScaler
 except Exception:
@@ -97,7 +94,6 @@ except Exception:
     plotly = None
 
 # --- Plotting:
-import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 try:
     import seaborn as sns
@@ -138,6 +134,13 @@ assert os.path.exists(DATA_CSV), f"[ERROR]: model-data CSV not found at {DATA_CS
 # (no env var) = full: all folds, full draws.
 # =============================================================================
 SMOKE = os.environ.get("SFMMO_SMOKE") == "1"
+# Robustness variant: SFMMO_STRICT_HOLDOUT=1 freezes the per-league Elo on the held-out
+# season (no Elo update on held-out outcomes) -> a strict pre-tournament forecast. The default
+# (sequential / "vs-the-closing-line") lets prior held-out matches update Elo, matching the
+# information set the bookmaker closing odds are formed on. (Cumulative-goals features come
+# pre-computed from the data CSV and are unchanged by this switch.)
+STRICT_HOLDOUT = os.environ.get("SFMMO_STRICT_HOLDOUT") == "1"
+_VARIANT = "_strict" if STRICT_HOLDOUT else ""
 
 
 # ===== cell 5 =====
@@ -191,7 +194,7 @@ def build_confederation_map(data):
     return {t: max(cs, key=cs.get) for t, cs in counts.items()}   # most-frequent confederation
 
 # ===== cell 8 =====
-def compute_league_elo(complete_data, K=20, home_adv=50, regress_to=1500, regress_w=0.0):
+def compute_league_elo(complete_data, K=20, home_adv=50, regress_to=1500, regress_w=0.0, freeze_seasons=None):
 
   # --- Run over Leagues
   N_leagues = complete_data['name_league'].unique().tolist()
@@ -248,8 +251,10 @@ def compute_league_elo(complete_data, K=20, home_adv=50, regress_to=1500, regres
         complete_data.loc[gg_idx,'elo_team'] = gg_home__elo
         complete_data.loc[gg_idx,'elo_opp'] = gg_away__elo
 
-        # --- Update ELO Ratings:
-        ELO_rating[gg_home], ELO_rating[gg_away] = update_elo(gg_home__elo,gg_away__elo,ll_ss_data['match_outcome__home'].iloc[gg],K=K, home_adv=home_adv)
+        # --- Update ELO Ratings (robustness): skip the update on frozen/held-out seasons so a
+        #     held-out match's result cannot leak into a later held-out match's pre-game Elo.
+        if freeze_seasons is None or ss not in freeze_seasons:
+          ELO_rating[gg_home], ELO_rating[gg_away] = update_elo(gg_home__elo,gg_away__elo,ll_ss_data['match_outcome__home'].iloc[gg],K=K, home_adv=home_adv)
 
   return complete_data
 
@@ -631,7 +636,8 @@ def main():
 
       # --- Compute 'elo':
       #complete_data = compute_global_elo(complete_data, regress_w=0.25)
-      complete_data = compute_league_elo(complete_data, K=20, home_adv=50, regress_to=1500, regress_w=0.25)
+      complete_data = compute_league_elo(complete_data, K=20, home_adv=50, regress_to=1500, regress_w=0.25,
+                                          freeze_seasons=(val_seasons if STRICT_HOLDOUT else None))
 
       # --- 'elo' weighting:
       if 1==1:
@@ -1503,7 +1509,7 @@ def main():
       # (e.g. ..._idata_WMQ2026.nc) for auditable diagnostics.
       try:
           idata_path = os.path.join(
-              OUT_DIR, f"Evaluation__SFMMOwm_Dev{devVersion}__scaleCS__EW__improved_idata_{val_seasons[0]}.nc")
+              OUT_DIR, f"Evaluation__SFMMOwm_Dev{devVersion}__scaleCS__EW__improved{_VARIANT}_idata_{val_seasons[0]}.nc")
           idata.to_netcdf(idata_path)
           print(f"[SAVE] idata -> {idata_path}")
       except Exception as _e:
@@ -1515,7 +1521,6 @@ def main():
     # `if 1==2:` (cells 16 & 17, disabled) so nothing was ever written. Re-enabled
     # as an unconditional save of the IMPROVED DevK pickle, under a NEW filename so
     # it does NOT overwrite the committed ...DevK__scaleCS__EW.pkl.
-    import pickle
     import cloudpickle
 
     if do__scaleCS:
@@ -1528,7 +1533,7 @@ def main():
     # with scale__type='_scaleCS' reproduces the eval's `...DevK__scaleCS__EW` stem;
     # we append `__improved` to avoid clobbering the committed file.
     pickle_filepath = os.path.join(
-        OUT_DIR, f'Evaluation__SFMMOwm_Dev{devVersion}_{scale__type}__EW__improved.pkl')
+        OUT_DIR, f'Evaluation__SFMMOwm_Dev{devVersion}_{scale__type}__EW__improved{_VARIANT}.pkl')
     dict_to_save = {
                     'factors': factors,
                     'dict_preds': dict_preds
@@ -1541,7 +1546,7 @@ def main():
 
     # IMPROVEMENT (patch 2): also dump a small diagnostics json (max R-hat + divergence count per fold).
     diag_path = os.path.join(
-        OUT_DIR, f'Evaluation__SFMMOwm_Dev{devVersion}_{scale__type}__EW__improved_diagnostics.json')
+        OUT_DIR, f'Evaluation__SFMMOwm_Dev{devVersion}_{scale__type}__EW__improved{_VARIANT}_diagnostics.json')
     with open(diag_path, 'w') as f:
         json.dump(diagnostics, f, indent=2)
     print(f'[SAVE] diagnostics json -> {diag_path}')

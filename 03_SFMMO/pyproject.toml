@@ -43,6 +43,14 @@ target-version = "py312"
 # Colab notebooks. Neither is part of this improvement's lint scope.
 extend-exclude = ["20_review", "*.ipynb"]
 
+[tool.ruff.lint.per-file-ignores]
+# sfmmo_fit.py is a deliberately VERBATIM extraction of Max's Colab notebook (kept as an
+# auditable diff — only the lines marked `# IMPROVEMENT` are ours), so we preserve his style
+# rather than restyle it: ambiguous loop vars (E741), inline semicolons (E702), type-equality
+# (E721), unused locals (F841), and one undefined name in the dead BART branch (F821;
+# devVersion 'Z', never executed — the model runs DevK).
+"00_code/sfmmo_fit.py" = ["E741", "E702", "E721", "F841", "F821"]
+
 [tool.pytest.ini_options]
 testpaths = ["00_code/tests"]
 pythonpath = ["00_code"]
