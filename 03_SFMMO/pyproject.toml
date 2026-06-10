@@ -27,6 +27,8 @@ model = [
     "h5netcdf>=1.8.1",
     "h5py>=3.16.0",
     "numpyro>=0.21.0",
+    "nutpie>=0.16.10",
+    "preliz>=0.26.0",
     "pymc>=6.0.1",
 ]
 

@@ -1184,36 +1184,44 @@ def main():
       # ============================================= Inference! ============================================= #
 
 
-      # --- In the paper we use 4 chains
-      # --- Just for speed: set it to 1
-      # IMPROVEMENT (patch 5): 4 chains + fixed seed for reproducibility (was 2 via N_chains).
-      # IMPROVEMENT (SMOKE mode): chains=2, draws=200, tune=200 for a fast run-check.
-      N_chains = 2 if SMOKE else 4
-      N_draws  = 200 if SMOKE else 4000
-      N_tune   = 200 if SMOKE else 1000
-      RANDOM_SEED = sum(map(ord, "sfm"))   # == 326
+      # ============================== Inference (nutpie) ==============================
+      # IMPROVEMENT (Bayesian workflow): nutpie sampler. Do NOT hardcode the chain count for
+      # the real run -- let nutpie pick the platform's multi-chain default (smoke keeps
+      # chains=2 only as a fast dev check). Descriptive, fixed seed for reproducibility.
+      # The tightened fixed-scale team priors removed the hierarchical funnel, so target_accept
+      # comes down from 0.99 to 0.9 (Alex's June review saw 0 divergences at 0.9).
+      N_draws = 200 if SMOKE else 4000
+      N_tune  = 200 if SMOKE else 1000
+      RANDOM_SEED = sum(map(ord, "sfmmo"))
 
       with SFMMO__dev:
 
           if devVersion in ['Z']:
-
-            idata = pm.sample(draws=N_draws, tune=N_tune, chains=N_chains,cores=4, random_seed=RANDOM_SEED, idata_kwargs={"log_likelihood": True})
-
+            idata = pm.sample(draws=N_draws, tune=N_tune, cores=4, random_seed=RANDOM_SEED)
           else:
+            sample_kwargs = dict(nuts_sampler="nutpie", target_accept=0.9,
+                                 draws=N_draws, tune=N_tune, random_seed=RANDOM_SEED)
+            if SMOKE:
+                sample_kwargs["chains"] = 2  # dev-only fast check (still multi-chain)
+            idata = pm.sample(**sample_kwargs)
 
-            idata = pm.sample(nuts_sampler="numpyro",
-                              target_accept=0.99,
-                              chains=N_chains,
-                              draws=N_draws, tune=N_tune,
-                              cores=1,  # --- CPU cores (irrelevant for GPU)
-                              random_seed=RANDOM_SEED,   # IMPROVEMENT (patch 5): fixed seed
-                              # version fix: this PyMC takes chain_method as a direct kwarg,
-                              # not via nuts_sampler_kwargs (which is forwarded to the NUTS kernel).
-                              chain_method="vectorized",
-                              idata_kwargs={"log_likelihood": True})  # --- Runs chains in parallel on GPU)
+          # nutpie silently ignores idata_kwargs for log_likelihood / log_prior, so compute
+          # them explicitly: log_likelihood -> LOO, log_prior -> prior-sensitivity (psense).
+          try:
+              pm.compute_log_likelihood(idata, model=SFMMO__dev)
+              pm.compute_log_prior(idata, model=SFMMO__dev)
+          except Exception as _e:
+              print(f"[WARN] compute_log_likelihood/log_prior failed: {_e}")
 
 
-      # IMPROVEMENT (patch 5): compute & print max R-hat and divergence count per fold.
+      # IMPROVEMENT (Bayesian workflow): arviz_stats.diagnose() is the first diagnostic --
+      # R-hat, ESS, divergences, tree-depth and E-BFMI in a single call.
+      if arviz_stats is not None:
+          try:
+              print(f"\n[diagnose fold={val_seasons[0]}]")
+              arviz_stats.diagnose(idata)
+          except Exception as _e:
+              print(f"[WARN] arviz_stats.diagnose failed: {_e}")
       try:
           rhat_ds = az.rhat(idata)
           max_rhat = float(max(float(rhat_ds[v].max()) for v in rhat_ds.data_vars))
@@ -1225,11 +1233,15 @@ def main():
       except Exception as _e:
           n_divergences = -1
           print(f"[WARN] could not read divergences: {_e}")
+      try:
+          n_chains = int(idata.posterior.sizes["chain"])
+      except Exception:
+          n_chains = -1
       print(f"\n[DIAGNOSTICS fold={val_seasons[0]}] max R-hat = {max_rhat:.4f} | "
-            f"divergences = {n_divergences}\n")
+            f"divergences = {n_divergences} | chains = {n_chains}\n")
       diagnostics[val_seasons[0]] = {"max_rhat": max_rhat,
                                      "n_divergences": n_divergences,
-                                     "n_chains": int(N_chains),
+                                     "n_chains": n_chains,
                                      "n_draws": int(N_draws),
                                      "n_tune": int(N_tune)}
 
