@@ -1,0 +1,37 @@
+{
+  "WMQ2018": {
+    "max_rhat": 1.0014605430720616,
+    "n_divergences": 0,
+    "n_chains": 4,
+    "n_draws": 4000,
+    "n_tune": 1000
+  },
+  "WM2018": {
+    "max_rhat": 1.003150008204419,
+    "n_divergences": 0,
+    "n_chains": 4,
+    "n_draws": 4000,
+    "n_tune": 1000
+  },
+  "WMQ2022": {
+    "max_rhat": 1.001614306244263,
+    "n_divergences": 0,
+    "n_chains": 4,
+    "n_draws": 4000,
+    "n_tune": 1000
+  },
+  "WM2022": {
+    "max_rhat": 1.0017926752235289,
+    "n_divergences": 0,
+    "n_chains": 4,
+    "n_draws": 4000,
+    "n_tune": 1000
+  },
+  "WMQ2026": {
+    "max_rhat": 1.0018869428526562,
+    "n_divergences": 0,
+    "n_chains": 4,
+    "n_draws": 4000,
+    "n_tune": 1000
+  }
+}

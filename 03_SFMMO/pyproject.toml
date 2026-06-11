@@ -1,0 +1,58 @@
+[project]
+name = "sfmmo"
+version = "0.1.0"
+description = "SFMMO World-Cup model — fit, improvement, and properly-scored evaluation vs the bookmakers. Proper scoring / calibration / uncertainty vendored from the foresight package."
+readme = "00_code/README.md"
+requires-python = ">=3.12"
+# Light core: everything the evaluation (load predictions -> score -> calibrate -> report)
+# needs. The heavy Bayesian stack (for fitting the model + the prior-predictive check) is an
+# opt-in group so the eval iterates fast: `uv sync` for the eval, `uv sync --group model`
+# to fit.
+dependencies = [
+    "cloudpickle>=3.0",
+    "matplotlib>=3.10.9",
+    "numpy>=2.4.6",
+    "pandas>=3.0.3",
+    "pyarrow>=24.0.0",
+    "scipy>=1.17.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "ruff>=0.15.16",
+]
+model = [
+    "arviz>=0.18",
+    "h5netcdf>=1.8.1",
+    "h5py>=3.16.0",
+    "numpyro>=0.21.0",
+    "nutpie>=0.16.10",
+    "preliz>=0.26.0",
+    "pymc>=6.0.1",
+]
+
+# Analysis project, not a distributable library — don't try to build/install it.
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# 20_review/ is the prior hand-review (Max's notes + Alex's June scripts); *.ipynb are Max's
+# Colab notebooks. Neither is part of this improvement's lint scope.
+extend-exclude = ["20_review", "*.ipynb"]
+
+[tool.ruff.lint.per-file-ignores]
+# sfmmo_fit.py is a deliberately VERBATIM extraction of Max's Colab notebook (kept as an
+# auditable diff — only the lines marked `# IMPROVEMENT` are ours), so we preserve his style
+# rather than restyle it: ambiguous loop vars (E741), inline semicolons (E702), type-equality
+# (E721), unused locals (F841), and one undefined name in the dead BART branch (F821;
+# devVersion 'Z', never executed — the model runs DevK).
+"00_code/sfmmo_fit.py" = ["E741", "E702", "E721", "F841", "F821"]
+
+[tool.pytest.ini_options]
+testpaths = ["00_code/tests"]
+pythonpath = ["00_code"]
+# Keep test output pristine: any warning becomes a failure (matches the foresight repo).
+filterwarnings = ["error"]
