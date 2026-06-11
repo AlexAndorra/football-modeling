@@ -1,17 +1,12 @@
-"""compare_strict.py — strict-holdout robustness check.
+"""Strict-holdout robustness check.
 
-Scores the improved re-fit against the de-vigged consensus books under BOTH forecasting
-semantics, to confirm the "books win the qualifiers" verdict survives the conservative setup:
+Scores the improved re-fit against the de-vigged consensus books under both forecasting
+semantics: sequential (Elo updates on prior held-out matches, matching the closing-odds
+information set) and strict-holdout (Elo frozen at the train cut, a pre-tournament forecast).
+Both renorm + LOFO-calibrated, paired bootstrap; also splits qualifiers vs World-Cup finals.
 
-  - sequential (primary): Elo updates on prior held-out matches — the information set the
-    bookmaker closing odds are formed on (forecast each match using results to kickoff).
-  - strict-holdout: Elo frozen at the train cutoff (no held-out outcomes) — a pre-tournament
-    forecast. The adversarial review flagged the sequential Elo as a potential leak; this run
-    shows the verdict either way.
-
-Both variants are renormalized + leave-one-fold-out temperature-calibrated, scored with a
-paired Bayesian bootstrap. Run after both `sfmmo_fit.py` and `SFMMO_STRICT_HOLDOUT=1 sfmmo_fit.py`:
-  uv run --group model python 00_code/compare_strict.py
+Run after sfmmo_fit.py and SFMMO_STRICT_HOLDOUT=1 sfmmo_fit.py:
+uv run --group model python 00_code/compare_strict.py
 """
 
 import os
@@ -75,12 +70,25 @@ def vs_book(dp, book_df, rng, score_folds=None):
     Pm, Pb, yy = np.vstack(Pm), np.vstack(Pb), np.concatenate(yy)
     d_rps = bayesian_bootstrap(
         ranked_probability_score(Pm, yy, reduce="none")
-        - ranked_probability_score(Pb, yy, reduce="none"), n_draws=N_BOOT, rng=rng)
+        - ranked_probability_score(Pb, yy, reduce="none"),
+        n_draws=N_BOOT,
+        rng=rng,
+    )
     d_ll = bayesian_bootstrap(log_score(Pm, yy) - log_score(Pb, yy), n_draws=N_BOOT, rng=rng)
     return {
         "n": len(yy),
-        "rps": (d_rps.mean(), np.quantile(d_rps, .025), np.quantile(d_rps, .975), float(np.mean(d_rps < 0))),
-        "ll": (d_ll.mean(), np.quantile(d_ll, .025), np.quantile(d_ll, .975), float(np.mean(d_ll > 0))),
+        "rps": (
+            d_rps.mean(),
+            np.quantile(d_rps, 0.025),
+            np.quantile(d_rps, 0.975),
+            float(np.mean(d_rps < 0)),
+        ),
+        "ll": (
+            d_ll.mean(),
+            np.quantile(d_ll, 0.025),
+            np.quantile(d_ll, 0.975),
+            float(np.mean(d_ll > 0)),
+        ),
         "pit": float(kstest(randomized_pit(Pm, yy, rng), "uniform").pvalue),
     }
 
@@ -98,8 +106,12 @@ def main():
         r = vs_book(load(stem), book_df, rng)
         results[label] = r
         print(f"\n{label} (n={r['n']}) vs consensus book:")
-        print(f"  ΔlogLik = {r['ll'][0]:+.4f} [{r['ll'][1]:+.4f}, {r['ll'][2]:+.4f}]  P(model better)={r['ll'][3]:.3f}")
-        print(f"  ΔRPS    = {r['rps'][0]:+.4f} [{r['rps'][1]:+.4f}, {r['rps'][2]:+.4f}]  P(model better)={r['rps'][3]:.3f}")
+        print(
+            f"  ΔlogLik = {r['ll'][0]:+.4f} [{r['ll'][1]:+.4f}, {r['ll'][2]:+.4f}]  P(model better)={r['ll'][3]:.3f}"
+        )
+        print(
+            f"  ΔRPS    = {r['rps'][0]:+.4f} [{r['rps'][1]:+.4f}, {r['rps'][2]:+.4f}]  P(model better)={r['rps'][3]:.3f}"
+        )
         print(f"  PIT KS p = {r['pit']:.3f}")
 
     # Per-competition split (qualifiers vs World-Cup finals) for the sequential primary variant.
@@ -113,31 +125,41 @@ def main():
             r = vs_book(dp, book_df, rng, score_folds=cf)
             comp_results[comp] = r
             print(f"\n[sequential] {comp} (n={r['n']}) vs consensus book:")
-            print(f"  ΔlogLik = {r['ll'][0]:+.4f} [{r['ll'][1]:+.4f}, {r['ll'][2]:+.4f}]  P(model better)={r['ll'][3]:.3f}")
-            print(f"  ΔRPS    = {r['rps'][0]:+.4f} [{r['rps'][1]:+.4f}, {r['rps'][2]:+.4f}]  P(model better)={r['rps'][3]:.3f}")
+            print(
+                f"  ΔlogLik = {r['ll'][0]:+.4f} [{r['ll'][1]:+.4f}, {r['ll'][2]:+.4f}]  P(model better)={r['ll'][3]:.3f}"
+            )
+            print(
+                f"  ΔRPS    = {r['rps'][0]:+.4f} [{r['rps'][1]:+.4f}, {r['rps'][2]:+.4f}]  P(model better)={r['rps'][3]:.3f}"
+            )
 
     if results:
         os.makedirs(OUT, exist_ok=True)
-        lines = ["# Improved model vs consensus books — robustness\n",
-                 "*Negative ΔlogLik / positive ΔRPS ⇒ the books are better. Renorm + LOFO-calibrated; "
-                 "paired Bayesian bootstrap.*\n",
-                 "## By forecasting semantics (all folds)\n",
-                 "| variant | n | ΔlogLik (model−book) [95% CI] | ΔRPS [95% CI] | P(model better) | PIT p |",
-                 "|---|--:|--:|--:|--:|--:|"]
+        lines = [
+            "# Improved model vs consensus books — robustness\n",
+            "*Negative ΔlogLik / positive ΔRPS ⇒ the books are better. Renorm + LOFO-calibrated; "
+            "paired Bayesian bootstrap.*\n",
+            "## By forecasting semantics (all folds)\n",
+            "| variant | n | ΔlogLik (model−book) [95% CI] | ΔRPS [95% CI] | P(model better) | PIT p |",
+            "|---|--:|--:|--:|--:|--:|",
+        ]
         for label, r in results.items():
             lines.append(
                 f"| {label} | {r['n']} | {r['ll'][0]:+.4f} [{r['ll'][1]:+.4f}, {r['ll'][2]:+.4f}] "
                 f"| {r['rps'][0]:+.4f} [{r['rps'][1]:+.4f}, {r['rps'][2]:+.4f}] "
-                f"| {r['ll'][3]:.3f} / {r['rps'][3]:.3f} | {r['pit']:.3f} |")
+                f"| {r['ll'][3]:.3f} / {r['rps'][3]:.3f} | {r['pit']:.3f} |"
+            )
         if comp_results:
-            lines += ["\n## By competition (sequential variant) — the finals are the actual event\n",
-                      "| competition | n | ΔlogLik (model−book) [95% CI] | ΔRPS [95% CI] | P(model better) |",
-                      "|---|--:|--:|--:|--:|"]
+            lines += [
+                "\n## By competition (sequential variant) — the finals are the actual event\n",
+                "| competition | n | ΔlogLik (model−book) [95% CI] | ΔRPS [95% CI] | P(model better) |",
+                "|---|--:|--:|--:|--:|",
+            ]
             for comp, r in comp_results.items():
                 lines.append(
                     f"| {comp} | {r['n']} | {r['ll'][0]:+.4f} [{r['ll'][1]:+.4f}, {r['ll'][2]:+.4f}] "
                     f"| {r['rps'][0]:+.4f} [{r['rps'][1]:+.4f}, {r['rps'][2]:+.4f}] "
-                    f"| {r['ll'][3]:.3f} / {r['rps'][3]:.3f} |")
+                    f"| {r['ll'][3]:.3f} / {r['rps'][3]:.3f} |"
+                )
         with open(os.path.join(OUT, "strict_robustness.md"), "w") as f:
             f.write("\n".join(lines) + "\n")
         print(f"\nwrote {OUT}/strict_robustness.md")

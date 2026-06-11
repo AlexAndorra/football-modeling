@@ -1,24 +1,11 @@
-"""honest_eval.py — properly-scored, uncertainty-quantified SFMMO-vs-bookmaker evaluation.
+"""Properly-scored evaluation of the committed SFMMO predictions vs the bookmaker consensus.
 
-Consumes the *committed* model prediction pickles + the odds CSV and applies the fixes
-the technical review called for, then reports the result honestly:
+Scores log-loss / RPS / Brier against the de-vigged "Avg" odds, with Bayesian-bootstrap
+uncertainty and randomized-PIT calibration. Two post-hoc fixes are applied to the predictions:
+renormalizing the k_max=5 goal-PMF truncation, and leave-one-fold-out temperature calibration.
+Scoring is vendored from foresight (see foresight_scoring/).
 
-  1. Outcome renormalization — the W/D/L probabilities are a Poisson goal-PMF collapse
-     truncated at k_max=5; on extreme-lambda (blowout / cold-start) fixtures they lose
-     up to ~80% of their mass and sum well below 1, which artificially inflates the
-     model's log-loss on the qualifiers. We renormalize per match and report the
-     affected fraction (a proper fix re-runs with a larger k_max; see fit_sfmmo.py).
-  2. Proper per-fold temperature calibration — leave-one-fold-out, so no leakage. The
-     notebook computed this but left it switched off (T_star = None).
-  3. De-vigged CONSENSUS books ("Avg") as the benchmark, not the best-price "Max" line
-     (which is not a coherent probability — guarded below).
-  4. Proper scores (log-loss, RPS, Brier) with **Bayesian-bootstrap** uncertainty on the
-     paired model-minus-book difference -> P(model beats book), plus randomized-PIT
-     calibration. Point estimates alone hide that the qualifier gaps are real and the
-     finals gaps are noise.
-
-Scoring/uncertainty/calibration are vendored from the foresight package (see
-foresight_scoring/). Run:  uv run python honest_eval.py
+Run: uv run python 00_code/sfmmo_eval.py
 """
 
 import os
@@ -135,7 +122,7 @@ def point_metrics(P, y):
     return {
         "logLik": mean_log_loss(P, y),
         "ACC": float(np.mean(np.argmax(P, axis=1) == y)),
-        "RPS": ranked_probability_score(P, y),          # normalised (÷ K-1); notebook RPS = ×2
+        "RPS": ranked_probability_score(P, y),  # normalised (÷ K-1); notebook RPS = ×2
         "Brier": brier_score(P, y),
     }
 
@@ -154,16 +141,20 @@ def head_to_head(P_model, y, ids_model, book_df, rng):
     # log score: higher is better -> P(model better) = P(diff > 0)
     dm = log_score(Pm, yj) - log_score(Pb, yj)
     bd = bayesian_bootstrap(dm, n_draws=N_BOOT, rng=rng)
-    out["logLik"] = {"p_model_better": float(np.mean(bd > 0)),
-                     "delta_mean": float(bd.mean()),
-                     "ci": (float(np.quantile(bd, .025)), float(np.quantile(bd, .975)))}
+    out["logLik"] = {
+        "p_model_better": float(np.mean(bd > 0)),
+        "delta_mean": float(bd.mean()),
+        "ci": (float(np.quantile(bd, 0.025)), float(np.quantile(bd, 0.975))),
+    }
     # RPS & Brier: lower is better -> P(model better) = P(diff < 0)
     for name, fn in [("RPS", ranked_probability_score), ("Brier", brier_score)]:
         dd = fn(Pm, yj, reduce="none") - fn(Pb, yj, reduce="none")
         bd = bayesian_bootstrap(dd, n_draws=N_BOOT, rng=rng)
-        out[name] = {"p_model_better": float(np.mean(bd < 0)),
-                     "delta_mean": float(bd.mean()),
-                     "ci": (float(np.quantile(bd, .025)), float(np.quantile(bd, .975)))}
+        out[name] = {
+            "p_model_better": float(np.mean(bd < 0)),
+            "delta_mean": float(bd.mean()),
+            "ci": (float(np.quantile(bd, 0.025)), float(np.quantile(bd, 0.975))),
+        }
     return out
 
 
@@ -270,8 +261,11 @@ def main(focal="K"):
             pooled_y.append(j["y"].to_numpy(dtype=int))
     Pm, Pb, yov = np.vstack(pooled_m), np.vstack(pooled_b), np.concatenate(pooled_y)
     d_rps = bayesian_bootstrap(
-        ranked_probability_score(Pm, yov, reduce="none") - ranked_probability_score(Pb, yov, reduce="none"),
-        n_draws=N_BOOT, rng=rng)
+        ranked_probability_score(Pm, yov, reduce="none")
+        - ranked_probability_score(Pb, yov, reduce="none"),
+        n_draws=N_BOOT,
+        rng=rng,
+    )
     d_ll = bayesian_bootstrap(log_score(Pm, yov) - log_score(Pb, yov), n_draws=N_BOOT, rng=rng)
 
     # --- PIT calibration (pooled overlap) ----------------------------------------------
@@ -281,9 +275,16 @@ def main(focal="K"):
     # --- calibration figure ------------------------------------------------------------
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
     for P, lab, c in [(Pm, "model K (renorm+cal)", "C0"), (Pb, "book (Avg)", "C1")]:
-        axes[0].hist(randomized_pit(P, yov, np.random.default_rng(SEED)), bins=20,
-                     histtype="step", density=True, label=lab, color=c, lw=2)
-    axes[0].axhline(1.0, ls="--", c="k", alpha=.4)
+        axes[0].hist(
+            randomized_pit(P, yov, np.random.default_rng(SEED)),
+            bins=20,
+            histtype="step",
+            density=True,
+            label=lab,
+            color=c,
+            lw=2,
+        )
+    axes[0].axhline(1.0, ls="--", c="k", alpha=0.4)
     axes[0].set_title("Randomized PIT (flat = calibrated)")
     axes[0].set_xlabel("PIT")
     axes[0].legend()
@@ -297,7 +298,7 @@ def main(focal="K"):
                 cx.append(pk[msk].mean())
                 cy.append(ak_[msk].mean())
         axes[1].plot(cx, cy, "o-", color=c, label=lab)
-    axes[1].plot([0, 1], [0, 1], "k--", alpha=.4)
+    axes[1].plot([0, 1], [0, 1], "k--", alpha=0.4)
     axes[1].set_title("Reliability — home win")
     axes[1].set_xlabel("predicted P")
     axes[1].set_ylabel("observed")
@@ -312,13 +313,16 @@ def main(focal="K"):
         r = h2h[f]
         if r is None:
             return f"| {f} | — | no odds | | |"
-        return (f"| {f} | {r['n']} | {r['RPS']['p_model_better']:.2f} "
-                f"| {r['RPS']['delta_mean']:+.4f} [{r['RPS']['ci'][0]:+.4f}, {r['RPS']['ci'][1]:+.4f}] "
-                f"| {r['logLik']['p_model_better']:.2f} |")
+        return (
+            f"| {f} | {r['n']} | {r['RPS']['p_model_better']:.2f} "
+            f"| {r['RPS']['delta_mean']:+.4f} [{r['RPS']['ci'][0]:+.4f}, {r['RPS']['ci'][1]:+.4f}] "
+            f"| {r['logLik']['p_model_better']:.2f} |"
+        )
 
-    md = f"""# SFMMO World-Cup model vs. the bookmakers — honest, properly-scored evaluation
+    md = (
+        f"""# SFMMO World-Cup model vs. the bookmakers — honest, properly-scored evaluation
 
-*Generated by `honest_eval.py` (seed {SEED}). Scoring vendored from the foresight package.
+*Generated by `sfmmo_eval.py` (seed {SEED}). Scoring vendored from the foresight package.
 Lower is better for logLik / RPS / Brier; higher for ACC. RPS is normalized (÷ K−1);
 multiply by 2 to compare with the notebook's un-normalized RPS.*
 
@@ -334,7 +338,9 @@ extreme-λ fixtures (blowouts, cold-start qualifier teams) they lose most of the
 
 | fold | n | median row-sum | % rows summing < 0.9 |
 |---|--:|--:|--:|
-""" + "\n".join(f"| {f} | {n} | {md_:.3f} | {bad * 100:.1f}% |" for f, n, md_, bad in diag) + f"""
+"""
+        + "\n".join(f"| {f} | {n} | {md_:.3f} | {bad * 100:.1f}% |" for f, n, md_, bad in diag)
+        + f"""
 
 This **inflates the model's log-loss on the qualifiers** (every outcome gets a shrunken
 probability). Renormalizing recovers most of it; the proper fix re-runs with a larger
@@ -367,11 +373,13 @@ RPS difference (model − book; negative ⇒ model better) with 95% CI:
 
 | fold | n | P(model better, RPS) | ΔRPS (model − book) [95% CI] | P(model better, logLik) |
 |---|--:|--:|--:|--:|
-""" + "\n".join(h2h_line(f) for f in folds) + f"""
+"""
+        + "\n".join(h2h_line(f) for f in folds)
+        + f"""
 
 **Pooled across the {len(pooled_y)} overlapping folds (n={len(yov)}):**
-- ΔRPS (model − book) = {d_rps.mean():+.4f}  [{np.quantile(d_rps, .025):+.4f}, {np.quantile(d_rps, .975):+.4f}]  → P(model better) = {np.mean(d_rps < 0):.3f}
-- ΔlogLik (model − book) = {d_ll.mean():+.4f}  [{np.quantile(d_ll, .025):+.4f}, {np.quantile(d_ll, .975):+.4f}]  → P(model better) = {np.mean(d_ll > 0):.3f}
+- ΔRPS (model − book) = {d_rps.mean():+.4f}  [{np.quantile(d_rps, 0.025):+.4f}, {np.quantile(d_rps, 0.975):+.4f}]  → P(model better) = {np.mean(d_rps < 0):.3f}
+- ΔlogLik (model − book) = {d_ll.mean():+.4f}  [{np.quantile(d_ll, 0.025):+.4f}, {np.quantile(d_ll, 0.975):+.4f}]  → P(model better) = {np.mean(d_ll > 0):.3f}
 
 ## 5. Calibration (randomized PIT, KS-uniformity p-value; pooled overlap)
 
@@ -387,6 +395,7 @@ RPS difference (model − book; negative ⇒ model better) with 95% CI:
 All variants are within ~0.001–0.01 of each other on every fold: the momentum/elo-encoding
 choices barely move anything. The gap that matters is model-vs-book, not model-vs-model.
 """
+    )
     with open(os.path.join(OUT, "honest_report.md"), "w") as f:
         f.write(md)
 
@@ -394,13 +403,17 @@ choices barely move anything. The gap that matters is model-vs-book, not model-v
     print(f"focal=Dev{focal}  folds={folds}")
     print("\ntruncation (median row-sum, %<0.9):")
     for f, n, md_, bad in diag:
-        print(f"  {f:>8s} n={n:<4d} median={md_:.3f}  bad={bad*100:.1f}%")
+        print(f"  {f:>8s} n={n:<4d} median={md_:.3f}  bad={bad * 100:.1f}%")
     print("\nlogLik raw -> renorm -> calibrated (focal):")
     for (f, mr), (_, mn), (_, mc) in zip(rows_raw, rows_renorm, rows_cal):
         print(f"  {f:>8s}: {mr['logLik']:.4f} -> {mn['logLik']:.4f} -> {mc['logLik']:.4f}")
     print(f"\nPOOLED overlap (n={len(yov)}) improved model vs consensus book:")
-    print(f"  ΔRPS  ={d_rps.mean():+.4f} [{np.quantile(d_rps,.025):+.4f},{np.quantile(d_rps,.975):+.4f}]  P(model better)={np.mean(d_rps<0):.3f}")
-    print(f"  ΔlogL ={d_ll.mean():+.4f} [{np.quantile(d_ll,.025):+.4f},{np.quantile(d_ll,.975):+.4f}]  P(model better)={np.mean(d_ll>0):.3f}")
+    print(
+        f"  ΔRPS  ={d_rps.mean():+.4f} [{np.quantile(d_rps, 0.025):+.4f},{np.quantile(d_rps, 0.975):+.4f}]  P(model better)={np.mean(d_rps < 0):.3f}"
+    )
+    print(
+        f"  ΔlogL ={d_ll.mean():+.4f} [{np.quantile(d_ll, 0.025):+.4f},{np.quantile(d_ll, 0.975):+.4f}]  P(model better)={np.mean(d_ll > 0):.3f}"
+    )
     print(f"  PIT KS p: model={pit_model:.3f} book={pit_book:.3f}")
     print(f"\nwrote {OUT}/honest_report.md + honest_calibration.png")
 

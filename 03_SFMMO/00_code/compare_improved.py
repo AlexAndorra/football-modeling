@@ -1,17 +1,11 @@
-"""compare_improved.py — did the re-fit actually change the verdict vs the bookmakers?
+"""Did the re-fit change the verdict vs the bookmakers?
 
-Compares three forecasters on the held-out folds, on proper scores with paired
-Bayesian-bootstrap uncertainty:
-  - ORIGINAL  : Max's committed DevK predictions, post-hoc renormalized + LOFO-calibrated
-  - IMPROVED  : the re-fit from sfmmo_fit.py (tightened team priors + k_max=15), LOFO-calibrated
-  - BOOK      : de-vigged consensus odds ("Avg")
+Compares three forecasters on the held-out folds with proper scores and a paired
+Bayesian-bootstrap: the ORIGINAL committed DevK predictions (renorm + LOFO-calibrated), the
+IMPROVED re-fit from sfmmo_fit.py, and the de-vigged consensus odds ("Avg"). Reports whether the
+re-fit beats/closes on the books, and whether it improved out-of-sample over the original.
 
-Answers two questions the post-hoc eval could not: (1) does the *actually re-fit* model
-beat / close on the consensus books? (2) did the modeling changes improve out-of-sample
-over the original (paired, same fixtures)?
-
-Run AFTER sfmmo_fit.py has produced the __improved.pkl:
-  uv run python 00_code/compare_improved.py
+Run after sfmmo_fit.py has produced the __improved.pkl: uv run python 00_code/compare_improved.py
 """
 
 import os
@@ -56,20 +50,38 @@ def align(ids_a, Pa, ya, ids_b, Pb):
     a["y"] = ya
     b = pd.DataFrame(Pb, columns=["0", "1", "2"], index=ids_b)
     j = a.join(b, how="inner", rsuffix="_b").dropna()
-    return (j[["0", "1", "2"]].to_numpy(), j[["0_b", "1_b", "2_b"]].to_numpy(),
-            j["y"].to_numpy(dtype=int))
+    return (
+        j[["0", "1", "2"]].to_numpy(),
+        j[["0_b", "1_b", "2_b"]].to_numpy(),
+        j["y"].to_numpy(dtype=int),
+    )
 
 
 def pooled_diff(P_model, P_other, y, rng, lower_better_metric=True):
     """Pooled paired Bayesian bootstrap of (model - other) on RPS and logLik."""
     d_rps = bayesian_bootstrap(
         ranked_probability_score(P_model, y, reduce="none")
-        - ranked_probability_score(P_other, y, reduce="none"), n_draws=N_BOOT, rng=rng)
-    d_ll = bayesian_bootstrap(log_score(P_model, y) - log_score(P_other, y), n_draws=N_BOOT, rng=rng)
+        - ranked_probability_score(P_other, y, reduce="none"),
+        n_draws=N_BOOT,
+        rng=rng,
+    )
+    d_ll = bayesian_bootstrap(
+        log_score(P_model, y) - log_score(P_other, y), n_draws=N_BOOT, rng=rng
+    )
     return {
         "n": len(y),
-        "rps": (d_rps.mean(), np.quantile(d_rps, .025), np.quantile(d_rps, .975), float(np.mean(d_rps < 0))),
-        "ll": (d_ll.mean(), np.quantile(d_ll, .025), np.quantile(d_ll, .975), float(np.mean(d_ll > 0))),
+        "rps": (
+            d_rps.mean(),
+            np.quantile(d_rps, 0.025),
+            np.quantile(d_rps, 0.975),
+            float(np.mean(d_rps < 0)),
+        ),
+        "ll": (
+            d_ll.mean(),
+            np.quantile(d_ll, 0.025),
+            np.quantile(d_ll, 0.975),
+            float(np.mean(d_ll > 0)),
+        ),
     }
 
 
@@ -92,8 +104,12 @@ def main():
     i_cal = lofo_calibrated(i_renorm)
 
     # per-fold metric tables
-    rows_imp_raw = [(f, {**point_metrics(i_raw[f][0], i_raw[f][1]), "n": len(i_raw[f][1])}) for f in folds]
-    rows_imp_cal = [(f, {**point_metrics(i_cal[f][0], i_renorm[f][1]), "n": len(i_renorm[f][1])}) for f in folds]
+    rows_imp_raw = [
+        (f, {**point_metrics(i_raw[f][0], i_raw[f][1]), "n": len(i_raw[f][1])}) for f in folds
+    ]
+    rows_imp_cal = [
+        (f, {**point_metrics(i_cal[f][0], i_renorm[f][1]), "n": len(i_renorm[f][1])}) for f in folds
+    ]
 
     # head-to-head vs book (pooled over folds with odds), for original+cal and improved+cal
     def vs_book(cal, renorm_dict):
@@ -128,8 +144,12 @@ def main():
     # ---- console ----
     def show(tag, d):
         print(f"\n{tag} (n={d['n']}):")
-        print(f"  ΔRPS  ={d['rps'][0]:+.4f} [{d['rps'][1]:+.4f},{d['rps'][2]:+.4f}]  P(model better)={d['rps'][3]:.3f}")
-        print(f"  ΔlogL ={d['ll'][0]:+.4f} [{d['ll'][1]:+.4f},{d['ll'][2]:+.4f}]  P(model better)={d['ll'][3]:.3f}")
+        print(
+            f"  ΔRPS  ={d['rps'][0]:+.4f} [{d['rps'][1]:+.4f},{d['rps'][2]:+.4f}]  P(model better)={d['rps'][3]:.3f}"
+        )
+        print(
+            f"  ΔlogL ={d['ll'][0]:+.4f} [{d['ll'][1]:+.4f},{d['ll'][2]:+.4f}]  P(model better)={d['ll'][3]:.3f}"
+        )
 
     print("\n=== improved DevK: raw re-fit (per fold) ===\n" + fmt_metrics_table(rows_imp_raw))
     print("\n=== improved DevK: re-fit + calibration ===\n" + fmt_metrics_table(rows_imp_cal))
@@ -142,11 +162,13 @@ def main():
     os.makedirs(OUT, exist_ok=True)
 
     def block(tag, d):
-        return (f"**{tag}** (n={d['n']}): "
-                f"ΔRPS {d['rps'][0]:+.4f} [{d['rps'][1]:+.4f}, {d['rps'][2]:+.4f}] "
-                f"(P model better {d['rps'][3]:.3f}); "
-                f"ΔlogLik {d['ll'][0]:+.4f} [{d['ll'][1]:+.4f}, {d['ll'][2]:+.4f}] "
-                f"(P model better {d['ll'][3]:.3f}).")
+        return (
+            f"**{tag}** (n={d['n']}): "
+            f"ΔRPS {d['rps'][0]:+.4f} [{d['rps'][1]:+.4f}, {d['rps'][2]:+.4f}] "
+            f"(P model better {d['rps'][3]:.3f}); "
+            f"ΔlogLik {d['ll'][0]:+.4f} [{d['ll'][1]:+.4f}, {d['ll'][2]:+.4f}] "
+            f"(P model better {d['ll'][3]:.3f})."
+        )
 
     md = f"""# Re-fit vs bookmakers — does the improvement change the verdict?
 
