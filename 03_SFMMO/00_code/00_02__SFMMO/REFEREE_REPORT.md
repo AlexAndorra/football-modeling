@@ -221,3 +221,24 @@ unusually concrete because the WC ledger already priced every weakness: fix what
 mechanical (M2, M3, M5.1), unify what is duplicated (M6), make the harness see what
 production sees (M1, M7), and only then calibrate what remains (E2, E3). None of it
 requires new data, and most of it requires deleting code rather than writing it.
+
+
+---
+
+## Post-review addendum (2026-08-14)
+
+A seventh defect class was found **after** this review, by the collaborator's port
+review rather than by the referee: the in-notebook ELO double-updated every match
+(iterating perspective rows), washed out the home advantage across the paired calls,
+and assigned the second-processed row **post-match ratings — leaking each match's own
+outcome into a feature** (point-biserial +0.46), present in fold validation but
+impossible in production. It was the largest defect of the off-season (~0.02 log-loss,
+~10× the Dixon–Coles effect) and it manufactured a spurious variant-selection result
+that briefly dethroned Dev K.
+
+The referee notes, for the record, that this reviewer read the affected loop during the
+original audit — and had diagnosed the *identical* double-row trap in the momentum
+block one screen away (M5.1) — without generalizing the finding to the class. The
+review's own remedy applies to its author: after any bug, sweep the data-shape class,
+and trust re-implementation and parity tests over reading. Full account and corrected
+numbers: `FINDINGS_2026-27_OFFSEASON.md`, repair #7 and §6.
