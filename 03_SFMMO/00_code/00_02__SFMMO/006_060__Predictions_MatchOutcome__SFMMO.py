@@ -83,6 +83,7 @@ VINTAGE_DIR = f'{OUT_DIR}/_vintages'
 
 OUT_MATCH_CSV = f'{OUT_DIR}/SFMMO_predictions__matches.csv'
 OUT_GRID_CSV  = f'{OUT_DIR}/SFMMO_predictions__scorelines.csv'
+OUT_TEAM_CSV  = f'{OUT_DIR}/SFMMO_predictions__team_goals.csv'
 OUT_PKL       = f'{OUT_DIR}/SFMMO_predictions__prod.pkl'
 
 # ============================================================================= #
@@ -366,7 +367,8 @@ def main():
     print(f"  joint grids: {joint.shape[0]} fixtures x {joint.shape[1]} draws, "
           f"{K_MAX+1}x{K_MAX+1} (mass {joint.sum(axis=(2,3)).mean():.6f})")
 
-    rows, grid_rows = [], []
+    rows, grid_rows, team_rows = [], [], []
+    q_lo, q_hi = (1 - CRED_REGION) / 2, 1 - (1 - CRED_REGION) / 2
     meta_h = oos.loc[idx_home].reset_index(drop=True)
     meta_a = oos.loc[idx_away].reset_index(drop=True)
     for f in range(len(pair)):
@@ -375,6 +377,8 @@ def main():
             g = apply_dc_tau(g, lam_h[f], lam_a[f], rho)
         w = wdl_from_grid(g)
         gm = g.mean(axis=0)
+        gq_lo = np.quantile(g, q_lo, axis=0)      # per-cell credible band (the WC feed had these)
+        gq_up = np.quantile(g, q_hi, axis=0)
         ml = np.unravel_index(np.argmax(gm), gm.shape)
         rows.append(dict(
             id_match=meta_h.loc[f, 'id_match'], name_league=meta_h.loc[f, 'name_league'],
@@ -394,14 +398,33 @@ def main():
                     grid_rows.append(dict(id_match=meta_h.loc[f, 'id_match'],
                                           home_team=meta_h.loc[f, 'name_team'],
                                           away_team=meta_h.loc[f, 'name_opp'],
-                                          home_goals=hh, away_goals=aa, p_mid=float(gm[hh, aa])))
+                                          home_goals=hh, away_goals=aa,
+                                          p_mid=float(gm[hh, aa]),
+                                          p_lo=float(gq_lo[hh, aa]), p_up=float(gq_up[hh, aa])))
+
+        # --- per-team goal distribution P(0/1/2/3+) with bands (the match-detail section)
+        for side, lam_s, tm, opp in [('home', lam_h[f], meta_h.loc[f, 'name_team'], meta_h.loc[f, 'name_opp']),
+                                     ('away', lam_a[f], meta_h.loc[f, 'name_opp'], meta_h.loc[f, 'name_team'])]:
+            pk = np.stack([poisson.pmf(k, lam_s) for k in (0, 1, 2)]
+                          + [1.0 - poisson.cdf(2, lam_s)])          # (4, n_samples)
+            rec = dict(id_match=meta_h.loc[f, 'id_match'], name_league=meta_h.loc[f, 'name_league'],
+                       gameday=meta_h.loc[f, 'gameday'], kick_off=meta_h.loc[f, 'kick_off'],
+                       team=tm, opponent=opp, is_home=int(side == 'home'),
+                       exp_goals=float(lam_s.mean()))
+            for i, lbl in enumerate(['0', '1', '2', '3plus']):
+                rec[f'p_goals_{lbl}'] = float(pk[i].mean())
+                rec[f'p_goals_{lbl}_lo'] = float(np.quantile(pk[i], q_lo))
+                rec[f'p_goals_{lbl}_up'] = float(np.quantile(pk[i], q_hi))
+            team_rows.append(rec)
     df_matches = pd.DataFrame(rows).sort_values(['name_league', 'kick_off']).reset_index(drop=True)
     df_grid = pd.DataFrame(grid_rows)
+    df_team = pd.DataFrame(team_rows).sort_values(['name_league', 'kick_off', 'id_match', 'is_home'],
+                                                  ascending=[True, True, True, False]).reset_index(drop=True)
 
     # ----------------------- 7. archive + export ----------------------- #
     os.makedirs(OUT_DIR, exist_ok=True)
     if ARCHIVE_VINTAGES:
-        arch = archive_existing_outputs([OUT_MATCH_CSV, OUT_GRID_CSV, OUT_PKL])
+        arch = archive_existing_outputs([OUT_MATCH_CSV, OUT_GRID_CSV, OUT_TEAM_CSV, OUT_PKL])
         print(f"\nArchived {len(arch)} previous output(s) -> {VINTAGE_DIR}/" if arch
               else "\n[vintage] no previous board to archive (first run)")
 
@@ -409,16 +432,18 @@ def main():
                          train_end=meta['train_end'], target_season=TARGET_SEASON,
                          rho=rho, k_max=K_MAX, cred_region=CRED_REGION,
                          run=datetime.now().strftime('%Y-%m-%d %H:%M'), eta_parity=dev),
-               matches=df_matches, scorelines=df_grid)
+               matches=df_matches, scorelines=df_grid, team_goals=df_team)
     with open(OUT_PKL, 'wb') as f:
         pickle.dump(out, f)
     df_matches.to_csv(OUT_MATCH_CSV, index=False)
     df_grid.to_csv(OUT_GRID_CSV, index=False)
+    df_team.to_csv(OUT_TEAM_CSV, index=False)
 
     print(f"\n================== DONE ==================")
     print(f"Fixtures forecast : {len(df_matches)}")
     print(f"Saved matches csv : {OUT_MATCH_CSV}")
-    print(f"Saved grid csv    : {OUT_GRID_CSV}  ({len(df_grid):,} cells)")
+    print(f"Saved grid csv    : {OUT_GRID_CSV}  ({len(df_grid):,} cells, with credible bands)")
+    print(f"Saved team csv    : {OUT_TEAM_CSV}  ({len(df_team)} team-matches)")
     with pd.option_context('display.width', 200, 'display.max_columns', 20):
         print("\n" + df_matches[['name_league', 'home_team', 'away_team', 'p_home_win', 'p_draw',
                                  'p_away_win', 'exp_goals_home', 'exp_goals_away',
