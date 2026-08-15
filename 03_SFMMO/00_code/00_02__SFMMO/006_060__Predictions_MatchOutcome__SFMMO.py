@@ -85,6 +85,7 @@ OUT_MATCH_CSV = f'{OUT_DIR}/SFMMO_predictions__matches.csv'
 OUT_GRID_CSV  = f'{OUT_DIR}/SFMMO_predictions__scorelines.csv'
 OUT_TEAM_CSV  = f'{OUT_DIR}/SFMMO_predictions__team_goals.csv'
 OUT_PKL       = f'{OUT_DIR}/SFMMO_predictions__prod.pkl'
+FROZEN_LEDGER = f'{OUT_DIR}/SFMMO_predictions__frozen.csv'   # last PRE-MATCH forecast per fixture
 
 # ============================================================================= #
 
@@ -417,6 +418,65 @@ def main():
                 rec[f'p_goals_{lbl}_up'] = float(np.quantile(pk[i], q_hi))
             team_rows.append(rec)
     df_matches = pd.DataFrame(rows).sort_values(['name_league', 'kick_off']).reset_index(drop=True)
+
+    # ------------------------------------------------------------------ #
+    #  FROZEN FORECAST LEDGER  +  full-season feed (played + upcoming)
+    #
+    #  Two things the downstream stack (validation / receipts / pick'em) needs and that a
+    #  naive "forecast the unplayed" feed cannot give:
+    #    (a) results must APPEAR in the feed once a match is played -- otherwise played
+    #        fixtures silently leave the file;
+    #    (b) the probabilities shown for a played match must be the ones FROZEN BEFORE it
+    #        kicked off, never a re-forecast. By the next run the ELO has absorbed the
+    #        result, so a re-forecast is hindsight (WC lesson L5: it flattered accuracy by
+    #        ~4pp). The ledger below stores each fixture's LAST pre-match forecast; once the
+    #        match is played that row is never overwritten again.
+    # ------------------------------------------------------------------ #
+    PCOLS = ['p_home_win', 'p_home_win_lo', 'p_home_win_up', 'p_draw', 'p_draw_lo', 'p_draw_up',
+             'p_away_win', 'p_away_win_lo', 'p_away_win_up', 'exp_goals_home', 'exp_goals_away',
+             'ml_score_home', 'ml_score_away']
+    stamp = datetime.now().strftime('%Y-%m-%d')
+    fresh = df_matches[['id_match'] + PCOLS].copy()
+    fresh['forecast_frozen_at'] = stamp
+    if os.path.exists(FROZEN_LEDGER):
+        led = pd.read_csv(FROZEN_LEDGER)
+        led = led[~led['id_match'].isin(fresh['id_match'])]      # still unplayed -> refresh
+        ledger = pd.concat([led, fresh], ignore_index=True)
+    else:
+        ledger = fresh
+    ledger.to_csv(FROZEN_LEDGER, index=False)
+
+    # played fixtures of the target season: result + the forecast frozen before kickoff
+    played = cd[(cd['season'] == TARGET_SEASON) & (cd['home_pitch'] == 1)
+                & (cd['match_outcome'].notna())].copy()
+    feed_rows = []
+    if len(played):
+        lref = ledger.set_index('id_match')
+        missing = [m for m in played['id_match'] if m not in lref.index]
+        if missing:
+            print(f"  ⚠️  {len(missing)} played fixture(s) have NO frozen forecast (first run after "
+                  f"they were played?) — results shipped without probabilities: {missing[:3]}")
+        for r in played.itertuples():
+            rec = dict(id_match=r.id_match, name_league=r.name_league, season=r.season,
+                       gameday=r.gameday, kick_off=r.kick_off,
+                       home_team=r.name_team, away_team=r.name_opp,
+                       home_goals=float(r.match_outcome), away_goals=float(r.goalsscored_inGame_opp),
+                       status='finished',
+                       elo_home=round(float(r.elo_team), 1), elo_away=round(float(r.elo_opp), 1))
+            if r.id_match in lref.index:
+                for c in PCOLS:
+                    rec[c] = lref.loc[r.id_match, c]
+                rec['forecast_frozen_at'] = lref.loc[r.id_match, 'forecast_frozen_at']
+            feed_rows.append(rec)
+    df_upcoming = df_matches.copy()
+    df_upcoming['home_goals'] = np.nan
+    df_upcoming['away_goals'] = np.nan
+    df_upcoming['status'] = 'upcoming'
+    df_upcoming['forecast_frozen_at'] = stamp
+    df_matches = (pd.concat([pd.DataFrame(feed_rows), df_upcoming], ignore_index=True)
+                  .sort_values(['name_league', 'kick_off', 'id_match']).reset_index(drop=True))
+    print(f"  feed: {int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
+          f"forecast) + {int((df_matches['status'] == 'upcoming').sum())} upcoming")
     df_grid = pd.DataFrame(grid_rows)
     df_team = pd.DataFrame(team_rows).sort_values(['name_league', 'kick_off', 'id_match', 'is_home'],
                                                   ascending=[True, True, True, False]).reset_index(drop=True)
