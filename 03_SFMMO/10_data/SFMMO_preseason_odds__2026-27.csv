@@ -1,0 +1,97 @@
+league,team,p_title,p_top4,p_releg,exp_pts,elo_start,new_team
+bundesliga,Bayern München,0.761375,0.988125,0.0,73.2,1656,False
+bundesliga,RB Leipzig,0.091875,0.73275,0.00075,61.0,1539,False
+bundesliga,Borussia Dortmund,0.0855,0.740125,0.000125,61.2,1577,False
+bundesliga,Bayer 04 Leverkusen,0.042875,0.60025,0.000875,58.2,1551,False
+bundesliga,VfB Stuttgart,0.00825,0.269875,0.00925,52.2,1536,False
+bundesliga,TSG Hoffenheim,0.004125,0.185,0.022,49.9,1502,False
+bundesliga,Eintracht Frankfurt,0.001625,0.080125,0.061875,46.3,1477,False
+bundesliga,Bor. Mönchengladbach,0.001,0.077125,0.06025,46.1,1450,False
+bundesliga,Werder Bremen,0.000875,0.070875,0.071125,45.5,1424,False
+bundesliga,1. FSV Mainz 05,0.000875,0.090875,0.052375,46.7,1475,False
+bundesliga,1. FC Union Berlin,0.000625,0.042125,0.1285,43.3,1440,False
+bundesliga,SC Freiburg,0.000375,0.04975,0.10725,43.8,1485,False
+bundesliga,FC Schalke 04,0.00025,0.01,0.304125,38.5,1300,False
+bundesliga,FC Augsburg,0.00025,0.034375,0.130625,42.9,1464,False
+bundesliga,1. FC Köln,0.000125,0.00725,0.3535,37.4,1374,False
+bundesliga,SC Paderborn 07,0.0,0.00075,0.783875,29.0,1300,False
+bundesliga,SV Elversberg,0.0,0.000625,0.723125,30.9,1300,True
+bundesliga,Hamburger SV,0.0,0.02,0.190375,41.0,1405,False
+la-liga,FC Barcelona,0.622375,0.988875,0.0,80.6,1632,False
+la-liga,Real Madrid,0.31775,0.9605,0.0,76.2,1605,False
+la-liga,Atletico Madrid,0.036875,0.651875,0.00075,65.6,1532,False
+la-liga,FC Villarreal,0.012125,0.438375,0.003625,61.3,1537,False
+la-liga,FC Valencia,0.00375,0.213375,0.0095,56.7,1471,False
+la-liga,FC Sevilla,0.00175,0.132,0.0235,54.1,1426,False
+la-liga,Real Betis Sevilla,0.001625,0.1515,0.0215,55.0,1515,False
+la-liga,Celta Vigo,0.00125,0.10925,0.033375,53.0,1479,False
+la-liga,Real Sociedad San Sebastian,0.001,0.09675,0.038375,52.8,1448,False
+la-liga,Athletic Bilbao,0.00075,0.08975,0.04175,52.6,1455,False
+la-liga,Rayo Vallecano,0.00025,0.0295,0.12325,47.8,1478,False
+la-liga,FC Getafe,0.00025,0.05125,0.076875,49.7,1452,False
+la-liga,CA Osasuna,0.000125,0.01975,0.168625,46.3,1431,False
+la-liga,FC Elche,0.000125,0.008,0.285375,43.4,1402,False
+la-liga,FC Malaga,0.0,0.002875,0.423875,40.4,1300,False
+la-liga,Racing Santander,0.0,0.002625,0.497625,38.9,1300,False
+la-liga,Espanyol Barcelona,0.0,0.01975,0.15825,46.4,1420,False
+la-liga,Deportivo Alaves,0.0,0.018,0.193875,45.4,1438,False
+la-liga,Deportivo A Coruna,0.0,0.000375,0.698375,35.2,1300,True
+la-liga,UD Levante,0.0,0.015625,0.2015,45.2,1406,False
+ligue-1,Paris St. Germain,0.692625,0.9545,0.0,69.4,1610,False
+ligue-1,RC Lens,0.081875,0.545375,0.002,57.3,1547,False
+ligue-1,Olympique Lyon,0.052,0.441,0.003875,55.3,1523,False
+ligue-1,AS Monaco,0.040125,0.3955,0.004625,54.3,1516,False
+ligue-1,Lille OSC,0.032,0.349625,0.008375,53.4,1541,False
+ligue-1,Olympique Marseille,0.0315,0.33975,0.008,53.4,1520,False
+ligue-1,FC Paris,0.024875,0.229875,0.046875,49.6,1431,False
+ligue-1,Stade Rennes,0.024125,0.30825,0.008625,52.6,1511,False
+ligue-1,Racing Straßburg,0.01325,0.170375,0.028875,49.2,1506,False
+ligue-1,OGC Nizza,0.003,0.07225,0.0665,45.4,1444,False
+ligue-1,AJ Auxerre,0.0015,0.065625,0.11925,43.8,1432,False
+ligue-1,Stade Brest,0.00125,0.05375,0.10525,44.0,1452,False
+ligue-1,FC Toulouse,0.00075,0.03,0.164375,41.6,1468,False
+ligue-1,FC Lorient,0.000625,0.016875,0.25375,39.5,1424,False
+ligue-1,AC Le Havre,0.0005,0.021875,0.254375,39.7,1426,False
+ligue-1,FC Le Mans,0.0,0.000375,0.749875,30.1,1300,True
+ligue-1,ES Troyes AC,0.0,0.00075,0.738875,30.1,1300,False
+ligue-1,Angers SCO,0.0,0.00425,0.4365,35.7,1407,False
+premier-league,FC Arsenal,0.326375,0.82275,0.0,72.0,1609,False
+premier-league,Manchester City,0.324875,0.834,0.0,72.0,1590,False
+premier-league,FC Liverpool,0.124625,0.626625,0.0,67.0,1528,False
+premier-league,Manchester United,0.116875,0.603875,0.0,66.8,1543,False
+premier-league,FC Chelsea,0.06875,0.449625,0.00025,63.9,1484,False
+premier-league,FC Brentford,0.015,0.163125,0.0095,56.9,1487,False
+premier-league,Tottenham Hotspur,0.004625,0.081375,0.017,53.7,1426,False
+premier-league,Nottingham Forest,0.003875,0.06775,0.036625,52.2,1469,False
+premier-league,Aston Villa,0.00375,0.067375,0.024625,53.0,1526,False
+premier-league,AFC Bournemouth,0.002875,0.068,0.0315,52.6,1519,False
+premier-league,Brighton &amp; Hove Albion,0.0025,0.062,0.030375,52.3,1490,False
+premier-league,Newcastle United,0.002,0.0445,0.037125,51.5,1475,False
+premier-league,FC Everton,0.001875,0.041875,0.03275,51.7,1464,False
+premier-league,Crystal Palace,0.001,0.02675,0.0665,48.8,1459,False
+premier-league,Leeds United,0.0005,0.01625,0.128375,46.5,1433,False
+premier-league,FC Fulham,0.0005,0.022125,0.07125,48.7,1473,False
+premier-league,AFC Sunderland,0.0,0.001875,0.283125,41.7,1441,False
+premier-league,Hull City,0.0,0.0,0.700875,33.9,1300,False
+premier-league,Ipswich Town,0.0,0.0,0.8345,30.2,1300,False
+premier-league,Coventry City,0.0,0.000125,0.695625,34.2,1300,True
+serie-a,Inter Mailand,0.29575,0.778625,0.0,71.5,1619,False
+serie-a,Juventus Turin,0.2,0.677,0.0,69.2,1552,False
+serie-a,Como 1907,0.183875,0.604375,0.0005,68.0,1528,False
+serie-a,SSC Neapel,0.132375,0.5715,0.000125,67.2,1567,False
+serie-a,AS Rom,0.07875,0.44175,0.000625,64.6,1556,False
+serie-a,AC Mailand,0.0585,0.37975,0.00075,63.4,1531,False
+serie-a,Atalanta Bergamo,0.024375,0.213875,0.001625,59.6,1522,False
+serie-a,Lazio Rom,0.013875,0.146625,0.0065,57.4,1500,False
+serie-a,AC Florenz,0.007625,0.094,0.013,55.4,1477,False
+serie-a,FC Bologna,0.001375,0.028125,0.039625,50.5,1496,False
+serie-a,Udinese Calcio,0.000875,0.0165,0.069125,48.4,1453,False
+serie-a,CFC Genua 1893,0.000875,0.00925,0.099625,46.6,1435,False
+serie-a,FC Turin,0.00075,0.017875,0.068125,48.3,1445,False
+serie-a,Cagliari Calcio,0.000375,0.002875,0.165,44.0,1431,False
+serie-a,Sassuolo Calcio,0.000375,0.00875,0.126,45.8,1412,False
+serie-a,Parma Calcio,0.000125,0.007375,0.169625,44.6,1439,False
+serie-a,US Lecce,0.000125,0.001375,0.31475,40.6,1415,False
+serie-a,Frosinone Calcio,0.0,0.000125,0.749125,32.1,1300,False
+serie-a,AC Monza,0.0,0.0,0.595625,35.4,1300,False
+serie-a,FC Venedig,0.0,0.00025,0.58025,35.5,1300,False

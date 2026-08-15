@@ -160,7 +160,73 @@ honest-harness-confirmed.**
 
 ---
 
-## 7 · Open items
+## 7 · Time-decayed team effects: two experiments, no adoption
+
+Undecayed α/δ produce a visible pathology — Germany ranked 3rd at the World Cup, Juventus
+2nd (and Napoli 4th) on the 2026/27 pre-season board — because the fixed effects never
+forget, while ELO does. Dixon & Coles (1997, §4) propose exponentially down-weighting old
+matches; we pre-registered and tested it.
+
+**Implementation.** Each training row's log-likelihood is weighted `0.5^(age_years/HL)`,
+applied as a `pm.Potential` correction `(w−1)·logp` on top of the intact observed node, so
+posterior-predictive checks and the prediction path are untouched. Verified on a synthetic
+regime switch (α +0.6 for nine years, −0.4 for three): undecayed recovers +0.44 (the era
+average — the pathology), HL=3 recovers +0.21 (tracking the recent regime).
+
+**Experiment M — match forecasting** (4 folds, 7,225 matches). HL ∈ {2,4,8}: all improve K
+directionally, none reach |t| ≥ 2.5 (best −1.58). Gentle decay beats aggressive: HL=2 is
+both the weakest and the least stable across folds. Contra Dixon–Coles' ~1.5-year optimum —
+they had one league and no ELO; our ELO already carries recency, so short half-lives mostly
+discard sample. **Not adopted.**
+
+**Experiment M2 — season simulation** (8 folds, 40 league-seasons, 782 team-seasons;
+primary metric declared in advance as champion log-loss, since this is the title-board
+product). The rank-RPS sign *flips* relative to match forecasting — decay helps once α/δ
+run unchecked over 38 matchdays with no ELO correction, confirming the mechanism.
+
+| arm | champion log-loss | Δ vs K | t | beats K in |
+|---|---|---|---|---|
+| K | 1.1775 | — | — | — |
+| HL=1y | 1.1416 | −0.036 | −0.42 | 19/40 |
+| HL=2y | 1.0734 | −0.104 | −1.69 | 21/40 |
+| **HL=4y** | **1.0694** | **−0.108** | **−2.46** | **22/40** |
+
+**Not adopted** — 2.46 against a pre-registered bar of 2.5.
+
+Two findings outlast the verdict. First, **the pilot's winner collapsed**: a 4-fold pilot
+ranked HL=2 best (t = −2.26); powered up it fell to −1.69, while the pilot's middling HL=4
+scaled exactly as √2 (−1.74 → −2.46), i.e. stable effect size, doubled power. Adopting on
+the pilot would have shipped the wrong half-life — the second time this off-season
+pre-registration prevented a convincing-but-wrong adoption. Second, **crossing the bar
+would take one more league-season**, which is precisely why the pre-registration forbade
+adding folds after seeing results; the threshold was not moved.
+
+The clean follow-up is prospective: HL=4 versus K on champion log-loss over 2026/27–2027/28
+(ten fully independent league-seasons, no overlap, no winner's curse), pre-registered
+before the seasons are played.
+
+---
+
+## 8 · Production pipeline
+
+Fit-once / predict-weekly, mirroring the World Cup deployment:
+
+- **Season bundle** — `SFMMO__dev_EW.ipynb` with `FIT_PRODUCTION=True` trains on all data
+  through 2025/26 and exports posterior draws (η and log-likelihood stripped: ~25 MB rather
+  than ~9 GB), the model graph, team index, cross-sectional scaling moments and the fitted ρ.
+- **Weekly predictor** — `006_060__Predictions_MatchOutcome__SFMMO.py` re-runs feature
+  engineering on updated data (results roll in, ELO moves, posterior frozen), pushes the
+  upcoming fixtures through the model's OOS graph, applies Dixon–Coles τ, and writes the
+  match feed with credible bands, expected goals and most-likely scores. Every run is gated
+  by the **η parity assertion** (NumPy reconstruction vs. model graph, < 1e-8; observed
+  4.4e-16) and archives the outgoing board to `_vintages/` before overwriting.
+
+Freezing the posterior for the season is not a shortcut: it is exactly the protocol the
+expanding-window validation measured, so the published intervals mean what they say.
+
+---
+
+## 9 · Open items
 
 1. **Holdout run** (2024/25, once, after collaborator review and any final fold-tested
    changes). Mechanism wired (`RUN_HOLDOUT`), sealed by default, still unburned.
