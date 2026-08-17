@@ -1,5 +1,80 @@
 # =============================== SFM II =============================== #
 
 
-The **SFM II** is an evolution of **SFM I**. 
+The **SFM II** is an evolution of **SFM I**.
 **SFM II** comprises a larger feature set (i.e. *more factors*) and a larger universe of players.
+
+
+# --------------------- 2026 off-season revision --------------------- #
+
+The 2026 revision re-selected the specification on a repaired, deployment-shaped harness
+after a referee-style audit of the codebase. Read in this order:
+
+  REFEREE_REPORT.md            the audit. Major/minor points, every claim tagged
+                               [verified] / [code] / [implied], plus a dated addendum
+                               recording what a later data vintage superseded.
+
+  FINDINGS_2026_REVISION.md    the verdict. Protocol, results, and the reasoning --
+                               including the pre-registered selection rule, the reviewer
+                               round, and the single holdout number.
+
+  SFM_II__dev_EW.ipynb         the harness. Expanding-window folds (train <= t, score t+1
+                               frozen), paired tests on identical player-appearances, one
+                               devVersion per run, sealed holdout, production-fit mode.
+                               This is the source of truth for the model definition.
+
+  SFM_II__dev.ipynb            the older single-fit dev notebook, carrying the phase-1
+                               repairs. Retained for reference; the harness supersedes it.
+
+  SFM_data_audit.py            the data-vintage verification battery. Run it on EVERY new
+                               data build before fitting anything.
+
+  006_040__..._SFM_II.ipynb    weekly serving: scoring probabilities + the point-in-time
+  006_041__SAR_PAR__SFM_II.py  ledger, and the SAR/PAR boards. Both pure NumPy -- they read
+                               a light bundle of posterior draws, no PyMC at serving time.
+
+  HANDOVER_SFM_II__*.md        what the website consumes and how to re-run it weekly.
+
+
+## The committed specification (2026/27)
+
+**Dev C_ELO.** Ordered logistic over goal categories {0, 1, 2, 3+}:
+
+    eta = player_effect + f_within(gameday) + f_long(career season) + X*beta
+
+with X = home_pitch, position_FOR, and the cross-sectionally standardised points_diff,
+cumulative player goals, opponent conceded-rank, player goal-share, goal appeal, and
+**elo_diff**. Player effects are baseline + zero-sum normal; both f() are HSGPs.
+
+Selected 2026-08-13 under a rule fixed before any run: a challenger replaces the incumbent
+only by winning **both** log-loss and RPS with paired |t| >= 2.5. The incumbent was **OG**,
+the published SFM I (Andorra & Goebel 2024) -- so every richer specification had to earn its
+complexity. C_ELO beat all twelve competitors pairwise and was the sole member of the top
+class. Holdout (2024/25, scored once, 2026-08-14): **+3.56 % skill** vs a
+marginal-frequency baseline.
+
+What did NOT survive: momentum (no effect in any clean ablation), a calendar-era term,
+league intercepts, and the sparse "Model K" specification.
+
+
+## Reproducing the verdict without a GPU
+
+    ../../10_data/102_Development/SFM_II__selection_evidence.csv.gz
+
+797,319 per-appearance rows: 13 variants x 3 validation folds, plus the holdout, with the
+per-row log-loss and RPS the paired tests consume. Every t-statistic in
+FINDINGS_2026_REVISION.md reproduces from this file alone -- no refitting required.
+Sampler diagnostics for every fit are in SFM_II__selection_diagnostics.csv.
+
+
+## The point-in-time ledger
+
+    ../../10_data/SFM_predictions__frozen.csv
+
+The only honest record of what the model forecast **before** kickoff. Unplayed fixtures
+refresh each run; a played fixture's row is never rewritten, and its result is attached
+beside the probabilities standing at kickoff. `appeared` flags forecast players who did not
+feature, so the tracker can void rather than score them as misses.
+
+NOTE: the serving pickles regenerate history on every run and the annual refit re-scores it
+in-sample, so **only this ledger may be used to claim a track record**.
