@@ -69,9 +69,21 @@ import pytensor.tensor as pt
 directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
 
 BUNDLE_PATH   = f'{directory}/10_data/01_Models/SFMMO_DevK__scaleCS__train202526__PROD.pkl'
-HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer__SFM_II__TM.csv'   # played history
+HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer__SFM_II.csv'       # played history
+# NOTE: the weekly pipeline refreshes the NON-TM file; the __TM variant (market values) is
+# only rebuilt for model fitting. Model K uses no Transfermarkt columns, and the K features
+# are identical across the two files (verified: max|diff| = 0 on 79,845 shared rows).
 OOS_PATH      = f'{directory}/10_data/106_Website/data_byPlayer__OOS.csv'          # upcoming fixtures
 TARGET_SEASON = '2026/27'          # the season whose unplayed fixtures we forecast
+HORIZON_DAYS  = 14                 # forecast fixtures kicking off within this many days.
+#   The OOS file carries the WHOLE season (~1,670 fixtures). Forecasting all of them is both
+#   wasteful and wrong-headed: a May fixture predicted in August carries no form information,
+#   and it would freeze that near-useless number into the ledger. A rolling horizon means each
+#   fixture is frozen shortly before kickoff, with maximal information.
+#   Chosen DATE-based, not round-based (the La Liga lesson: rounds interleave when matches are
+#   postponed). 14 days covers the next matchday plus midweek games, with slack if a weekly run
+#   is skipped -- widen it if runs are ever missed, since a fixture that kicks off without ever
+#   entering the horizon has no frozen forecast (the run warns loudly if that happens).
 
 K_MAX         = 15                 # scoreline grid (M2: 5 truncated ~11% of joint mass)
 CRED_REGION   = 0.90               # credible band for the W/D/L probabilities
@@ -197,15 +209,22 @@ def compute_elo(cd):
     return cd
 
 
-def joint_pmf(eta_da, idx_home, idx_away, k_max=K_MAX):
-    """Per-fixture joint scoreline PMF. Returns (joint[f, s, h, a], lam_h, lam_a)."""
+def fixture_lambdas(eta_da, idx_home, idx_away):
+    """Per-fixture home/away scoring rates per posterior draw. (n_fixtures, n_samples)."""
     lam = np.exp(eta_da.stack(samples=('chain', 'draw')).values)     # (n_obs, n_samples)
-    lam_h = lam[idx_home, :]
-    lam_a = lam[idx_away, :]
+    return lam[idx_home, :], lam[idx_away, :]
+
+
+def joint_grid_one(lam_h_s, lam_a_s, k_max=K_MAX):
+    """Joint scoreline PMF for ONE fixture: (n_samples, k_max+1, k_max+1).
+
+    Built lazily per fixture on purpose. Materialising all fixtures at once is fine for a
+    single matchday (~48) but not for a full season: 1,672 fixtures x 8,000 draws x 16x16
+    would be ~27 GB. Per fixture it is ~16 MB."""
     ks = np.arange(k_max + 1)
-    pmf_h = poisson.pmf(ks[:, None, None], mu=lam_h[None, :, :])
-    pmf_a = poisson.pmf(ks[:, None, None], mu=lam_a[None, :, :])
-    return np.einsum('hfs,afs->fsha', pmf_h, pmf_a), lam_h, lam_a
+    pmf_h = poisson.pmf(ks[:, None], mu=lam_h_s[None, :])            # (k+1, n_samples)
+    pmf_a = poisson.pmf(ks[:, None], mu=lam_a_s[None, :])
+    return np.einsum('hs,as->sha', pmf_h, pmf_a)
 
 
 def apply_dc_tau(joint_s, lam_h_s, lam_a_s, rho):
@@ -265,8 +284,17 @@ def main():
     if not len(oos):
         raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found — nothing to forecast. "
                          f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
+    n_all = oos['id_match'].nunique()
+    horizon = pd.Timestamp.now().normalize() + pd.Timedelta(days=HORIZON_DAYS)
+    deferred = oos[oos['kick_off'] > horizon]
+    oos = oos[oos['kick_off'] <= horizon].copy()
+    if not len(oos):
+        raise SystemExit(f"No {TARGET_SEASON} fixtures within {HORIZON_DAYS} days "
+                         f"({n_all} unplayed exist, earliest {deferred['kick_off'].min():%Y-%m-%d}).")
     oos = oos.sort_values(['name_league', 'kick_off']).reset_index(drop=True)
     n_fix = oos['id_match'].nunique()
+    print(f"  horizon: {HORIZON_DAYS} days (to {horizon:%Y-%m-%d}) -> forecasting {n_fix} of "
+          f"{n_all} unplayed fixtures; {deferred['id_match'].nunique()} deferred to later runs")
     print(f"\nUpcoming fixtures in {TARGET_SEASON}: {n_fix} "
           f"({', '.join(f'{k} {v}' for k, v in oos[oos.home_pitch == 1].groupby('name_league').size().items())})")
 
@@ -364,16 +392,16 @@ def main():
             .rename(columns={1: 'pos_home', 0: 'pos_away'}).dropna().astype(int))
     idx_home = pair['pos_home'].to_numpy()
     idx_away = pair['pos_away'].to_numpy()
-    joint, lam_h, lam_a = joint_pmf(preds['predictions']['eta_oos'], idx_home, idx_away)
-    print(f"  joint grids: {joint.shape[0]} fixtures x {joint.shape[1]} draws, "
-          f"{K_MAX+1}x{K_MAX+1} (mass {joint.sum(axis=(2,3)).mean():.6f})")
+    lam_h, lam_a = fixture_lambdas(preds['predictions']['eta_oos'], idx_home, idx_away)
+    print(f"  building {len(pair)} joint grids lazily ({lam_h.shape[1]:,} draws, "
+          f"{K_MAX+1}x{K_MAX+1} each) ...")
 
     rows, grid_rows, team_rows = [], [], []
     q_lo, q_hi = (1 - CRED_REGION) / 2, 1 - (1 - CRED_REGION) / 2
     meta_h = oos.loc[idx_home].reset_index(drop=True)
     meta_a = oos.loc[idx_away].reset_index(drop=True)
     for f in range(len(pair)):
-        g = joint[f]
+        g = joint_grid_one(lam_h[f], lam_a[f])
         if rho is not None:
             g = apply_dc_tau(g, lam_h[f], lam_a[f], rho)
         w = wdl_from_grid(g)
@@ -435,12 +463,22 @@ def main():
     PCOLS = ['p_home_win', 'p_home_win_lo', 'p_home_win_up', 'p_draw', 'p_draw_lo', 'p_draw_up',
              'p_away_win', 'p_away_win_lo', 'p_away_win_up', 'exp_goals_home', 'exp_goals_away',
              'ml_score_home', 'ml_score_away']
+    # KEY ON THE TEAMS, NOT id_match. When a fixture is postponed out of a round, the source
+    # RENUMBERS the survivors (La Liga 2026-08: Celta-Osasuna left GD1, so G6->G5, G7->G6).
+    # An id-keyed ledger then hands each match its NEIGHBOUR's frozen forecast -- silent, and
+    # fatal to the receipts. (season, home_team, away_team) is unique in a double round-robin
+    # and immune to both renumbering and date changes.
+    KEY = ['season', 'home_team', 'away_team']
     stamp = datetime.now().strftime('%Y-%m-%d')
-    fresh = df_matches[['id_match'] + PCOLS].copy()
+    fresh = df_matches[KEY + ['id_match'] + PCOLS].copy()
     fresh['forecast_frozen_at'] = stamp
     if os.path.exists(FROZEN_LEDGER):
         led = pd.read_csv(FROZEN_LEDGER)
-        led = led[~led['id_match'].isin(fresh['id_match'])]      # still unplayed -> refresh
+        if not all(k in led.columns for k in KEY):
+            raise SystemExit(f"{FROZEN_LEDGER} predates the team-keyed schema. Rebuild it from "
+                             f"the archived vintages before running (see rebuild_frozen_ledger.py).")
+        led = led.merge(fresh[KEY].assign(_refresh=1), on=KEY, how='left')
+        led = led[led['_refresh'].isna()].drop(columns='_refresh')   # keep only NOT-refreshed rows
         ledger = pd.concat([led, fresh], ignore_index=True)
     else:
         ledger = fresh
@@ -451,11 +489,12 @@ def main():
                 & (cd['match_outcome'].notna())].copy()
     feed_rows = []
     if len(played):
-        lref = ledger.set_index('id_match')
-        missing = [m for m in played['id_match'] if m not in lref.index]
+        lref = ledger.set_index(KEY)
+        pk = list(zip(played['season'], played['name_team'], played['name_opp']))
+        missing = [f"{h} v {a}" for (_, h, a) in pk if (_, h, a) not in lref.index]
         if missing:
-            print(f"  ⚠️  {len(missing)} played fixture(s) have NO frozen forecast (first run after "
-                  f"they were played?) — results shipped without probabilities: {missing[:3]}")
+            print(f"  ⚠️  {len(missing)} played fixture(s) have NO frozen forecast (they were never "
+                  f"in a run while unplayed) — results shipped without probabilities: {missing[:3]}")
         for r in played.itertuples():
             rec = dict(id_match=r.id_match, name_league=r.name_league, season=r.season,
                        gameday=r.gameday, kick_off=r.kick_off,
@@ -463,10 +502,11 @@ def main():
                        home_goals=float(r.match_outcome), away_goals=float(r.goalsscored_inGame_opp),
                        status='finished',
                        elo_home=round(float(r.elo_team), 1), elo_away=round(float(r.elo_opp), 1))
-            if r.id_match in lref.index:
+            k = (r.season, r.name_team, r.name_opp)
+            if k in lref.index:
                 for c in PCOLS:
-                    rec[c] = lref.loc[r.id_match, c]
-                rec['forecast_frozen_at'] = lref.loc[r.id_match, 'forecast_frozen_at']
+                    rec[c] = lref.loc[k, c]
+                rec['forecast_frozen_at'] = lref.loc[k, 'forecast_frozen_at']
             feed_rows.append(rec)
     df_upcoming = df_matches.copy()
     df_upcoming['home_goals'] = np.nan
@@ -475,6 +515,8 @@ def main():
     df_upcoming['forecast_frozen_at'] = stamp
     df_matches = (pd.concat([pd.DataFrame(feed_rows), df_upcoming], ignore_index=True)
                   .sort_values(['name_league', 'kick_off', 'id_match']).reset_index(drop=True))
+    for c in ['ml_score_home', 'ml_score_away', 'home_goals', 'away_goals']:
+        df_matches[c] = df_matches[c].astype('Int64')     # nullable int: render 2, not 2.0
     print(f"  feed: {int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
           f"forecast) + {int((df_matches['status'] == 'upcoming').sum())} upcoming")
     df_grid = pd.DataFrame(grid_rows)
@@ -508,8 +550,10 @@ def main():
         print("\n" + df_matches[['name_league', 'home_team', 'away_team', 'p_home_win', 'p_draw',
                                  'p_away_win', 'exp_goals_home', 'exp_goals_away',
                                  'ml_score_home', 'ml_score_away']].head(12).round(3).to_string(index=False))
-    print(f"\nsanity: mean row sum {(df_matches[['p_home_win','p_draw','p_away_win']].sum(axis=1)).mean():.6f} | "
-          f"home-win share {df_matches['p_home_win'].mean():.3f} | draw share {df_matches['p_draw'].mean():.3f}")
+    _has = df_matches[['p_home_win', 'p_draw', 'p_away_win']].notna().all(axis=1)
+    _p = df_matches.loc[_has, ['p_home_win', 'p_draw', 'p_away_win']]
+    print(f"\nsanity ({int(_has.sum())} rows with a forecast): mean row sum {_p.sum(axis=1).mean():.6f} | "
+          f"home-win share {_p['p_home_win'].mean():.3f} | draw share {_p['p_draw'].mean():.3f}")
     return out
 
 
