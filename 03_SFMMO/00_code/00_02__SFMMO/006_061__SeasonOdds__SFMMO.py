@@ -36,6 +36,7 @@ METHOD AND ITS LIMITS (state these on the site, as with the WC board)
 """
 
 import os
+import zlib
 import shutil
 import importlib.util
 from datetime import datetime
@@ -158,19 +159,36 @@ def main():
     print(f"  {TARGET_SEASON}: {home['id_match'].nunique()} fixtures known, "
           f"{played_rows['id_match'].nunique()} already played")
 
-    rng = np.random.default_rng(SEED)
     stamp = datetime.now().strftime('%Y-%m-%d')
     boards = []
     for lg, g in home.groupby('name_league'):
         teams = sorted(set(g['name_team']) | set(g['name_opp']))
         played = {(r.name_team, r.name_opp): (r.match_outcome, r.goalsscored_inGame_opp)
                   for r in g[g['match_outcome'].notna()].itertuples()}
-        # current ELO per team: the latest rating seen in this season's rows
+        # CURRENT ELO per team = its rating going into its EARLIEST UNPLAYED fixture, i.e.
+        # after its last played match and before any speculative update.
+        #
+        # It must NOT be the latest row: compute_elo applies a fake-draw update to unplayed
+        # fixtures (so upcoming gamedays carry sensible ratings), which means a team's rating
+        # on its May fixture has ~34 phantom draws baked in and has regressed hard toward the
+        # mean. That silently wrecked the 2026-08-25 board -- Bayern entered the simulation at
+        # 1537 instead of 1656 (-119 elo) and its title probability fell 76% -> 62% having
+        # played no matches at all. Harmless while the OOS file held one matchday; wrong the
+        # moment it carried the full season.
+        g_sorted = g.sort_values('kick_off', kind='stable')
         elo_now = {}
-        for r in g.itertuples():
-            elo_now[r.name_team] = r.elo_team
-            elo_now[r.name_opp] = r.elo_opp
+        for r in g_sorted[g_sorted['match_outcome'].isna()].itertuples():   # earliest first
+            elo_now.setdefault(r.name_team, r.elo_team)
+            elo_now.setdefault(r.name_opp, r.elo_opp)
+        for r in g_sorted.itertuples():          # fallback: teams with no fixtures left
+            elo_now.setdefault(r.name_team, r.elo_team)
+            elo_now.setdefault(r.name_opp, r.elo_opp)
         sp_lg = dict(sp, elo_now=elo_now)
+        # Per-league RNG derived from (SEED, stable hash of the league name): each league's
+        # simulation is then independent of iteration order and of which other leagues ran, so
+        # a league that played nothing this week reports identical numbers week over week.
+        # (zlib.crc32, not hash() -- Python's string hash is salted per process.)
+        rng = np.random.default_rng([SEED, zlib.crc32(lg.encode())])
         df, n_pin, n_sim = simulate_league(teams, played, sp_lg, rng, N_SIM, RELEGATED.get(lg, 3))
         df.insert(0, 'league', lg)
         df.insert(0, 'as_of', stamp)

@@ -69,7 +69,7 @@ import pytensor.tensor as pt
 directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
 
 BUNDLE_PATH   = f'{directory}/10_data/01_Models/SFMMO_DevK__scaleCS__train202526__PROD.pkl'
-HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer__SFM_II.csv'       # played history
+HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer.csv'       # played history
 # NOTE: the weekly pipeline refreshes the NON-TM file; the __TM variant (market values) is
 # only rebuilt for model fitting. Model K uses no Transfermarkt columns, and the K features
 # are identical across the two files (verified: max|diff| = 0 on 79,845 shared rows).
