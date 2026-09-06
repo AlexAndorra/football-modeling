@@ -52,7 +52,9 @@ extend-exclude = ["20_review", "*.ipynb"]
 "00_code/sfmmo_fit.py" = ["E741", "E702", "E721", "F841", "F821"]
 
 [tool.pytest.ini_options]
-testpaths = ["00_code/tests"]
-pythonpath = ["00_code"]
+# Both suites: the shared tests and the World-Cup edition's (moved under 00_01__SFMMO_WC26 by
+# the 2026-08 reorganisation; they were silently uncollected since).
+testpaths = ["00_code/tests", "00_code/00_01__SFMMO_WC26/tests"]
+pythonpath = ["00_code", "00_code/00_01__SFMMO_WC26"]
 # Keep test output pristine: any warning becomes a failure (matches the foresight repo).
 filterwarnings = ["error"]
