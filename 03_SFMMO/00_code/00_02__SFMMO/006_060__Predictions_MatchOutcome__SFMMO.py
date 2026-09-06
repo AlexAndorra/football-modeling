@@ -84,6 +84,8 @@ HORIZON_DAYS  = 14                 # forecast fixtures kicking off within this m
 #   postponed). 14 days covers the next matchday plus midweek games, with slack if a weekly run
 #   is skipped -- widen it if runs are ever missed, since a fixture that kicks off without ever
 #   entering the horizon has no frozen forecast (the run warns loudly if that happens).
+#   The window also has a LOWER bound: a fixture that kicked off on an earlier day and still has
+#   no result is never re-forecast (its frozen row stands) -- see select_forecast_window.
 
 K_MAX         = 15                 # scoreline grid (M2: 5 truncated ~11% of joint mass)
 CRED_REGION   = 0.90               # credible band for the W/D/L probabilities
@@ -209,6 +211,105 @@ def compute_elo(cd):
     return cd
 
 
+def select_forecast_window(oos, now, horizon_days):
+    """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon.
+
+    stale    : already kicked off but still carries no result (results feed lagging, postponement
+               not yet re-dated, ...). NEVER re-forecast: by now the ELO has absorbed the other
+               results of that round, so a re-forecast is hindsight and would overwrite the
+               genuine pre-match row in the ledger (WC lesson L5, ~4 pp flattering). A postponed
+               fixture is re-forecast as soon as the feed carries its new kick-off.
+    window   : anchor .. anchor + horizon_days (day-inclusive) -> forecast in this run
+    deferred : beyond the horizon -> forecast by a later run, closer to kickoff
+
+    The anchor is today, unless nothing forecastable falls within today + horizon_days (an
+    international break): then the window slides to start at the earliest forecastable kick-off,
+    so the run forecasts the next round instead of exiting empty (Max, 64f86df). Stale fixtures
+    never enter the anchor, so a past kick-off cannot drag the window backwards.
+
+    "Already kicked off" = on an earlier day, or today with a confirmed time that has passed.
+    An unconfirmed slot is stored as 00:00 local (not a midnight kickoff), so a same-day 00:00
+    stamp cannot be judged and stays in the window."""
+    now = pd.Timestamp(now)
+    today = now.normalize()
+    ko = pd.to_datetime(oos['kick_off'])
+    if ko.isna().any():
+        raise ValueError(f"{int(ko.isna().sum())} unplayed row(s) have no kick_off -- they would "
+                         f"fall outside every bucket and vanish silently; fix the fixture feed")
+    day = ko.dt.normalize()
+    timed = ko != day                                   # a real kickoff time, not a 00:00 placeholder
+    kicked_off = (day < today) | ((day == today) & timed & (ko < now))
+    stale = oos[kicked_off].copy()
+    live = oos[~kicked_off]
+    anchor = today
+    if len(live) and day[~kicked_off].min() > today + pd.Timedelta(days=horizon_days):
+        anchor = day[~kicked_off].min()
+    horizon = anchor + pd.Timedelta(days=horizon_days)
+    deferred = live[day[~kicked_off] > horizon].copy()
+    window = live[(day[~kicked_off] >= anchor) & (day[~kicked_off] <= horizon)].copy()
+    return window, deferred, stale, horizon
+
+
+def merge_frozen_ledger(led, fresh, key):
+    """Ledger update rule: a fixture forecast in THIS run (present in `fresh`) takes the new
+    row -- it is still unplayed, so this is new information, still pre-match. Every other ledger
+    row is kept verbatim. Refuses duplicate keys on either side: a duplicate would make the
+    feed's `.loc[key]` lookup return a Series and ship garbage probabilities without an error."""
+    for name, df in (('ledger', led), ('fresh', fresh)):
+        dup = df.duplicated(subset=key, keep=False)
+        if dup.any():
+            raise ValueError(f"duplicate {key} rows in the {name}: "
+                             f"{df.loc[dup, key].drop_duplicates().values.tolist()[:3]}")
+    kept = led.merge(fresh[key].assign(_refresh=1), on=key, how='left')
+    kept = kept[kept['_refresh'].isna()].drop(columns='_refresh')     # NOT refreshed -> verbatim
+    return pd.concat([kept, fresh], ignore_index=True)
+
+
+def stale_feed_rows(stale_home, ledger, key, pcols):
+    """Feed rows for fixtures that kicked off without a recorded result (one row per fixture,
+    home perspective): shipped as 'upcoming' with the probabilities FROZEN before kickoff, never
+    a re-forecast. Returns (rows, missing) -- `missing` names fixtures with no frozen row at all
+    (they never entered a run while unplayed; that receipt cannot be reconstructed honestly)."""
+    lref = ledger.set_index(key)
+    rows, missing = [], []
+    for r in stale_home.itertuples():
+        k = (r.season, r.name_team, r.name_opp)
+        if k not in lref.index:
+            missing.append(f"{r.name_team} v {r.name_opp}")
+            continue
+        rec = dict(id_match=r.id_match, name_league=r.name_league, season=r.season,
+                   gameday=r.gameday, kick_off=r.kick_off,
+                   home_team=r.name_team, away_team=r.name_opp,
+                   home_goals=np.nan, away_goals=np.nan, status='upcoming',
+                   elo_home=round(float(getattr(r, 'elo_team', np.nan)), 1),
+                   elo_away=round(float(getattr(r, 'elo_opp', np.nan)), 1))
+        for c in pcols:
+            rec[c] = lref.loc[k, c]
+        rec['forecast_frozen_at'] = lref.loc[k, 'forecast_frozen_at']
+        rows.append(rec)
+    return rows, missing
+
+
+def carry_forward_board_rows(prev, stale_home):
+    """Scoreline grids and team-goal rows for stale fixtures, taken from the PREVIOUS board
+    (`prev` = the last run's exported dict) so they do not vanish from those two feeds while the
+    result is pending. Matched on the team pair, never on id_match. Returns (grid, team, missing)."""
+    ids = {(h, a): i for h, a, i in zip(stale_home['name_team'], stale_home['name_opp'],
+                                         stale_home['id_match'])}
+    g, t = prev['scorelines'], prev['team_goals']
+    grid = g[[(h, a) in ids for h, a in zip(g['home_team'], g['away_team'])]].copy()
+    grid['id_match'] = [ids[(h, a)] for h, a in zip(grid['home_team'], grid['away_team'])]
+    # the home side's row is (team, opponent, is_home=1); the away side's is the mirror. The
+    # return leg (opponent at home) is a DIFFERENT fixture and must not be picked up.
+    home_key = [(tm, op) if h == 1 else (op, tm)
+                for tm, op, h in zip(t['team'], t['opponent'], t['is_home'])]
+    team = t[[k in ids for k in home_key]].copy()
+    team['id_match'] = [ids[k] for k in home_key if k in ids]
+    found = set(zip(grid['home_team'], grid['away_team']))
+    missing = [f"{h} v {a}" for (h, a) in ids if (h, a) not in found]
+    return grid, team, sorted(missing)
+
+
 def fixture_lambdas(eta_da, idx_home, idx_away):
     """Per-fixture home/away scoring rates per posterior draw. (n_fixtures, n_samples)."""
     lam = np.exp(eta_da.stack(samples=('chain', 'draw')).values)     # (n_obs, n_samples)
@@ -285,25 +386,18 @@ def main():
         raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found — nothing to forecast. "
                          f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
     n_all = oos['id_match'].nunique()
-    # Anchor the window at max(today, earliest unplayed), never at today alone.
-    #
-    # Two ways a today-only anchor goes wrong. During a long gap — an
-    # international break, or the run happening early in a week with no
-    # fixtures — every unplayed match sits beyond today+14, the slice comes back
-    # empty and the run exits rather than forecasting the next round. And a
-    # postponed fixture carrying a past kick-off must not be able to pull the
-    # anchor backwards, which is what max() prevents.
-    #
-    # No-op on a normal week: the earliest unplayed is at or before today, so
-    # the anchor is today and the window is unchanged. (2026-08-28: earliest
-    # unplayed 2026-08-22, 139 fixtures either way.)
-    anchor = max(pd.Timestamp.now().normalize(), oos['kick_off'].min().normalize())
-    horizon = anchor + pd.Timedelta(days=HORIZON_DAYS)
-    deferred = oos[oos['kick_off'] > horizon]
-    oos = oos[oos['kick_off'] <= horizon].copy()
+    oos, deferred, stale, horizon = select_forecast_window(oos, pd.Timestamp.now(), HORIZON_DAYS)
+    if len(stale):
+        _sh = stale[stale['home_pitch'] == 1]
+        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) kicked off before today but carry NO "
+              f"result yet (results feed lagging? postponement not yet re-dated?) -- NOT re-forecast, "
+              f"their frozen forecast stands: "
+              f"{[f'{h} v {a}' for h, a in zip(_sh['name_team'], _sh['name_opp'])][:4]}")
     if not len(oos):
+        nxt = (f"earliest {deferred['kick_off'].min():%Y-%m-%d}" if len(deferred)
+               else "none beyond the horizon either -- only kicked-off fixtures awaiting results")
         raise SystemExit(f"No {TARGET_SEASON} fixtures within {HORIZON_DAYS} days "
-                         f"({n_all} unplayed exist, earliest {deferred['kick_off'].min():%Y-%m-%d}).")
+                         f"({n_all} unplayed exist, {nxt}).")
     oos = oos.sort_values(['name_league', 'kick_off']).reset_index(drop=True)
     n_fix = oos['id_match'].nunique()
     print(f"  horizon: {HORIZON_DAYS} days (to {horizon:%Y-%m-%d}) -> forecasting {n_fix} of "
@@ -490,9 +584,7 @@ def main():
         if not all(k in led.columns for k in KEY):
             raise SystemExit(f"{FROZEN_LEDGER} predates the team-keyed schema. Rebuild it from "
                              f"the archived vintages before running (see rebuild_frozen_ledger.py).")
-        led = led.merge(fresh[KEY].assign(_refresh=1), on=KEY, how='left')
-        led = led[led['_refresh'].isna()].drop(columns='_refresh')   # keep only NOT-refreshed rows
-        ledger = pd.concat([led, fresh], ignore_index=True)
+        ledger = merge_frozen_ledger(led, fresh, KEY)
     else:
         ledger = fresh
     ledger.to_csv(FROZEN_LEDGER, index=False)
@@ -521,6 +613,12 @@ def main():
                     rec[c] = lref.loc[k, c]
                 rec['forecast_frozen_at'] = lref.loc[k, 'forecast_frozen_at']
             feed_rows.append(rec)
+    if len(stale):
+        _rows, _miss = stale_feed_rows(stale[stale['home_pitch'] == 1], ledger, KEY, PCOLS)
+        feed_rows.extend(_rows)
+        if _miss:
+            print(f"  ⚠️  {len(_miss)} kicked-off fixture(s) have NO frozen forecast and no result "
+                  f"-- absent from the feed until the result lands: {_miss[:3]}")
     df_upcoming = df_matches.copy()
     df_upcoming['home_goals'] = np.nan
     df_upcoming['away_goals'] = np.nan
@@ -533,8 +631,21 @@ def main():
     print(f"  feed: {int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
           f"forecast) + {int((df_matches['status'] == 'upcoming').sum())} upcoming")
     df_grid = pd.DataFrame(grid_rows)
-    df_team = pd.DataFrame(team_rows).sort_values(['name_league', 'kick_off', 'id_match', 'is_home'],
-                                                  ascending=[True, True, True, False]).reset_index(drop=True)
+    df_team = pd.DataFrame(team_rows)
+    if len(stale) and not os.path.exists(OUT_PKL):
+        print(f"  [stale] no previous board on disk -- kicked-off fixtures awaiting results have no "
+              f"scoreline/team-goal rows this run")
+    if len(stale) and os.path.exists(OUT_PKL):      # previous board still on disk (archived below)
+        with open(OUT_PKL, 'rb') as f:
+            _prev = pickle.load(f)
+        _g, _t, _miss = carry_forward_board_rows(_prev, stale[stale['home_pitch'] == 1])
+        df_grid = pd.concat([df_grid, _g], ignore_index=True)
+        df_team = pd.concat([df_team, _t], ignore_index=True)
+        print(f"  [stale] scorelines/team-goals carried forward from the previous board for "
+              f"{len(set(zip(_g['home_team'], _g['away_team'])))} fixture(s)"
+              + (f"; not on the previous board: {_miss[:3]}" if _miss else ""))
+    df_team = df_team.sort_values(['name_league', 'kick_off', 'id_match', 'is_home'],
+                                  ascending=[True, True, True, False]).reset_index(drop=True)
 
     # ------------------- 6b. NORMALISATION GATE (pre-export) ------------------- #
     # W/D/L must sum to 1 on EVERY row, not on average: a mean over ~200 rows hides a single
