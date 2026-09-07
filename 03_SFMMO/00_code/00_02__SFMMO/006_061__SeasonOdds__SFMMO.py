@@ -198,6 +198,28 @@ def main():
 
     board = pd.concat(boards, ignore_index=True)
 
+    # ---------------------- RANK-VALIDITY GATE (pre-export) ---------------------- #
+    # The per-league line above only PRINTS sum p_title at 3dp -- a league summing to 0.970
+    # would print "0.970" and export anyway. Same failure mode as 006_060's old row-sum check:
+    # a report placed after the write is not a gate. Asserted here, before to_csv.
+    # All three sums are exact invariants of a valid ranking: across n teams, exactly one is
+    # 1st, TOP_N are top-4 and n_releg are relegated in EVERY simulated season. So the sums
+    # must hit 1, TOP_N and n_releg exactly -- to Monte-Carlo rounding, not approximately.
+    # p_title alone is near-tautological; p_top4 and p_releg are what actually prove `rank` is
+    # a permutation (a tie or duplicate in the argsort-of-argsort would break them, not it).
+    RANK_TOL = 1e-9
+    for lg, b in board.groupby('league'):
+        n_releg = RELEGATED.get(lg, 3)
+        for col, want in (('p_title', 1.0), ('p_top4', float(TOP_N)), ('p_releg', float(n_releg))):
+            got = float(b[col].sum())
+            if abs(got - want) > RANK_TOL:
+                raise AssertionError(
+                    f"[rank validity] FAIL — {lg}: sum {col} = {got:.10f}, expected {want:.1f} "
+                    f"(off by {got - want:+.2e}). `rank` is not a valid permutation; "
+                    f"nothing exported.")
+    print(f"\n[rank validity] PASS — p_title/p_top4/p_releg sum exactly across all "
+          f"{board['league'].nunique()} leagues. Safe to export.")
+
     os.makedirs(VINTAGE_DIR, exist_ok=True)
     if os.path.exists(OUT_CSV):     # archive the outgoing board before overwriting
         mt = datetime.fromtimestamp(os.path.getmtime(OUT_CSV)).strftime('%Y-%m-%d')

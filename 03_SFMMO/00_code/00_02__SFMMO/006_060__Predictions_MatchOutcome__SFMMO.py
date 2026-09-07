@@ -285,7 +285,20 @@ def main():
         raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found — nothing to forecast. "
                          f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
     n_all = oos['id_match'].nunique()
-    horizon = pd.Timestamp.now().normalize() + pd.Timedelta(days=HORIZON_DAYS)
+    # Anchor the window at max(today, earliest unplayed), never at today alone.
+    #
+    # Two ways a today-only anchor goes wrong. During a long gap — an
+    # international break, or the run happening early in a week with no
+    # fixtures — every unplayed match sits beyond today+14, the slice comes back
+    # empty and the run exits rather than forecasting the next round. And a
+    # postponed fixture carrying a past kick-off must not be able to pull the
+    # anchor backwards, which is what max() prevents.
+    #
+    # No-op on a normal week: the earliest unplayed is at or before today, so
+    # the anchor is today and the window is unchanged. (2026-08-28: earliest
+    # unplayed 2026-08-22, 139 fixtures either way.)
+    anchor = max(pd.Timestamp.now().normalize(), oos['kick_off'].min().normalize())
+    horizon = anchor + pd.Timedelta(days=HORIZON_DAYS)
     deferred = oos[oos['kick_off'] > horizon]
     oos = oos[oos['kick_off'] <= horizon].copy()
     if not len(oos):
@@ -523,6 +536,29 @@ def main():
     df_team = pd.DataFrame(team_rows).sort_values(['name_league', 'kick_off', 'id_match', 'is_home'],
                                                   ascending=[True, True, True, False]).reset_index(drop=True)
 
+    # ------------------- 6b. NORMALISATION GATE (pre-export) ------------------- #
+    # W/D/L must sum to 1 on EVERY row, not on average: a mean over ~200 rows hides a single
+    # broken fixture, and this check used to run after to_csv -- i.e. it could only ever report
+    # a bad file, never stop one. It now gates export, like the eta parity check.
+    # Tolerance: the joint grid is truncated at k_max, so a little mass is legitimately lost.
+    # It is largest on fixtures involving PROMOTED teams -- their new-team priors are wide, so
+    # some posterior draws put lambda high enough for the k_max tail to bite (2026/27 worst
+    # case: Man City v Coventry, 3.6e-5). SUM_TOL sits well above that floor and far below any
+    # real normalisation bug, which would be orders of magnitude larger.
+    SUM_TOL = 1e-3
+    _has = df_matches[['p_home_win', 'p_draw', 'p_away_win']].notna().all(axis=1)
+    _s = df_matches.loc[_has, ['p_home_win', 'p_draw', 'p_away_win']].sum(axis=1)
+    _worst = df_matches.loc[_s.sub(1).abs().idxmax()]
+    print(f"\n[row sums] {int(_has.sum())} forecast rows | min {_s.min():.9f} max {_s.max():.9f} | "
+          f"max deficit {(1 - _s.min()):.2e} (k_max={K_MAX} truncation) | "
+          f"worst: {_worst['home_team']} v {_worst['away_team']}")
+    if not np.isclose(_s, 1.0, atol=SUM_TOL, rtol=0).all():
+        bad = df_matches.loc[_has][~np.isclose(_s, 1.0, atol=SUM_TOL, rtol=0)]
+        raise AssertionError(
+            f"[row sums] FAIL — {len(bad)} row(s) off 1.0 by more than {SUM_TOL:.0e}; "
+            f"nothing exported. Worst: {bad.iloc[0]['home_team']} v {bad.iloc[0]['away_team']}")
+    print("[row sums] PASS — safe to export.")
+
     # ----------------------- 7. archive + export ----------------------- #
     os.makedirs(OUT_DIR, exist_ok=True)
     if ARCHIVE_VINTAGES:
@@ -550,9 +586,8 @@ def main():
         print("\n" + df_matches[['name_league', 'home_team', 'away_team', 'p_home_win', 'p_draw',
                                  'p_away_win', 'exp_goals_home', 'exp_goals_away',
                                  'ml_score_home', 'ml_score_away']].head(12).round(3).to_string(index=False))
-    _has = df_matches[['p_home_win', 'p_draw', 'p_away_win']].notna().all(axis=1)
     _p = df_matches.loc[_has, ['p_home_win', 'p_draw', 'p_away_win']]
-    print(f"\nsanity ({int(_has.sum())} rows with a forecast): mean row sum {_p.sum(axis=1).mean():.6f} | "
+    print(f"\nsanity ({int(_has.sum())} rows with a forecast): "
           f"home-win share {_p['p_home_win'].mean():.3f} | draw share {_p['p_draw'].mean():.3f}")
     return out
 
