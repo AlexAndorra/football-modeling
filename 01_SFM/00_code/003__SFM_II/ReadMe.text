@@ -23,8 +23,13 @@ after a referee-style audit of the codebase. Read in this order:
                                devVersion per run, sealed holdout, production-fit mode.
                                This is the source of truth for the model definition.
 
-  SFM_II__dev.ipynb            the older single-fit dev notebook, carrying the phase-1
-                               repairs. Retained for reference; the harness supersedes it.
+  SFM_II__dev.ipynb            the single-fit exploratory notebook, and the only record of
+                               how the model was CONSTRUCTED: HSGP approximation-parameter
+                               choice, the PyMC model built up step by step, prior predictive
+                               checks, the model graph, in-sample evaluation, SAR/PAR.
+                               !! It PREDATES the ELO term and still carries momentum, so it
+                               documents the ROUTE, not the destination. Do not read it as
+                               the shipped specification -- that is SFM_II__dev_EW.ipynb.
 
   SFM_data_audit.py            the data-vintage verification battery. Run it on EVERY new
                                data build before fitting anything.

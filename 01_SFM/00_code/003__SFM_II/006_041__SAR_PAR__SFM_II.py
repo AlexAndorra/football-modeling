@@ -135,7 +135,7 @@ del _eta
 # ======================================== Data & Features ======================================== #
 # (mirrors training exactly; the boards are computed over the TRAINING window)
 
-d = pd.read_csv(f'{directory}/10_data/106_Website/data_byPlayer__SFM_II.csv')
+d = pd.read_csv(f'{directory}/10_data/106_Website/data_byPlayer.csv')
 d['kick_off'] = pd.to_datetime(d['kick_off'])
 d = d.sort_values(['name_player', 'season', 'kick_off']).reset_index(drop=True)
 d['gameday'] = d['gameday'].astype(int)

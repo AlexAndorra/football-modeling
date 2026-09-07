@@ -30,7 +30,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-CANONICAL = "/Users/maximilian/Dropbox/Max/51_SoccerAnalytics/10_data/106_Website/data_byPlayer__SFM_II.csv"
+CANONICAL = "/Users/maximilian/Dropbox/Max/51_SoccerAnalytics/10_data/106_Website/data_byPlayer.csv"
 
 # --- seasons no experiment may tune against (keep in sync with SFM_II__dev_EW.ipynb):
 SEALED_SEASONS = ["2024/25", "2025/26"]
