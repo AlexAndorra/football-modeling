@@ -585,8 +585,8 @@ def main():
             raise SystemExit(f"{FROZEN_LEDGER} predates the team-keyed schema. Rebuild it from "
                              f"the archived vintages before running (see rebuild_frozen_ledger.py).")
         ledger = merge_frozen_ledger(led, fresh, KEY)
-    else:
-        ledger = fresh
+    else:   # first run: same guard (a duplicate key in the board must never reach the ledger)
+        ledger = merge_frozen_ledger(fresh.iloc[0:0], fresh, KEY)
     ledger.to_csv(FROZEN_LEDGER, index=False)
 
     # played fixtures of the target season: result + the forecast frozen before kickoff

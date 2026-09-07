@@ -285,3 +285,20 @@ def test_window_anchor_is_today_on_a_normal_week():
     assert horizon == pd.Timestamp("2026-09-21")
     assert list(window["id_match"]) == ["g1"]
     assert list(deferred["id_match"]) == ["g2"]
+
+
+def test_merge_with_an_empty_ledger_is_the_first_run_path():
+    # First run (no ledger file yet) must go through the same guard: a duplicate key in the
+    # fresh board would otherwise be written and make every later `.loc[key]` return a Series.
+    empty = _ledger([]).iloc[0:0]
+    clean = _ledger([("2026/27", "C", "D", "g2", 0.4, 0.3, 0.3, "2026-09-07")])
+    out = W.merge_frozen_ledger(empty, clean, KEY)
+    assert len(out) == 1 and list(out["home_team"]) == ["C"]
+    dup = _ledger(
+        [
+            ("2026/27", "A", "B", "g1", 0.5, 0.3, 0.2, "2026-09-07"),
+            ("2026/27", "A", "B", "g9", 0.4, 0.3, 0.3, "2026-09-07"),
+        ]
+    )
+    with pytest.raises(ValueError, match="duplicate"):
+        W.merge_frozen_ledger(empty, dup, KEY)
