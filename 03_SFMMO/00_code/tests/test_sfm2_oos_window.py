@@ -365,3 +365,20 @@ def test_a_row_of_unknown_orientation_is_not_repointed():
     out = ns["_repoint"](first.assign(id_match="g_old"), pd.concat([first, ret]))
     assert out["id_match"].tolist() == ["gF"]  # known orientation -> re-pointed to its own leg
     assert L  # the cell's functions still load together
+
+
+def test_a_universe_row_of_unknown_orientation_is_ignored():
+    fn = next(
+        n
+        for n in ast.walk(ast.parse(_ledger_cell()))
+        if isinstance(n, ast.FunctionDef) and n.name == "_repoint"
+    )
+    ns = {"np": np, "pd": pd}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), str(NB), "exec"), ns)
+    ret = _scored([("gR", "a_player", 22, "A", "B", 0, pd.Timestamp("2027-02-20 15:00"))])
+    first_unknown = _scored(
+        [("gX", "a_player", 3, "A", "B", np.nan, pd.Timestamp("2026-09-20 15:00"))]
+    )
+    # gX has no orientation: read as an away row it would key as B v A, the return leg
+    out = ns["_repoint"](ret, pd.concat([first_unknown, ret]))
+    assert out["id_match"].tolist() == ["gR"]
