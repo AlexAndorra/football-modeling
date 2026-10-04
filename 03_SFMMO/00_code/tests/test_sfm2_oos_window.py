@@ -84,6 +84,7 @@ def test_kicked_off_rule_is_identical_to_006_060():
         ["2026-09-25 15:00", "2026-09-26 15:00", "2026-10-12 15:00"],  # international break
         ["2026-08-30 15:00", "2026-09-25 15:00", "2026-10-12 15:00"],  # break + stale fixture
         ["2026-09-06 15:00", "2026-09-05 15:00"],  # nothing live left
+        ["2026-09-08 15:00", None, "2026-09-06 15:00"],  # an undated fixture: never forecast
     ],
 )
 def test_horizon_covers_the_same_fixtures_as_006_060(stamps):

@@ -84,8 +84,8 @@ HORIZON_DAYS  = 14                 # forecast fixtures kicking off within this m
 #   postponed). 14 days covers the next matchday plus midweek games, with slack if a weekly run
 #   is skipped -- widen it if runs are ever missed, since a fixture that kicks off without ever
 #   entering the horizon has no frozen forecast (the run warns loudly if that happens).
-#   The window also has a LOWER bound: a fixture that kicked off on an earlier day and still has
-#   no result is never re-forecast (its frozen row stands) -- see select_forecast_window.
+#   The window also has a LOWER bound: a fixture that has already kicked off and still has no
+#   result is never forecast again (its frozen row stands) -- see select_forecast_window.
 
 K_MAX         = 15                 # scoreline grid (M2: 5 truncated ~11% of joint mass)
 CRED_REGION   = 0.90               # credible band for the W/D/L probabilities
@@ -234,7 +234,8 @@ def select_forecast_window(oos, now, horizon_days):
                the genuine pre-match row in the ledger (WC lesson L5). A postponed fixture is
                forecast again as soon as the feed carries its new kick-off.
     window   : anchor .. anchor + horizon_days (day-inclusive) -> forecast in this run
-    deferred : beyond the horizon -> forecast by a later run, closer to kickoff
+    deferred : beyond the horizon -> forecast by a later run, closer to kickoff; also any row with
+               no kick_off yet (it waits for a date; main() warns)
 
     Anchor = max(today, earliest unplayed) -- Max's rule (64f86df), so an international break
     forecasts the next round instead of exiting empty -- taken over fixtures that have NOT
@@ -243,17 +244,15 @@ def select_forecast_window(oos, now, horizon_days):
     now = pd.Timestamp(now)
     today = now.normalize()
     ko = pd.to_datetime(oos['kick_off'])
-    if ko.isna().any():
-        raise ValueError(f"{int(ko.isna().sum())} unplayed row(s) have no kick_off -- they would "
-                         f"fall outside every bucket and vanish silently; fix the fixture feed")
     day = ko.dt.normalize()
-    kicked_off = kicked_off_mask(ko, now)
+    undated = ko.isna()
+    kicked_off = kicked_off_mask(ko, now) & ~undated
+    live = ~kicked_off & ~undated
     stale = oos[kicked_off].copy()
-    live = oos[~kicked_off]
-    anchor = max(today, day[~kicked_off].min()) if len(live) else today
+    anchor = max(today, day[live].min()) if live.any() else today
     horizon = anchor + pd.Timedelta(days=horizon_days)
-    deferred = live[day[~kicked_off] > horizon].copy()
-    window = live[(day[~kicked_off] >= anchor) & (day[~kicked_off] <= horizon)].copy()
+    deferred = oos[(live & (day > horizon)) | undated].copy()
+    window = oos[live & (day >= anchor) & (day <= horizon)].copy()
     return window, deferred, stale, horizon
 
 
@@ -554,16 +553,23 @@ def main():
               f"result yet (results feed lagging? postponement not yet re-dated?) -- NOT re-forecast, "
               f"their frozen forecast stands: "
               f"{[f'{h} v {a}' for h, a in zip(_sh['name_team'], _sh['name_opp'])][:4]}")
+    _ud = deferred[deferred['kick_off'].isna() & (deferred['home_pitch'] == 1)]
+    if len(_ud):
+        print(f"  ⚠️  {_ud['id_match'].nunique()} fixture(s) have NO kick_off in the feed -- not "
+              f"forecast until it dates them: "
+              f"{[f'{h} v {a}' for h, a in zip(_ud['name_team'], _ud['name_opp'])][:4]}")
     if not len(oos):
         # With the anchor at the next fixture not yet kicked off, an empty window means nothing
-        # live is left: only kicked-off fixtures awaiting results. Nothing to forecast, but results
-        # that landed since the last run still belong in the feed, and the stale fixtures keep
-        # their frozen rows -- so the feed is rebuilt without the model, and the ledger untouched.
+        # dated is still to come: only kicked-off fixtures awaiting results (and undated ones).
+        # Nothing to forecast, but results that landed since the last run still belong in the
+        # feed, and the stale fixtures keep their frozen rows -- so the feed is rebuilt without
+        # the model, and the ledger untouched.
         if not os.path.exists(OUT_PKL):
-            raise SystemExit(f"Nothing to forecast ({n_all} unplayed fixture(s), all kicked off) and no "
-                             f"previous board at {OUT_PKL} to carry their scorelines from.")
-        print(f"  nothing to forecast: all {n_all} unplayed fixture(s) have kicked off and await "
-              f"results -- rebuilding the feed from results + frozen forecasts only")
+            raise SystemExit(f"Nothing to forecast ({n_all} unplayed fixture(s), none still to come with "
+                             f"a date) and no previous board at {OUT_PKL} to carry scorelines from.")
+        print(f"  nothing to forecast: {stale['id_match'].nunique()} fixture(s) kicked off and await "
+              f"results, {_ud['id_match'].nunique()} undated -- rebuilding the feed from results + "
+              f"frozen forecasts only")
         df_matches, grid_rows, team_rows, dev = pd.DataFrame(), [], [], None
     else:
         oos = oos.sort_values(['name_league', 'kick_off']).reset_index(drop=True)
@@ -610,9 +616,10 @@ def main():
         # first run: same guard (a duplicate key in the board must never reach the ledger)
         ledger = merge_frozen_ledger(led if led is not None else fresh.iloc[0:0], fresh, KEY)
         ledger.to_csv(FROZEN_LEDGER, index=False)
-    else:   # nothing forecast this run: the ledger is read, never rewritten
-        ledger = (led if led is not None
-                  else pd.DataFrame(columns=KEY + ['id_match'] + PCOLS + ['forecast_frozen_at']))
+    elif led is not None:   # nothing forecast this run: the ledger is read (same guard), never rewritten
+        ledger = merge_frozen_ledger(led, led.iloc[0:0], KEY)
+    else:
+        ledger = pd.DataFrame(columns=KEY + ['id_match'] + PCOLS + ['forecast_frozen_at'])
 
     # played fixtures of the target season: result + the forecast frozen before kickoff
     played = cd[(cd['season'] == TARGET_SEASON) & (cd['home_pitch'] == 1)
@@ -676,6 +683,13 @@ def main():
         print(f"  [stale] scorelines/team-goals carried forward from the previous board for "
               f"{len(set(zip(_g['home_team'], _g['away_team'])))} fixture(s)"
               + (f"; not on the previous board: {_miss[:3]}" if _miss else ""))
+    if not len(df_grid.columns) or not len(df_team.columns):
+        # nothing forecast and nothing carried forward: keep the previous board's columns, so the
+        # site reads an empty table rather than a header-less file
+        with open(OUT_PKL, 'rb') as f:
+            _prev = pickle.load(f)
+        df_grid = df_grid if len(df_grid.columns) else _prev['scorelines'].iloc[0:0]
+        df_team = df_team if len(df_team.columns) else _prev['team_goals'].iloc[0:0]
     df_team = df_team.sort_values(['name_league', 'kick_off', 'id_match', 'is_home'],
                                   ascending=[True, True, True, False]).reset_index(drop=True)
 

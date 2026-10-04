@@ -244,11 +244,18 @@ def test_previous_board_rows_are_carried_forward_for_stale_fixtures():
 # --- red-team round 2 additions -------------------------------------------------------
 
 
-def test_window_refuses_rows_without_kick_off():
-    oos = _oos([("g1", "A", "B", "2026-09-12 15:00", np.nan)])
-    oos.loc[0, "kick_off"] = pd.NaT
-    with pytest.raises(ValueError, match="no kick_off"):
-        W.select_forecast_window(oos, NOW, horizon_days=14)
+def test_window_defers_rows_without_kick_off():
+    # an undated fixture is neither forecast nor treated as kicked off: it waits for a date
+    # (main() warns), rather than crashing the weekly run or vanishing silently
+    oos = _oos(
+        [("g1", "A", "B", "2026-09-12 15:00", np.nan), ("g2", "C", "D", "2026-09-13 15:00", np.nan)]
+    )
+    oos.loc[1, "kick_off"] = pd.NaT
+    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+    assert (
+        list(window["id_match"]) == ["g1"] and list(deferred["id_match"]) == ["g2"] and stale.empty
+    )
+    assert horizon == pd.Timestamp("2026-09-26")
 
 
 def test_carry_forward_ignores_the_return_leg_and_remaps_renumbered_ids():
@@ -495,3 +502,29 @@ def test_main_forecasts_only_fixtures_that_have_not_kicked_off(season_files, mon
         "finished", "upcoming", "upcoming",
     ]  # fmt: skip
     assert feed.loc["PL_GD02_CD", "p_home_win"] == 0.4
+
+
+def test_main_with_nothing_to_forecast_still_refuses_a_duplicated_ledger(season_files, monkeypatch):
+    oos = pd.read_csv(season_files["OOS_PATH"])
+    oos[oos["id_match"] == "PL_GD02_CD"].to_csv(season_files["OOS_PATH"], index=False)
+    led = pd.read_csv(season_files["FROZEN_LEDGER"])
+    pd.concat([led, led.iloc[[1]]]).to_csv(season_files["FROZEN_LEDGER"], index=False)
+    monkeypatch.setattr(
+        W, "forecast_fixtures", lambda *a, **k: (_ for _ in ()).throw(AssertionError)
+    )
+    with pytest.raises(ValueError, match="duplicate"):
+        W.main()
+
+
+def test_main_with_only_undated_fixtures_left_ships_readable_tables(season_files, monkeypatch):
+    oos = pd.read_csv(season_files["OOS_PATH"])
+    oos = oos[oos["id_match"] == "PL_GD03_EF"].assign(kick_off=np.nan)
+    oos.to_csv(season_files["OOS_PATH"], index=False)
+    monkeypatch.setattr(
+        W, "forecast_fixtures", lambda *a, **k: (_ for _ in ()).throw(AssertionError)
+    )
+    W.main()
+    assert list(pd.read_csv(season_files["OUT_MATCH_CSV"])["id_match"]) == ["PL_GD01_AB"]
+    grid = pd.read_csv(season_files["OUT_GRID_CSV"])  # header-only, not an unreadable empty file
+    assert grid.empty and "p_mid" in grid.columns
+    assert pd.read_csv(season_files["OUT_TEAM_CSV"]).empty
