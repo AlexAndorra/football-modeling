@@ -358,59 +358,13 @@ def wdl_from_grid(g, cred=CRED_REGION):
     return out
 
 
-def main():
-    # ----------------------- 1. bundle ----------------------- #
-    print(f"Loading season bundle:\n  {BUNDLE_PATH}")
-    with open(BUNDLE_PATH, 'rb') as f:
-        B = cloudpickle.load(f)
-    meta = B['meta']
-    model = B['model']
-    idata = B['idata']
-    team_to_idx = B['team_to_idx']
-    names_teams = B['names_teams']
+def forecast_fixtures(oos, B, rho, factors_CS, factors_g):
+    """Model forecasts for the fixtures in the window -> (df_matches, grid_rows, team_rows,
+    eta-parity deviation). Moved verbatim out of main() so that a run with nothing to forecast
+    can still rebuild the feed without touching the model."""
+    meta, model, idata = B['meta'], B['model'], B['idata']
+    team_to_idx, names_teams = B['team_to_idx'], B['names_teams']
     train_means, train_stds = B['train_means'], B['train_stds']
-    rho = B['rho'] if USE_DIXON_COLES else None
-    factors_CS = meta['factors_CS']
-    factors = meta['factors']
-    factors_g = [f for f in factors if f != 'home_pitch']
-    print(f"  devVersion {meta['devVersion']} | trained through {meta['train_end']} "
-          f"({meta['n_train_rows']:,} rows) | rho {B['rho']:+.4f} | created {meta['created']}")
-
-    # ----------------------- 2. data + features ----------------------- #
-    print(f"\nLoading data:\n  HIST {HIST_PATH}\n  OOS  {OOS_PATH}")
-    hist_raw = pd.read_csv(HIST_PATH, low_memory=False)
-    oos_raw = pd.read_csv(OOS_PATH, low_memory=False)
-    print(f"  history rows {len(hist_raw):,} | upcoming rows {len(oos_raw):,} "
-          f"({oos_raw['id_match'].nunique()} fixtures)")
-    raw = pd.concat([hist_raw, oos_raw], axis=0, ignore_index=True)
-    cd = build_match_level(raw)
-    print(f"  {len(cd):,} team-match rows | seasons {cd['season'].min()} .. {cd['season'].max()}")
-    cd = compute_elo(cd)
-
-    # ----------------------- 3. OOS slice + scaling ----------------------- #
-    oos = cd[(cd['season'] == TARGET_SEASON) & (cd['match_outcome'].isna())].copy()
-    if not len(oos):
-        raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found — nothing to forecast. "
-                         f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
-    n_all = oos['id_match'].nunique()
-    oos, deferred, stale, horizon = select_forecast_window(oos, pd.Timestamp.now(), HORIZON_DAYS)
-    if len(stale):
-        _sh = stale[stale['home_pitch'] == 1]
-        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) already kicked off but carry NO "
-              f"result yet (results feed lagging? postponement not yet re-dated?) -- NOT re-forecast, "
-              f"their frozen forecast stands: "
-              f"{[f'{h} v {a}' for h, a in zip(_sh['name_team'], _sh['name_opp'])][:4]}")
-    if not len(oos):
-        nxt = (f"earliest {deferred['kick_off'].min():%Y-%m-%d}" if len(deferred)
-               else "none beyond the horizon either -- only kicked-off fixtures awaiting results")
-        raise SystemExit(f"No {TARGET_SEASON} fixtures within {HORIZON_DAYS} days "
-                         f"({n_all} unplayed exist, {nxt}).")
-    oos = oos.sort_values(['name_league', 'kick_off']).reset_index(drop=True)
-    n_fix = oos['id_match'].nunique()
-    print(f"  horizon: {HORIZON_DAYS} days (to {horizon:%Y-%m-%d}) -> forecasting {n_fix} of "
-          f"{n_all} unplayed fixtures; {deferred['id_match'].nunique()} deferred to later runs")
-    print(f"\nUpcoming fixtures in {TARGET_SEASON}: {n_fix} "
-          f"({', '.join(f'{k} {v}' for k, v in oos[oos.home_pitch == 1].groupby('name_league').size().items())})")
 
     # keep the RAW ELO ratings for display before standardization overwrites the columns
     oos['elo_home_raw'] = oos['elo_team'].to_numpy()
@@ -560,6 +514,66 @@ def main():
                 rec[f'p_goals_{lbl}_up'] = float(np.quantile(pk[i], q_hi))
             team_rows.append(rec)
     df_matches = pd.DataFrame(rows).sort_values(['name_league', 'kick_off']).reset_index(drop=True)
+    return df_matches, grid_rows, team_rows, dev
+
+
+def main():
+    # ----------------------- 1. bundle ----------------------- #
+    print(f"Loading season bundle:\n  {BUNDLE_PATH}")
+    with open(BUNDLE_PATH, 'rb') as f:
+        B = cloudpickle.load(f)
+    meta = B['meta']      # model, idata, team maps and training moments: see forecast_fixtures()
+    rho = B['rho'] if USE_DIXON_COLES else None
+    factors_CS = meta['factors_CS']
+    factors = meta['factors']
+    factors_g = [f for f in factors if f != 'home_pitch']
+    print(f"  devVersion {meta['devVersion']} | trained through {meta['train_end']} "
+          f"({meta['n_train_rows']:,} rows) | rho {B['rho']:+.4f} | created {meta['created']}")
+
+    # ----------------------- 2. data + features ----------------------- #
+    print(f"\nLoading data:\n  HIST {HIST_PATH}\n  OOS  {OOS_PATH}")
+    hist_raw = pd.read_csv(HIST_PATH, low_memory=False)
+    oos_raw = pd.read_csv(OOS_PATH, low_memory=False)
+    print(f"  history rows {len(hist_raw):,} | upcoming rows {len(oos_raw):,} "
+          f"({oos_raw['id_match'].nunique()} fixtures)")
+    raw = pd.concat([hist_raw, oos_raw], axis=0, ignore_index=True)
+    cd = build_match_level(raw)
+    print(f"  {len(cd):,} team-match rows | seasons {cd['season'].min()} .. {cd['season'].max()}")
+    cd = compute_elo(cd)
+
+    # ----------------------- 3. OOS slice + scaling ----------------------- #
+    oos = cd[(cd['season'] == TARGET_SEASON) & (cd['match_outcome'].isna())].copy()
+    if not len(oos):
+        raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found — nothing to forecast. "
+                         f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
+    n_all = oos['id_match'].nunique()
+    oos, deferred, stale, horizon = select_forecast_window(oos, pd.Timestamp.now(), HORIZON_DAYS)
+    if len(stale):
+        _sh = stale[stale['home_pitch'] == 1]
+        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) already kicked off but carry NO "
+              f"result yet (results feed lagging? postponement not yet re-dated?) -- NOT re-forecast, "
+              f"their frozen forecast stands: "
+              f"{[f'{h} v {a}' for h, a in zip(_sh['name_team'], _sh['name_opp'])][:4]}")
+    if not len(oos):
+        # With the anchor at the next fixture not yet kicked off, an empty window means nothing
+        # live is left: only kicked-off fixtures awaiting results. Nothing to forecast, but results
+        # that landed since the last run still belong in the feed, and the stale fixtures keep
+        # their frozen rows -- so the feed is rebuilt without the model, and the ledger untouched.
+        if not os.path.exists(OUT_PKL):
+            raise SystemExit(f"Nothing to forecast ({n_all} unplayed fixture(s), all kicked off) and no "
+                             f"previous board at {OUT_PKL} to carry their scorelines from.")
+        print(f"  nothing to forecast: all {n_all} unplayed fixture(s) have kicked off and await "
+              f"results -- rebuilding the feed from results + frozen forecasts only")
+        df_matches, grid_rows, team_rows, dev = pd.DataFrame(), [], [], None
+    else:
+        oos = oos.sort_values(['name_league', 'kick_off']).reset_index(drop=True)
+        n_fix = oos['id_match'].nunique()
+        print(f"  horizon: {HORIZON_DAYS} days (to {horizon:%Y-%m-%d}) -> forecasting {n_fix} of "
+              f"{n_all} unplayed fixtures; {deferred['id_match'].nunique()} deferred to later runs")
+        print(f"\nUpcoming fixtures in {TARGET_SEASON}: {n_fix} "
+              f"({', '.join(f'{k} {v}' for k, v in oos[oos.home_pitch == 1].groupby('name_league').size().items())})")
+        df_matches, grid_rows, team_rows, dev = forecast_fixtures(oos, B, rho, factors_CS, factors_g)
+
 
     # ------------------------------------------------------------------ #
     #  FROZEN FORECAST LEDGER  +  full-season feed (played + upcoming)
@@ -584,17 +598,21 @@ def main():
     # and immune to both renumbering and date changes.
     KEY = ['season', 'home_team', 'away_team']
     stamp = datetime.now().strftime('%Y-%m-%d')
-    fresh = df_matches[KEY + ['id_match'] + PCOLS].copy()
-    fresh['forecast_frozen_at'] = stamp
+    led = None
     if os.path.exists(FROZEN_LEDGER):
         led = pd.read_csv(FROZEN_LEDGER)
         if not all(k in led.columns for k in KEY):
             raise SystemExit(f"{FROZEN_LEDGER} predates the team-keyed schema. Rebuild it from "
                              f"the archived vintages before running (see rebuild_frozen_ledger.py).")
-        ledger = merge_frozen_ledger(led, fresh, KEY)
-    else:   # first run: same guard (a duplicate key in the board must never reach the ledger)
-        ledger = merge_frozen_ledger(fresh.iloc[0:0], fresh, KEY)
-    ledger.to_csv(FROZEN_LEDGER, index=False)
+    if len(df_matches):
+        fresh = df_matches[KEY + ['id_match'] + PCOLS].copy()
+        fresh['forecast_frozen_at'] = stamp
+        # first run: same guard (a duplicate key in the board must never reach the ledger)
+        ledger = merge_frozen_ledger(led if led is not None else fresh.iloc[0:0], fresh, KEY)
+        ledger.to_csv(FROZEN_LEDGER, index=False)
+    else:   # nothing forecast this run: the ledger is read, never rewritten
+        ledger = (led if led is not None
+                  else pd.DataFrame(columns=KEY + ['id_match'] + PCOLS + ['forecast_frozen_at']))
 
     # played fixtures of the target season: result + the forecast frozen before kickoff
     played = cd[(cd['season'] == TARGET_SEASON) & (cd['home_pitch'] == 1)
@@ -631,8 +649,14 @@ def main():
     df_upcoming['away_goals'] = np.nan
     df_upcoming['status'] = 'upcoming'
     df_upcoming['forecast_frozen_at'] = stamp
-    df_matches = (pd.concat([pd.DataFrame(feed_rows), df_upcoming], ignore_index=True)
+    _parts = [p for p in (pd.DataFrame(feed_rows), df_upcoming) if len(p)]
+    if not _parts:
+        raise SystemExit("Nothing to ship: no result, no frozen forecast and nothing forecast this run.")
+    df_matches = (pd.concat(_parts, ignore_index=True)
                   .sort_values(['name_league', 'kick_off', 'id_match']).reset_index(drop=True))
+    for c in PCOLS + ['forecast_frozen_at']:      # a feed of results without any frozen forecast
+        if c not in df_matches:
+            df_matches[c] = np.nan
     for c in ['ml_score_home', 'ml_score_away', 'home_goals', 'away_goals']:
         df_matches[c] = df_matches[c].astype('Int64')     # nullable int: render 2, not 2.0
     print(f"  feed: {int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
@@ -646,8 +670,9 @@ def main():
         with open(OUT_PKL, 'rb') as f:
             _prev = pickle.load(f)
         _g, _t, _miss = carry_forward_board_rows(_prev, stale[stale['home_pitch'] == 1])
-        df_grid = pd.concat([df_grid, _g], ignore_index=True)
-        df_team = pd.concat([df_team, _t], ignore_index=True)
+        # (a run with nothing forecast has empty, column-less frames here: _g / _t alone)
+        df_grid = pd.concat([d for d in (df_grid, _g) if len(d.columns)], ignore_index=True)
+        df_team = pd.concat([d for d in (df_team, _t) if len(d.columns)], ignore_index=True)
         print(f"  [stale] scorelines/team-goals carried forward from the previous board for "
               f"{len(set(zip(_g['home_team'], _g['away_team'])))} fixture(s)"
               + (f"; not on the previous board: {_miss[:3]}" if _miss else ""))
@@ -666,10 +691,11 @@ def main():
     SUM_TOL = 1e-3
     _has = df_matches[['p_home_win', 'p_draw', 'p_away_win']].notna().all(axis=1)
     _s = df_matches.loc[_has, ['p_home_win', 'p_draw', 'p_away_win']].sum(axis=1)
-    _worst = df_matches.loc[_s.sub(1).abs().idxmax()]
-    print(f"\n[row sums] {int(_has.sum())} forecast rows | min {_s.min():.9f} max {_s.max():.9f} | "
-          f"max deficit {(1 - _s.min()):.2e} (k_max={K_MAX} truncation) | "
-          f"worst: {_worst['home_team']} v {_worst['away_team']}")
+    if _has.any():
+        _worst = df_matches.loc[_s.sub(1).abs().idxmax()]
+        print(f"\n[row sums] {int(_has.sum())} forecast rows | min {_s.min():.9f} max {_s.max():.9f} | "
+              f"max deficit {(1 - _s.min()):.2e} (k_max={K_MAX} truncation) | "
+              f"worst: {_worst['home_team']} v {_worst['away_team']}")
     if not np.isclose(_s, 1.0, atol=SUM_TOL, rtol=0).all():
         bad = df_matches.loc[_has][~np.isclose(_s, 1.0, atol=SUM_TOL, rtol=0)]
         raise AssertionError(

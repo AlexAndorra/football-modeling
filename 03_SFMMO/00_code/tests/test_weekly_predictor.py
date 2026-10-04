@@ -232,7 +232,9 @@ def test_previous_board_rows_are_carried_forward_for_stale_fixtures():
             }
         ),
     }
-    stale = pd.DataFrame({"id_match": ["g1", "g8"], "name_team": ["A", "Q"], "name_opp": ["B", "R"]})
+    stale = pd.DataFrame(
+        {"id_match": ["g1", "g8"], "name_team": ["A", "Q"], "name_opp": ["B", "R"]}
+    )
     grid, team, missing = W.carry_forward_board_rows(prev, stale)
     assert len(grid) == 2 and set(grid["home_team"]) == {"A"}
     assert len(team) == 2 and set(team["team"]) == {"A", "B"}
@@ -252,12 +254,23 @@ def test_window_refuses_rows_without_kick_off():
 def test_carry_forward_ignores_the_return_leg_and_remaps_renumbered_ids():
     prev = {
         "scorelines": pd.DataFrame(
-            {"id_match": ["g6", "g9"], "home_team": ["A", "B"], "away_team": ["B", "A"],
-             "home_goals": [0, 0], "away_goals": [0, 0], "p_mid": [0.1, 0.2]}
+            {
+                "id_match": ["g6", "g9"],
+                "home_team": ["A", "B"],
+                "away_team": ["B", "A"],
+                "home_goals": [0, 0],
+                "away_goals": [0, 0],
+                "p_mid": [0.1, 0.2],
+            }
         ),
         "team_goals": pd.DataFrame(
-            {"id_match": ["g6", "g6", "g9", "g9"], "team": ["A", "B", "B", "A"],
-             "opponent": ["B", "A", "A", "B"], "is_home": [1, 0, 1, 0], "p_goals_0": [0.2, 0.3, 0.4, 0.5]}
+            {
+                "id_match": ["g6", "g6", "g9", "g9"],
+                "team": ["A", "B", "B", "A"],
+                "opponent": ["B", "A", "A", "B"],
+                "is_home": [1, 0, 1, 0],
+                "p_goals_0": [0.2, 0.3, 0.4, 0.5],
+            }
         ),
     }
     stale = pd.DataFrame({"id_match": ["g5"], "name_team": ["A"], "name_opp": ["B"]})  # renumbered
@@ -304,7 +317,9 @@ def test_window_anchor_ignores_kicked_off_fixtures():
 def test_window_starts_at_the_next_forecastable_fixture():
     # Max's rule (64f86df): anchor = max(today, earliest unplayed), here over fixtures that have
     # not kicked off. Same rule as 006_040, so the two boards cover the same fixtures.
-    oos = _oos([("g1", "A", "B", "2026-09-08 15:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)])
+    oos = _oos(
+        [("g1", "A", "B", "2026-09-08 15:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)]
+    )
     window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
     assert horizon == pd.Timestamp("2026-09-22")
     assert list(window["id_match"]) == ["g1", "g2"]
@@ -312,7 +327,9 @@ def test_window_starts_at_the_next_forecastable_fixture():
 
 
 def test_window_anchor_is_today_when_a_fixture_is_still_to_come_today():
-    oos = _oos([("g1", "A", "B", "2026-09-07 20:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)])
+    oos = _oos(
+        [("g1", "A", "B", "2026-09-07 20:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)]
+    )
     window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
     assert horizon == pd.Timestamp("2026-09-21")
     assert list(window["id_match"]) == ["g1"]
@@ -334,3 +351,147 @@ def test_merge_with_an_empty_ledger_is_the_first_run_path():
     )
     with pytest.raises(ValueError, match="duplicate"):
         W.merge_frozen_ledger(empty, dup, KEY)
+
+
+# --- main(), end to end on toy files ----------------------------------------------------
+# The bundle and the season CSVs live outside the repo, so main() is driven here with toy
+# files and a stand-in for the model step: everything AROUND the model (window, ledger,
+# feed, export) runs for real.
+
+FULL_PCOLS = [
+    "p_home_win", "p_home_win_lo", "p_home_win_up", "p_draw", "p_draw_lo", "p_draw_up",
+    "p_away_win", "p_away_win_lo", "p_away_win_up", "exp_goals_home", "exp_goals_away",
+    "ml_score_home", "ml_score_away",
+]  # fmt: skip
+
+
+def _raw(id_match, home, away, kick_off, gh, ga):
+    base = dict(
+        id_match=id_match, name_league="PL", id_league=1, season="2026/27", gameday=0,
+        kick_off=kick_off, points_team=0, points_opp=0, points_diff=0,
+        goalsscored_cum_team=0, goalsscored_cum_opp=0,
+        goalsconceded_cum_team=0, goalsconceded_cum_opp=0,
+    )  # fmt: skip
+    return [
+        dict(base, name_player=f"{home}1", name_team=home, name_opp=away, home_pitch=1,
+             goalsscored_inGame_team=gh, goalsscored_inGame_opp=ga),
+        dict(base, name_player=f"{away}1", name_team=away, name_opp=home, home_pitch=0,
+             goalsscored_inGame_team=ga, goalsscored_inGame_opp=gh),
+    ]  # fmt: skip
+
+
+def _frozen(home, away, id_match, p_home, stamp):
+    row = dict(season="2026/27", home_team=home, away_team=away, id_match=id_match)
+    row.update({c: 0.0 for c in FULL_PCOLS})
+    row.update(
+        p_home_win=p_home, p_draw=0.3, p_away_win=0.7 - p_home, ml_score_home=1, ml_score_away=1
+    )
+    row["forecast_frozen_at"] = stamp
+    return row
+
+
+@pytest.fixture
+def season_files(tmp_path, monkeypatch):
+    import cloudpickle
+
+    future = (pd.Timestamp.now() + pd.Timedelta(days=3)).strftime("%Y-%m-%d 20:00")
+    hist = pd.DataFrame(_raw("PL_GD01_AB", "A", "B", "2026-09-01 15:00", 2, 1))
+    oos = pd.DataFrame(
+        _raw("PL_GD02_CD", "C", "D", "2026-09-20 15:00", np.nan, np.nan)  # kicked off, no result
+        + _raw("PL_GD03_EF", "E", "F", future, np.nan, np.nan)
+    )
+    ledger = pd.DataFrame(
+        [
+            _frozen("A", "B", "PL_GD01_AB", 0.5, "2026-08-30"),
+            _frozen("C", "D", "PL_GD02_CD", 0.4, "2026-09-18"),
+        ]
+    )
+    prev_board = dict(
+        scorelines=pd.DataFrame(
+            [dict(id_match="PL_GD02_CD", home_team="C", away_team="D", home_goals=1, away_goals=1,
+                  p_mid=0.12, p_lo=0.1, p_up=0.14)]
+        ),
+        team_goals=pd.DataFrame(
+            [dict(id_match="PL_GD02_CD", name_league="PL", gameday=2, kick_off="2026-09-20 15:00",
+                  team=t, opponent=o, is_home=h, exp_goals=1.2)
+             for t, o, h in [("C", "D", 1), ("D", "C", 0)]]
+        ),
+    )  # fmt: skip
+    bundle = dict(
+        meta=dict(devVersion="K", train_end="2025/26", n_train_rows=1, created="toy",
+                  factors_CS=[], factors=["home_pitch"], seed=1),
+        model=None, idata=None, team_to_idx={}, names_teams=[],
+        train_means=pd.DataFrame(), train_stds=pd.DataFrame(), rho=0.0,
+    )  # fmt: skip
+    p = {k: tmp_path / v for k, v in dict(
+        BUNDLE_PATH="bundle.pkl", HIST_PATH="hist.csv", OOS_PATH="oos.csv",
+        FROZEN_LEDGER="frozen.csv", OUT_MATCH_CSV="matches.csv", OUT_GRID_CSV="grid.csv",
+        OUT_TEAM_CSV="team.csv", OUT_PKL="board.pkl").items()}  # fmt: skip
+    with open(p["BUNDLE_PATH"], "wb") as f:
+        cloudpickle.dump(bundle, f)
+    with open(p["OUT_PKL"], "wb") as f:
+        cloudpickle.dump(prev_board, f)
+    hist.to_csv(p["HIST_PATH"], index=False)
+    oos.to_csv(p["OOS_PATH"], index=False)
+    ledger.to_csv(p["FROZEN_LEDGER"], index=False)
+    for k, v in p.items():
+        monkeypatch.setattr(W, k, str(v))
+    monkeypatch.setattr(W, "OUT_DIR", str(tmp_path))
+    monkeypatch.setattr(W, "ARCHIVE_VINTAGES", False)
+    return p
+
+
+def test_main_rebuilds_the_feed_when_only_kicked_off_fixtures_remain(season_files, monkeypatch):
+    # Sourcery on PR #3: with nothing left to forecast, main() used to exit before the feed,
+    # so results that landed since the last run never reached the site.
+    oos = pd.read_csv(season_files["OOS_PATH"])
+    oos[oos["id_match"] == "PL_GD02_CD"].to_csv(season_files["OOS_PATH"], index=False)
+
+    def no_model(*a, **k):
+        raise AssertionError("nothing is in the window: the model must not run")
+
+    monkeypatch.setattr(W, "forecast_fixtures", no_model)
+    ledger_before = season_files["FROZEN_LEDGER"].read_bytes()
+    W.main()
+    assert season_files["FROZEN_LEDGER"].read_bytes() == ledger_before  # nothing forecast
+    feed = pd.read_csv(season_files["OUT_MATCH_CSV"]).set_index("id_match")
+    assert (
+        feed.loc["PL_GD01_AB", "status"] == "finished" and feed.loc["PL_GD01_AB", "home_goals"] == 2
+    )
+    assert feed.loc["PL_GD01_AB", "p_home_win"] == 0.5  # the forecast frozen before kick-off
+    assert feed.loc["PL_GD02_CD", "status"] == "upcoming"
+    assert feed.loc["PL_GD02_CD", "p_home_win"] == 0.4
+    assert feed.loc["PL_GD02_CD", "forecast_frozen_at"] == "2026-09-18"
+    assert list(pd.read_csv(season_files["OUT_GRID_CSV"])["id_match"]) == ["PL_GD02_CD"]
+    assert set(pd.read_csv(season_files["OUT_TEAM_CSV"])["team"]) == {"C", "D"}
+
+
+def test_main_forecasts_only_fixtures_that_have_not_kicked_off(season_files, monkeypatch):
+    seen = {}
+
+    def fake_model(oos, *a, **k):
+        seen["ids"] = sorted(oos["id_match"].unique())
+        h = oos[oos["home_pitch"] == 1].iloc[0]
+        row = _frozen(h["name_team"], h["name_opp"], h["id_match"], 0.55, None)
+        row.pop("forecast_frozen_at")
+        row.update(
+            name_league="PL", gameday=3, kick_off=h["kick_off"], elo_home=1500.0, elo_away=1500.0
+        )
+        grid = [dict(id_match=h["id_match"], home_team="E", away_team="F", home_goals=1, away_goals=0,
+                     p_mid=0.1, p_lo=0.08, p_up=0.12)]  # fmt: skip
+        team = [dict(id_match=h["id_match"], name_league="PL", gameday=3, kick_off=h["kick_off"],
+                     team=t, opponent=o, is_home=i, exp_goals=1.0)
+                for t, o, i in [("E", "F", 1), ("F", "E", 0)]]  # fmt: skip
+        return pd.DataFrame([row]), grid, team, 0.0
+
+    monkeypatch.setattr(W, "forecast_fixtures", fake_model)
+    W.main()
+    assert seen["ids"] == ["PL_GD03_EF"]  # the kicked-off C v D is never sent to the model
+    led = pd.read_csv(season_files["FROZEN_LEDGER"]).set_index("id_match")
+    assert led.loc["PL_GD02_CD", "forecast_frozen_at"] == "2026-09-18"  # untouched
+    assert led.loc["PL_GD03_EF", "p_home_win"] == 0.55
+    feed = pd.read_csv(season_files["OUT_MATCH_CSV"]).set_index("id_match")
+    assert feed.loc[["PL_GD01_AB", "PL_GD02_CD", "PL_GD03_EF"], "status"].tolist() == [
+        "finished", "upcoming", "upcoming",
+    ]  # fmt: skip
+    assert feed.loc["PL_GD02_CD", "p_home_win"] == 0.4
