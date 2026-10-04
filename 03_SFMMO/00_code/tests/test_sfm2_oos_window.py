@@ -168,3 +168,30 @@ def test_a_board_row_for_a_kicked_off_fixture_never_replaces_the_frozen_one(tmp_
     out = run(_board([("p1", 5, "A", "B", 0.20)]), _scored([G1]), NO_PLAYED, "m",
               ledger_path=path, now="run2", stale_ids={"g1"}).set_index("id_match")  # fmt: skip
     assert out.loc["g1", "p0_mid"] == 0.70 and out.loc["g1", "forecast_frozen_at"] == "run1"
+
+
+# --- the run block: SMOKE never writes the ledger -------------------------------------------
+
+
+def _run_block():
+    tree = ast.parse(_ledger_cell())
+    block = [n for n in tree.body if isinstance(n, ast.If)][-1]
+    return compile(ast.Module(body=[block], type_ignores=[]), str(NB), "exec")
+
+
+@pytest.mark.parametrize("smoke", [True, False])
+def test_smoke_run_never_writes_the_ledger(smoke):
+    calls = []
+    data = pd.DataFrame(
+        {"id_match": ["g1"], "name_player": ["p1"], "season": ["2026/27"], "gameday": [5],
+         "name_league": ["L"], "name_team": ["A"], "name_opp": ["B"], "goals_in_match": [0],
+         "home_pitch": [1], "is_oos": [True]}
+    )  # fmt: skip
+    ns = dict(
+        SMOKE=smoke, dict_PLAYERS={"oos": {"p1": {}}}, data__all=data, SFM_model__NAME="m",
+        STALE_MATCH_IDS={"g0"}, update_frozen_ledger=lambda *a, **k: calls.append(k),
+    )  # fmt: skip
+    exec(_run_block(), ns)
+    assert len(calls) == (0 if smoke else 1)
+    if not smoke:
+        assert calls[0]["stale_ids"] == {"g0"}
