@@ -1,9 +1,9 @@
 """Receipts-integrity guards of the weekly league predictor (006_060).
 
 The frozen ledger is only honest if a fixture that has ALREADY kicked off is never re-forecast:
-by the next run the ELO has absorbed the weekend's results, so a re-forecast is hindsight (WC
-lesson L5, ~4 pp flattering). These tests pin the window selection, the ledger merge, and the
-hand-over of stale fixtures to the feed.
+a forecast made after kick-off is not a receipt, and it can see results the pre-match one could
+not (WC lesson L5). These tests pin the window selection, the ledger merge, and the hand-over of
+stale fixtures to the feed.
 """
 
 import importlib.util
@@ -68,9 +68,31 @@ def test_window_keeps_same_day_fixture_with_date_only_stamp():
 
 
 def test_window_horizon_is_inclusive_of_the_last_day():
-    oos = _oos([("g1", "A", "B", "2026-09-21 20:00", np.nan)])  # NOW + 14 days, evening
+    oos = _oos(
+        [
+            ("g0", "C", "D", "2026-09-07 20:00", np.nan),  # tonight -> anchor is today
+            ("g1", "A", "B", "2026-09-21 20:00", np.nan),  # NOW + 14 days, evening
+        ]
+    )
     window, deferred, stale, _ = W.select_forecast_window(oos, NOW, horizon_days=14)
-    assert list(window["id_match"]) == ["g1"]
+    assert list(window["id_match"]) == ["g0", "g1"]
+
+
+@pytest.mark.parametrize(
+    "kick_off, expected",
+    [
+        ("2026-09-06 15:00", True),  # yesterday
+        ("2026-09-06 00:00", True),  # yesterday, unconfirmed slot: the day itself has passed
+        ("2026-09-07 09:00", True),  # today, confirmed time already passed
+        ("2026-09-07 10:00", False),  # today, kicking off right now: not yet
+        ("2026-09-07 20:00", False),  # tonight
+        ("2026-09-07 00:00", False),  # today, unconfirmed slot: cannot be judged
+        ("2026-09-08 15:00", False),  # tomorrow
+    ],
+)
+def test_kicked_off_mask(kick_off, expected):
+    ko = pd.Series(pd.to_datetime([kick_off]))
+    assert bool(W.kicked_off_mask(ko, NOW).iloc[0]) is expected
 
 
 # --- ledger merge ---------------------------------------------------------------------
@@ -279,8 +301,18 @@ def test_window_anchor_ignores_kicked_off_fixtures():
     assert horizon == pd.Timestamp("2026-10-09")
 
 
-def test_window_anchor_is_today_on_a_normal_week():
+def test_window_starts_at_the_next_forecastable_fixture():
+    # Max's rule (64f86df): anchor = max(today, earliest unplayed), here over fixtures that have
+    # not kicked off. Same rule as 006_040, so the two boards cover the same fixtures.
     oos = _oos([("g1", "A", "B", "2026-09-08 15:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)])
+    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+    assert horizon == pd.Timestamp("2026-09-22")
+    assert list(window["id_match"]) == ["g1", "g2"]
+    assert deferred.empty
+
+
+def test_window_anchor_is_today_when_a_fixture_is_still_to_come_today():
+    oos = _oos([("g1", "A", "B", "2026-09-07 20:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)])
     window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
     assert horizon == pd.Timestamp("2026-09-21")
     assert list(window["id_match"]) == ["g1"]

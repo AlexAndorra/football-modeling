@@ -211,25 +211,35 @@ def compute_elo(cd):
     return cd
 
 
+def kicked_off_mask(ko, now):
+    """True where a fixture has already kicked off: on an earlier day, or today with a confirmed
+    time that has passed. An unconfirmed slot is stored as 00:00 local (not a midnight kickoff),
+    so a same-day 00:00 stamp cannot be judged and counts as not yet kicked off.
+    006_040 carries a copy of this rule; a parity test keeps the two identical."""
+    now = pd.Timestamp(now)
+    today = now.normalize()
+    ko = pd.to_datetime(ko)
+    day = ko.dt.normalize()
+    timed = ko != day                                   # a real kickoff time, not a 00:00 placeholder
+    return (day < today) | ((day == today) & timed & (ko < now))
+
+
 def select_forecast_window(oos, now, horizon_days):
     """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon.
 
     stale    : already kicked off but still carries no result (results feed lagging, postponement
-               not yet re-dated, ...). NEVER re-forecast: by now the ELO has absorbed the other
-               results of that round, so a re-forecast is hindsight and would overwrite the
-               genuine pre-match row in the ledger (WC lesson L5, ~4 pp flattering). A postponed
-               fixture is re-forecast as soon as the feed carries its new kick-off.
+               not yet re-dated, ...). NEVER re-forecast: a forecast made after kick-off is not a
+               receipt, and by then ELO carries results the pre-match forecast could not see
+               (matches that kicked off before or alongside it). Re-forecasting would overwrite
+               the genuine pre-match row in the ledger (WC lesson L5). A postponed fixture is
+               forecast again as soon as the feed carries its new kick-off.
     window   : anchor .. anchor + horizon_days (day-inclusive) -> forecast in this run
     deferred : beyond the horizon -> forecast by a later run, closer to kickoff
 
-    The anchor is today, unless nothing forecastable falls within today + horizon_days (an
-    international break): then the window slides to start at the earliest forecastable kick-off,
-    so the run forecasts the next round instead of exiting empty (Max, 64f86df). Stale fixtures
-    never enter the anchor, so a past kick-off cannot drag the window backwards.
-
-    "Already kicked off" = on an earlier day, or today with a confirmed time that has passed.
-    An unconfirmed slot is stored as 00:00 local (not a midnight kickoff), so a same-day 00:00
-    stamp cannot be judged and stays in the window."""
+    Anchor = max(today, earliest unplayed) -- Max's rule (64f86df), so an international break
+    forecasts the next round instead of exiting empty -- taken over fixtures that have NOT
+    kicked off: a stale fixture can neither be re-forecast nor drag the window backwards.
+    006_040 uses the same rule, so the two boards cover the same fixtures."""
     now = pd.Timestamp(now)
     today = now.normalize()
     ko = pd.to_datetime(oos['kick_off'])
@@ -237,13 +247,10 @@ def select_forecast_window(oos, now, horizon_days):
         raise ValueError(f"{int(ko.isna().sum())} unplayed row(s) have no kick_off -- they would "
                          f"fall outside every bucket and vanish silently; fix the fixture feed")
     day = ko.dt.normalize()
-    timed = ko != day                                   # a real kickoff time, not a 00:00 placeholder
-    kicked_off = (day < today) | ((day == today) & timed & (ko < now))
+    kicked_off = kicked_off_mask(ko, now)
     stale = oos[kicked_off].copy()
     live = oos[~kicked_off]
-    anchor = today
-    if len(live) and day[~kicked_off].min() > today + pd.Timedelta(days=horizon_days):
-        anchor = day[~kicked_off].min()
+    anchor = max(today, day[~kicked_off].min()) if len(live) else today
     horizon = anchor + pd.Timedelta(days=horizon_days)
     deferred = live[day[~kicked_off] > horizon].copy()
     window = live[(day[~kicked_off] >= anchor) & (day[~kicked_off] <= horizon)].copy()
@@ -389,7 +396,7 @@ def main():
     oos, deferred, stale, horizon = select_forecast_window(oos, pd.Timestamp.now(), HORIZON_DAYS)
     if len(stale):
         _sh = stale[stale['home_pitch'] == 1]
-        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) kicked off before today but carry NO "
+        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) already kicked off but carry NO "
               f"result yet (results feed lagging? postponement not yet re-dated?) -- NOT re-forecast, "
               f"their frozen forecast stands: "
               f"{[f'{h} v {a}' for h, a in zip(_sh['name_team'], _sh['name_opp'])][:4]}")
