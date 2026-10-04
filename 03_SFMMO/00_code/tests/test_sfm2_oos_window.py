@@ -195,3 +195,172 @@ def test_smoke_run_never_writes_the_ledger(smoke):
     assert len(calls) == (0 if smoke else 1)
     if not smoke:
         assert calls[0]["stale_ids"] == {"g0"}
+
+
+# --- ledger identity: each leg keeps its own receipt ------------------------------------------
+
+DUMMY = (
+    "gX",
+    "z_player",
+    4,
+    "X",
+    "Y",
+    1,
+    pd.Timestamp("2026-09-27 15:00"),
+)  # keeps the board non-empty
+
+
+def _played(rows, goals):
+    return _scored(rows).assign(goals_in_match=goals)[NO_PLAYED.columns]
+
+
+def test_the_return_leg_gets_its_own_receipt(tmp_path):
+    # A pair meets twice. The first leg's finished row must never be relabelled as the return leg
+    # (which would throw away the return leg's forecast and never record its result).
+    L = _ledger_functions()
+    path = str(tmp_path / "frozen.csv")
+    run = L["update_frozen_ledger"]
+    first = ("gF", "a_player", 3, "A", "B", 1, pd.Timestamp("2026-09-20 15:00"))  # A at home
+    ret = ("gR", "a_player", 22, "A", "B", 0, pd.Timestamp("2027-02-20 15:00"))  # B at home
+    dummy = _board([("z_player", 4, "X", "Y", 0.9)])
+    run(
+        _board([("a_player", 3, "A", "B", 0.70)]),
+        _scored([first]),
+        NO_PLAYED,
+        "m",
+        ledger_path=path,
+        now="run1",
+    )
+    run(dummy, _scored([DUMMY]), _played([first], 1), "m", ledger_path=path, now="run2")
+    out = run(_board([("a_player", 22, "A", "B", 0.40)]), _scored([ret]), _played([first, DUMMY], [1, 0]), "m",
+              ledger_path=path, now="run3").set_index("id_match")  # fmt: skip
+    assert out.loc["gF", "status"] == "finished" and out.loc["gF", "p0_mid"] == 0.70
+    assert out.loc["gF", "actual_goals"] == 1 and out.loc["gF", "gameday"] == 3
+    assert out.loc["gR", "status"] == "upcoming" and out.loc["gR", "p0_mid"] == 0.40
+    out = run(dummy, _scored([DUMMY]), _played([first, DUMMY, ret], [1, 0, 3]), "m",
+              ledger_path=path, now="run4").set_index("id_match")  # fmt: skip
+    assert out.loc["gR", "status"] == "finished" and out.loc["gR", "actual_goals"] == 3
+    assert out.loc["gR", "p0_mid"] == 0.40 and out.loc["gF", "p0_mid"] == 0.70
+
+
+def test_a_renumbered_fixture_is_still_frozen_when_played(tmp_path):
+    # Max's self-heal (La Liga 2026-08: a postponement renumbered G6 -> G5) must keep working.
+    L = _ledger_functions()
+    path = str(tmp_path / "frozen.csv")
+    run = L["update_frozen_ledger"]
+    g6 = ("g6", "p1", 6, "A", "B", 1, pd.Timestamp("2026-09-27 15:00"))
+    g5 = ("g5", "p1", 5, "A", "B", 1, pd.Timestamp("2026-09-27 15:00"))
+    run(
+        _board([("p1", 6, "A", "B", 0.70)]),
+        _scored([g6]),
+        NO_PLAYED,
+        "m",
+        ledger_path=path,
+        now="run1",
+    )
+    out = run(_board([("z_player", 4, "X", "Y", 0.9)]), _scored([DUMMY]), _played([g5], 2), "m",
+              ledger_path=path, now="run2").set_index("id_match")  # fmt: skip
+    assert "g6" not in out.index
+    assert out.loc["g5", "status"] == "finished" and out.loc["g5", "p0_mid"] == 0.70
+    assert out.loc["g5", "actual_goals"] == 2
+
+
+def test_a_held_over_tie_in_the_same_gameday_keeps_its_own_id(tmp_path):
+    # La Liga labels a held-over round-1 tie '2.5' -> floored to gameday 2, the same bucket as the
+    # team's round-2 match. The board row for the live tie must not be pinned to the other id.
+    L = _ledger_functions()
+    path = str(tmp_path / "frozen.csv")
+    run = L["update_frozen_ledger"]
+    r2 = ("g_r2", "p1", 2, "A", "B", 1, pd.Timestamp("2026-08-22 15:00"))  # kicked off, no result
+    held = ("g_held", "p1", 2, "A", "C", 1, pd.Timestamp("2026-08-26 20:00"))
+    run(
+        _board([("p1", 2, "A", "B", 0.70)]),
+        _scored([r2, held]),
+        NO_PLAYED,
+        "m",
+        ledger_path=path,
+        now="run1",
+    )
+    out = run(_board([("p1", 2, "A", "C", 0.55)]), _scored([r2, held]), NO_PLAYED, "m",
+              ledger_path=path, now="run2", stale_ids={"g_r2"}).set_index("id_match")  # fmt: skip
+    assert out.loc["g_r2", "p0_mid"] == 0.70 and out.loc["g_r2", "forecast_frozen_at"] == "run1"
+    assert out.loc["g_held", "p0_mid"] == 0.55 and out.loc["g_held", "forecast_frozen_at"] == "run2"
+
+
+# --- wiring: kicked-off fixtures leave the board ----------------------------------------------
+
+
+def test_load_cell_flags_kicked_off_fixtures_and_keeps_them_in_the_data(tmp_path):
+    src = next(s for s in _cells() if s.startswith("# -------------------------- Load & Combine"))
+    web = tmp_path / "10_data" / "106_Website"
+    web.mkdir(parents=True)
+    now = pd.Timestamp.now().floor("min")
+    cols = ["id_match", "name_player", "season", "gameday", "kick_off", "goals_in_match"]
+    pd.DataFrame([("gP", "p1", "2026/27", 1, now - pd.Timedelta(days=9), 1)], columns=cols).to_csv(
+        web / "data_byPlayer.csv", index=False
+    )
+    oos = [
+        (
+            "gS",
+            "p1",
+            "2026/27",
+            2,
+            (now - pd.Timedelta(days=1)).normalize() + pd.Timedelta(hours=15),
+            np.nan,
+        ),
+        (
+            "gL",
+            "p1",
+            "2026/27",
+            3,
+            (now + pd.Timedelta(days=2)).normalize() + pd.Timedelta(hours=15),
+            np.nan,
+        ),
+        ("gU", "p1", "2026/27", 4, pd.NaT, np.nan),  # no kick-off yet: not forecast
+    ]
+    pd.DataFrame(oos, columns=cols).to_csv(web / "data_byPlayer__OOS.csv", index=False)
+    ns = dict(
+        pd=pd,
+        np=np,
+        os=os,
+        directory=str(tmp_path),
+        FORECAST_HORIZON_DAYS=14,
+        oos_horizon=E["oos_horizon"],
+    )
+    exec(compile(src, str(NB), "exec"), ns)
+    assert ns["STALE_MATCH_IDS"] == {"gS"}
+    assert set(ns["data__all"].loc[ns["data__all"].is_oos, "id_match"]) == {"gS", "gL"}
+
+
+def test_the_oos_board_leaves_kicked_off_fixtures_out():
+    tree = ast.parse(
+        next(s for s in _cells() if "dict_PLAYERS = {d: {} for d in datasets_to_process}" in s)
+    )
+    oos_sel = [
+        ast.unparse(n)
+        for n in ast.walk(tree)
+        if isinstance(n, ast.Assign) and "data__new" in ast.unparse(n.targets[0])
+    ]
+    assert any(
+        "is_oos" in s and "~data__all.id_match.isin(STALE_MATCH_IDS)" in s for s in oos_sel
+    ), oos_sel
+
+
+def test_a_row_of_unknown_orientation_is_not_repointed():
+    # an old ledger row without home_pitch must not be guessed onto the other leg
+    L = _ledger_functions()
+    first = _scored([("gF", "a_player", 3, "A", "B", 1, pd.Timestamp("2026-09-20 15:00"))])
+    ret = _scored([("gR", "a_player", 22, "A", "B", 0, pd.Timestamp("2027-02-20 15:00"))])
+    fn = next(
+        n
+        for n in ast.walk(ast.parse(_ledger_cell()))
+        if isinstance(n, ast.FunctionDef) and n.name == "_repoint"
+    )
+    ns = {"np": np, "pd": pd}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), str(NB), "exec"), ns)
+    old = first.assign(home_pitch=np.nan)
+    out = ns["_repoint"](old, pd.concat([first, ret]))
+    assert out["id_match"].tolist() == ["gF"]
+    out = ns["_repoint"](first.assign(id_match="g_old"), pd.concat([first, ret]))
+    assert out["id_match"].tolist() == ["gF"]  # known orientation -> re-pointed to its own leg
+    assert L  # the cell's functions still load together
