@@ -528,3 +528,88 @@ def test_main_with_only_undated_fixtures_left_ships_readable_tables(season_files
     grid = pd.read_csv(season_files["OUT_GRID_CSV"])  # header-only, not an unreadable empty file
     assert grid.empty and "p_mid" in grid.columns
     assert pd.read_csv(season_files["OUT_TEAM_CSV"]).empty
+
+
+# --- season end -------------------------------------------------------------------------------
+
+
+def _season(season_files, played):
+    hist = pd.DataFrame([r for args in played for r in _raw(*args)])
+    hist.to_csv(season_files["HIST_PATH"], index=False)
+    pd.read_csv(season_files["OOS_PATH"]).iloc[0:0].to_csv(season_files["OOS_PATH"], index=False)
+
+
+def test_main_ships_the_final_results_once_the_season_is_complete(season_files, monkeypatch):
+    # two-team league: A v B and B v A is the whole double round-robin
+    _season(
+        season_files,
+        [
+            ("PL_GD01_AB", "A", "B", "2026-09-01 15:00", 2, 1),
+            ("PL_GD02_BA", "B", "A", "2027-05-20 15:00", 0, 0),
+        ],
+    )
+    monkeypatch.setattr(
+        W, "forecast_fixtures", lambda *a, **k: (_ for _ in ()).throw(AssertionError)
+    )
+    ledger_before = season_files["FROZEN_LEDGER"].read_bytes()
+    W.main()
+    assert season_files["FROZEN_LEDGER"].read_bytes() == ledger_before
+    feed = pd.read_csv(season_files["OUT_MATCH_CSV"]).set_index("id_match")
+    assert feed["status"].tolist() == ["finished", "finished"]
+    assert feed.loc["PL_GD01_AB", "p_home_win"] == 0.5 and feed.loc["PL_GD02_BA", "home_goals"] == 0
+    grid = pd.read_csv(season_files["OUT_GRID_CSV"])
+    assert grid.empty and "p_mid" in grid.columns
+
+
+def test_main_still_stops_when_the_fixture_feed_is_empty_mid_season(season_files, monkeypatch):
+    # B v A is still to play but missing from the OOS file: a pipeline problem, not a season end
+    _season(season_files, [("PL_GD01_AB", "A", "B", "2026-09-01 15:00", 2, 1)])
+    monkeypatch.setattr(
+        W, "forecast_fixtures", lambda *a, **k: (_ for _ in ()).throw(AssertionError)
+    )
+    with pytest.raises(SystemExit, match="No unplayed"):
+        W.main()
+
+
+def test_main_stops_when_the_next_season_is_waiting_and_target_season_was_not_bumped(
+    season_files, monkeypatch
+):
+    _season(
+        season_files,
+        [
+            ("PL_GD01_AB", "A", "B", "2026-09-01 15:00", 2, 1),
+            ("PL_GD02_BA", "B", "A", "2027-05-20 15:00", 0, 0),
+        ],
+    )
+    nxt = pd.DataFrame(_raw("PL28_GD01_AB", "A", "B", "2027-08-20 20:00", np.nan, np.nan)).assign(
+        season="2027/28"
+    )
+    nxt.to_csv(season_files["OOS_PATH"], index=False)
+    with pytest.raises(SystemExit, match="TARGET_SEASON"):
+        W.main()
+
+
+def _cd(rows):
+    """home-perspective match rows: (league, home, away, outcome)"""
+    return pd.DataFrame(
+        [dict(season="2026/27", home_pitch=1, name_league=lg, name_team=h, name_opp=a, match_outcome=o)
+         for lg, h, a, o in rows]
+    )  # fmt: skip
+
+
+def _round_robin(teams, league="L"):
+    return [(league, h, a, 1.0) for h in teams for a in teams if h != a]
+
+
+def test_season_complete_ignores_relegation_play_off_guests():
+    rr = _round_robin(["A", "B", "C", "D"])
+    playoff = [("L", "D", "Z2", 1.0), ("L", "Z2", "D", 0.0)]  # second-division side, two legs
+    assert W.season_complete(_cd(rr + playoff), "2026/27")
+
+
+def test_season_complete_counts_fixtures_not_rows():
+    rr = _round_robin(["A", "B", "C"])
+    missing = [r for r in rr if (r[1], r[2]) != ("C", "B")]
+    twice = missing + [missing[0]]  # one played fixture listed twice must not stand in for C v B
+    assert not W.season_complete(_cd(twice), "2026/27")
+    assert W.season_complete(_cd(rr), "2026/27")

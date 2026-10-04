@@ -382,3 +382,115 @@ def test_a_universe_row_of_unknown_orientation_is_ignored():
     # gX has no orientation: read as an away row it would key as B v A, the return leg
     out = ns["_repoint"](ret, pd.concat([first_unknown, ret]))
     assert out["id_match"].tolist() == ["gR"]
+
+
+# --- season end: an empty board still grades what was played -----------------------------------
+
+
+def test_with_nothing_on_the_board_played_rows_are_still_frozen(tmp_path):
+    L = _ledger_functions()
+    path = str(tmp_path / "frozen.csv")
+    run = L["update_frozen_ledger"]
+    last = ("gL", "p1", 38, "A", "B", 1, pd.Timestamp("2027-05-23 15:00"))
+    later = (
+        "gP",
+        "p2",
+        30,
+        "C",
+        "D",
+        1,
+        pd.Timestamp("2027-05-26 20:00"),
+    )  # postponed, still to play
+    run(_board([("p1", 38, "A", "B", 0.70), ("p2", 30, "C", "D", 0.60)]), _scored([last, later]), NO_PLAYED, "m",
+        ledger_path=path, now="run1")  # fmt: skip
+    out = run({}, _scored([])[:0], _played([last], 2), "m", ledger_path=path, now="run2",
+              hold_pending=True).set_index("id_match")  # fmt: skip
+    assert out.loc["gL", "status"] == "finished" and out.loc["gL", "actual_goals"] == 2
+    assert out.loc["gL", "p0_mid"] == 0.70 and out.loc["gL", "forecast_frozen_at"] == "run1"
+    assert out.loc["gP", "status"] == "upcoming" and out.loc["gP", "forecast_frozen_at"] == "run1"
+
+
+@pytest.mark.parametrize(
+    "board, datasets, ledger_exists, expected",
+    [
+        ({"p1": {}}, ["oos"], True, "board"),  # a normal week
+        ({}, ["oos"], True, "hold"),  # nothing on the board: grade, hold the rest
+        ({}, ["oos"], False, None),  # no ledger yet: nothing to grade
+        ({}, ["train"], True, None),  # not the weekly job: never touch the ledger
+    ],
+)
+def test_run_block_routes_an_empty_board(board, datasets, ledger_exists, expected, tmp_path):
+    calls = []
+    ledger = tmp_path / "frozen.csv"
+    if ledger_exists:
+        ledger.write_text("id_match\n")
+    data = pd.DataFrame(
+        {"id_match": ["g1"], "name_player": ["p1"], "season": ["2026/27"], "gameday": [5],
+         "name_league": ["L"], "name_team": ["A"], "name_opp": ["B"], "goals_in_match": [0],
+         "home_pitch": [1], "is_oos": [False]}
+    )  # fmt: skip
+    ns = dict(
+        SMOKE=False, dict_PLAYERS={"oos": board}, data__all=data, SFM_model__NAME="m", STALE_MATCH_IDS=set(),
+        datasets_to_process=datasets, os=os, LEDGER_PATH=str(ledger),
+        update_frozen_ledger=lambda b, *a, **k: calls.append((b, k)),
+    )  # fmt: skip
+    exec(_run_block(), ns)
+    if expected is None:
+        assert calls == []
+    elif expected == "board":
+        assert calls[0][0] == board and calls[0][1]["stale_ids"] == set()
+    else:
+        assert calls[0][0] == {} and calls[0][1]["hold_pending"] is True
+
+
+def test_a_board_that_resolves_to_no_rows_never_rewrites_the_ledger(tmp_path):
+    L = _ledger_functions()
+    path = tmp_path / "frozen.csv"
+    run = L["update_frozen_ledger"]
+    run(
+        _board([("p1", 5, "A", "B", 0.70)]),
+        _scored([G1]),
+        NO_PLAYED,
+        "m",
+        ledger_path=str(path),
+        now="run1",
+    )
+    before = path.read_bytes()
+    with pytest.raises(ValueError, match="no ledger rows"):
+        run(
+            _board([("p1", 9, "A", "B", 0.70)]),
+            _scored([G1]),
+            NO_PLAYED,
+            "m",
+            ledger_path=str(path),
+            now="run2",
+        )
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("hold", [True, False])
+def test_a_reused_id_never_freezes_the_wrong_fixture(tmp_path, hold):
+    # C v D (g5) is postponed and leaves this run's data; upstream renumbers A v B g6 -> g5 and
+    # it is played. C v D's pending row must not be frozen with A v B's result.
+    L = _ledger_functions()
+    path = str(tmp_path / "frozen.csv")
+    run = L["update_frozen_ledger"]
+    cd = ("g5", "p2", 5, "C", "D", 1, pd.Timestamp("2026-09-27 15:00"))
+    ab_old = ("g6", "p1", 6, "A", "B", 1, pd.Timestamp("2026-10-04 15:00"))
+    ab_new = ("g5", "p1", 5, "A", "B", 1, pd.Timestamp("2026-10-04 15:00"))
+    run(_board([("p2", 5, "C", "D", 0.60), ("p1", 6, "A", "B", 0.70)]), _scored([cd, ab_old]), NO_PLAYED, "m",
+        ledger_path=path, now="run1")  # fmt: skip
+    board, scored = (
+        ({}, _scored([])[:0])
+        if hold
+        else (_board([("z_player", 4, "X", "Y", 0.9)]), _scored([DUMMY]))
+    )
+    out = run(
+        board, scored, _played([ab_new], 2), "m", ledger_path=path, now="run2", hold_pending=hold
+    )
+    ab = out[out.name_player == "p1"].iloc[0]
+    assert ab["id_match"] == "g5" and ab["status"] == "finished" and ab["actual_goals"] == 2
+    cd_rows = out[out.name_player == "p2"]
+    assert not (cd_rows["status"] == "finished").any()  # never graded with someone else's result
+    if hold:
+        assert cd_rows.iloc[0]["p0_mid"] == 0.60 and cd_rows.iloc[0]["status"] == "upcoming"

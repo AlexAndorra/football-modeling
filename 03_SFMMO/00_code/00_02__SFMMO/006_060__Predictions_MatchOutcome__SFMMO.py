@@ -224,6 +224,24 @@ def kicked_off_mask(ko, now):
     return (day < today) | ((day == today) & timed & (ko < now))
 
 
+def season_complete(cd, season):
+    """True when every league of `season` has played its full double round-robin: n*(n-1)
+    DISTINCT (home, away) fixtures between its n own teams. A play-off guest from the division
+    below (two legs, far fewer matches than anyone else) is not one of the n, and a fixture
+    listed twice counts once. Once no unplayed row is left, this tells "the season is over"
+    (ship the final results) apart from "the fixture feed was not updated" (stop and fix it)."""
+    home = cd[(cd['season'] == season) & (cd['home_pitch'] == 1)]
+    if not len(home):
+        return False
+    for _, g in home.groupby('name_league'):
+        apps = pd.concat([g['name_team'], g['name_opp']]).value_counts()
+        core = apps[apps >= apps.max() / 2].index
+        played = g[g['match_outcome'].notna() & g['name_team'].isin(core) & g['name_opp'].isin(core)]
+        if len(played[['name_team', 'name_opp']].drop_duplicates()) < len(core) * (len(core) - 1):
+            return False
+    return True
+
+
 def select_forecast_window(oos, now, horizon_days):
     """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon.
 
@@ -542,8 +560,16 @@ def main():
 
     # ----------------------- 3. OOS slice + scaling ----------------------- #
     oos = cd[(cd['season'] == TARGET_SEASON) & (cd['match_outcome'].isna())].copy()
-    if not len(oos):
-        raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found — nothing to forecast. "
+    if not len(oos) and season_complete(cd, TARGET_SEASON):
+        _next = cd[(cd['season'] > TARGET_SEASON) & cd['match_outcome'].isna()]
+        if len(_next):      # the new season's fixtures are in: shipping the old one would skip them
+            raise SystemExit(f"{TARGET_SEASON} is complete and {_next['id_match'].nunique()} unplayed "
+                             f"fixture(s) of {sorted(_next['season'].unique())} are waiting -- bump "
+                             f"TARGET_SEASON (and the bundle) before running.")
+        print(f"  {TARGET_SEASON} is complete -- nothing left to forecast; shipping the final results")
+    elif not len(oos):
+        raise SystemExit(f"No unplayed {TARGET_SEASON} fixtures found and the season is not complete — "
+                         f"nothing to forecast. "
                          f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
     n_all = oos['id_match'].nunique()
     oos, deferred, stale, horizon = select_forecast_window(oos, pd.Timestamp.now(), HORIZON_DAYS)
