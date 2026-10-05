@@ -57,6 +57,18 @@ def test_absent_state_is_reported_not_invented(prod, tmp_path):
     assert not (tmp_path / 's/no/such/cache.pkl').exists()
 
 
+def test_a_replayed_clock_only_on_validation(prod, tmp_path):
+    _, _, cfg = prod
+    scratch = tmp_path / 'scratch'
+    runroots.seed_validation_state(scratch, [LEDGER], cfg)
+    v = runroots.load_roots(cfg, env={'SFM_VALIDATION_DIR': str(scratch)})
+    t = runroots.run_clock(v, env={'SFM_VALIDATION_NOW': '2026-10-10 18:00'})
+    assert str(t) == '2026-10-10 18:00:00+02:00'
+    with pytest.raises(RuntimeError, match='PRODUCTION'):
+        runroots.run_clock(runroots.load_roots(cfg, env={}), env={'SFM_VALIDATION_NOW': '2026-10-10'})
+    assert runroots.run_clock(runroots.load_roots(cfg, env={}), env={}).tzinfo is not None
+
+
 def test_missing_settings_file_says_what_to_do(tmp_path):
     with pytest.raises(FileNotFoundError, match='sfm_local.example.toml'):
         runroots.load_roots(tmp_path / 'nope.toml', env={})

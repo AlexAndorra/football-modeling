@@ -78,6 +78,25 @@ def load_roots(settings_path=SETTINGS, env=os.environ):
     return Roots(data=data, state=scratch, publish=scratch / 'publish', validation=True)
 
 
+def run_clock(roots, env=os.environ):
+    """The run's clock, tz-aware Berlin. A validation run may replay another moment through
+    SFM_VALIDATION_NOW (e.g. '2026-10-10 18:00', read as Berlin wall time), so the kick-off holds
+    can be exercised mid-matchday on real inputs. Production refuses it: a fake clock there would
+    decide which receipts are written."""
+    import pandas as pd
+
+    fake = env.get('SFM_VALIDATION_NOW')
+    if not fake:
+        return pd.Timestamp.now(tz='Europe/Berlin')
+    if not roots.validation:
+        raise RuntimeError('SFM_VALIDATION_NOW is set on a PRODUCTION run -- refused; a fake clock '
+                           'may only replay a validation run')
+    t = pd.Timestamp(fake)
+    t = t.tz_localize('Europe/Berlin') if t.tzinfo is None else t.tz_convert('Europe/Berlin')
+    print(f'[roots] VALIDATION clock replayed at {t}')
+    return t
+
+
 def seed_validation_state(scratch, state_files, settings_path=SETTINGS):
     """Copy production's state files (paths relative to data_root) into `scratch`, keeping their
     relative paths, and mark the folder seeded. Returns {relative path: copied?}. A state file that
