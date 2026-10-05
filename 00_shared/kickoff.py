@@ -106,6 +106,26 @@ def may_have_started(oos_date, kick_off_utc, time_confirmed, now):
     return (exact & (ko <= now)) | (~exact & uncertain)
 
 
+def certainly_started(oos_date, kick_off_utc, time_confirmed, now):
+    """True only where a fixture has CERTAINLY kicked off: a confirmed feed time that has passed
+    (inclusive), or a fixture day before today. The narrow question, for the BOARD.
+
+    Two questions, on purpose. The ledger asks `may_have_started` and holds anything uncertain,
+    because a late refresh costs a receipt. The board asks this one and drops only what is certain,
+    because an unconfirmed fixture three days out has almost always NOT started, and dropping it
+    would empty the weekend board midweek. Protect the receipt, not the display. An undated
+    fixture is never certain (it is deferred anyway: it has no day to forecast)."""
+    now = pd.Timestamp(now)
+    if now.tzinfo is None:
+        raise ValueError('certainly_started needs a tz-aware `now`')
+    today = now.tz_convert(BERLIN).normalize().tz_localize(None)
+    ko = pd.to_datetime(kick_off_utc, utc=True)
+    conf = pd.Series(time_confirmed, index=ko.index).astype('boolean').fillna(False).astype(bool)
+    oos_day = pd.to_datetime(pd.Series(oos_date, index=ko.index)).dt.normalize()
+    day = ko.dt.tz_convert(BERLIN).dt.normalize().dt.tz_localize(None).where(ko.notna(), oos_day)
+    return (conf & ko.notna() & (ko <= now)) | (day < today).fillna(False).astype(bool)
+
+
 def select_forecast_window(oos, started, now, horizon_days):
     """Split UNPLAYED target-season rows into (window, deferred, stale) and return the horizon.
 

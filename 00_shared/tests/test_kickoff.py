@@ -56,6 +56,27 @@ def test_hold_rule(r, tmp_path):
     assert bool(held.iloc[0]) is _true(r['expect_hold']), r['description']
 
 
+# The board's narrow question mirrors the prune's "certainties only" rule. The prune also reads the
+# OOS row's own TIME, which the date-only OOS file given to the writers does not carry, so the rows
+# whose prune answer depends on that time are out of scope here.
+NEEDS_OOS_TIME = {'stale_feed_fresh_oos__layers_differ',
+                  'stale_feed_confirmed_oos_placeholder__err_to_omission'}
+
+
+@pytest.mark.parametrize('r', [r for _, r in V.iterrows()], ids=list(V['case_id']))
+def test_certainly_started_never_exceeds_the_hold(r, tmp_path):
+    """Certain implies may-have-started, for every vector: the board can never drop a fixture the
+    ledger would still refresh."""
+    feed = kickoff.read_kickoff_feed(_stage_feed(r, tmp_path))
+    fx = kickoff.attach_kickoff(
+        pd.DataFrame({'fixture_key': [KEY], 'kick_off': [r['oos_date'] or None]}), feed)
+    args = (fx['kick_off'], fx['kick_off_utc'], fx['time_confirmed'], pd.Timestamp(r['now_utc']))
+    certain, maybe = kickoff.certainly_started(*args).iloc[0], kickoff.may_have_started(*args).iloc[0]
+    assert not (certain and not maybe)
+    if r['case_id'] not in NEEDS_OOS_TIME:
+        assert bool(certain) is _true(r['expect_prune_drop']), r['description']
+
+
 def test_naive_clock_is_refused():
     one = pd.Series([pd.NaT])
     with pytest.raises(ValueError, match='tz-aware'):
