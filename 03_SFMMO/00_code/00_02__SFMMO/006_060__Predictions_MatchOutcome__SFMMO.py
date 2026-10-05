@@ -48,7 +48,9 @@ Set TARGET_SEASON to the season being forecast. Everything else is read from the
 """
 
 import os
+import pathlib
 import re
+import sys
 import shutil
 import pickle
 import cloudpickle
@@ -61,12 +63,26 @@ from scipy.stats import poisson
 import pymc as pm
 import pytensor.tensor as pt
 
+# the shared kick-off rule (006_040 asks the same one) and the run roots
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / '00_shared'))
+import kickoff
+import runroots
 
 # ============================================================================= #
 #                              USER INTERACTION                                  #
 # ============================================================================= #
 
-directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
+# Machine paths come from sfm_local.toml at the repo root (git-ignored; copy
+# sfm_local.example.toml). Inputs are read from the DATA root. Everything this script writes --
+# the ledger, the board it reads back next run, the feed and its vintages -- goes under the STATE
+# root: the data root itself in production, a seeded scratch folder on a validation run
+# (SFM_VALIDATION_DIR set). The feed has always been published beside the ledger, where its
+# consumers read it, so it stays there. A machine without the settings file (CI) can still import
+# this module for the tests; a run then fails on the first path, which names the missing file.
+ROOTS = runroots.load_roots() if runroots.SETTINGS.exists() else None
+_UNSET = '<sfm_local.toml missing>'
+directory = str(ROOTS.data) if ROOTS else _UNSET
+state_dir = str(ROOTS.state) if ROOTS else _UNSET
 
 BUNDLE_PATH   = f'{directory}/10_data/01_Models/SFMMO_DevK__scaleCS__train202526__PROD.pkl'
 HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer.csv'       # played history
@@ -75,6 +91,9 @@ HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer.csv'       # pla
 # are identical across the two files (verified: max|diff| = 0 on 79,845 shared rows).
 OOS_PATH      = f'{directory}/10_data/106_Website/data_byPlayer__OOS.csv'          # upcoming fixtures
 TARGET_SEASON = '2026/27'          # the season whose unplayed fixtures we forecast
+# kick-off TIMES (UTC) and whether each is confirmed; the OOS file carries only the DATE
+KICKOFF_PATH  = (f'{directory}/10_data/106_Website/'
+                 f"fixtures_{TARGET_SEASON.replace('/', '-')}__kickoff.csv")
 HORIZON_DAYS  = 14                 # forecast fixtures kicking off within this many days.
 #   The OOS file carries the WHOLE season (~1,670 fixtures). Forecasting all of them is both
 #   wasteful and wrong-headed: a May fixture predicted in August carries no form information,
@@ -84,7 +103,7 @@ HORIZON_DAYS  = 14                 # forecast fixtures kicking off within this m
 #   postponed). 14 days covers the next matchday plus midweek games, with slack if a weekly run
 #   is skipped -- widen it if runs are ever missed, since a fixture that kicks off without ever
 #   entering the horizon has no frozen forecast (the run warns loudly if that happens).
-#   The window also has a LOWER bound: a fixture that has already kicked off and still has no
+#   The window also has a LOWER bound: a fixture that MAY have kicked off and still has no
 #   result is never forecast again (its frozen row stands) -- see select_forecast_window.
 
 K_MAX         = 15                 # scoreline grid (M2: 5 truncated ~11% of joint mass)
@@ -92,7 +111,7 @@ CRED_REGION   = 0.90               # credible band for the W/D/L probabilities
 USE_DIXON_COLES = True             # apply tau with the bundle's fitted rho
 
 ARCHIVE_VINTAGES = True
-OUT_DIR     = f'{directory}/10_data/106_Website'
+OUT_DIR     = f'{state_dir}/10_data/106_Website'
 VINTAGE_DIR = f'{OUT_DIR}/_vintages'
 
 OUT_MATCH_CSV = f'{OUT_DIR}/SFMMO_predictions__matches.csv'
@@ -100,6 +119,11 @@ OUT_GRID_CSV  = f'{OUT_DIR}/SFMMO_predictions__scorelines.csv'
 OUT_TEAM_CSV  = f'{OUT_DIR}/SFMMO_predictions__team_goals.csv'
 OUT_PKL       = f'{OUT_DIR}/SFMMO_predictions__prod.pkl'
 FROZEN_LEDGER = f'{OUT_DIR}/SFMMO_predictions__frozen.csv'   # last PRE-MATCH forecast per fixture
+# What a validation run must copy from production before it starts (runroots.seed_validation_state):
+# the files the NEXT run reads back. Paths relative to the data root.
+STATE_FILES = [f'10_data/106_Website/{f}' for f in (
+    'SFMMO_predictions__frozen.csv', 'SFMMO_predictions__prod.pkl', 'SFMMO_predictions__matches.csv',
+    'SFMMO_predictions__scorelines.csv', 'SFMMO_predictions__team_goals.csv')]
 
 # ============================================================================= #
 
@@ -211,19 +235,6 @@ def compute_elo(cd):
     return cd
 
 
-def kicked_off_mask(ko, now):
-    """True where a fixture has already kicked off: on an earlier day, or today with a confirmed
-    time that has passed. An unconfirmed slot is stored as 00:00 local (not a midnight kickoff),
-    so a same-day 00:00 stamp cannot be judged and counts as not yet kicked off.
-    006_040 carries a copy of this rule; a parity test keeps the two identical."""
-    now = pd.Timestamp(now)
-    today = now.normalize()
-    ko = pd.to_datetime(ko)
-    day = ko.dt.normalize()
-    timed = ko != day                                   # a real kickoff time, not a 00:00 placeholder
-    return (day < today) | ((day == today) & timed & (ko < now))
-
-
 def season_complete(cd, season):
     """True when every league of `season` has played its full double round-robin: n*(n-1)
     DISTINCT (home, away) fixtures between its n own teams. A play-off guest from the division
@@ -242,36 +253,40 @@ def season_complete(cd, season):
     return True
 
 
-def select_forecast_window(oos, now, horizon_days):
-    """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon.
+def fixture_keys(rows):
+    """kickoff.fixture_key for team-perspective rows. The key is ordered by VENUE, so the away
+    side's row (home_pitch == 0) is keyed with its opponent first: both rows of a fixture get the
+    same key, hence the same kick-off and the same decision."""
+    at_home = rows['home_pitch'] == 1
+    home = rows['name_team'].where(at_home, rows['name_opp'])
+    away = rows['name_opp'].where(at_home, rows['name_team'])
+    return kickoff.fixture_key(rows['season'], rows['name_league'], home, away)
 
-    stale    : already kicked off but still carries no result (results feed lagging, postponement
-               not yet re-dated, ...). NEVER re-forecast: a forecast made after kick-off is not a
-               receipt, and by then ELO carries results the pre-match forecast could not see
-               (matches that kicked off before or alongside it). Re-forecasting would overwrite
-               the genuine pre-match row in the ledger (WC lesson L5). A postponed fixture is
-               forecast again as soon as the feed carries its new kick-off.
-    window   : anchor .. anchor + horizon_days (day-inclusive) -> forecast in this run
-    deferred : beyond the horizon -> forecast by a later run, closer to kickoff; also any row with
-               no kick_off yet (it waits for a date; main() warns)
 
-    Anchor = max(today, earliest unplayed) -- Max's rule (64f86df), so an international break
-    forecasts the next round instead of exiting empty -- taken over fixtures that have NOT
-    kicked off: a stale fixture can neither be re-forecast nor drag the window backwards.
-    006_040 uses the same rule, so the two boards cover the same fixtures."""
-    now = pd.Timestamp(now)
-    today = now.normalize()
-    ko = pd.to_datetime(oos['kick_off'])
-    day = ko.dt.normalize()
-    undated = ko.isna()
-    kicked_off = kicked_off_mask(ko, now) & ~undated
-    live = ~kicked_off & ~undated
-    stale = oos[kicked_off].copy()
-    anchor = max(today, day[live].min()) if live.any() else today
-    horizon = anchor + pd.Timedelta(days=horizon_days)
-    deferred = oos[(live & (day > horizon)) | undated].copy()
-    window = oos[live & (day >= anchor) & (day <= horizon)].copy()
-    return window, deferred, stale, horizon
+def may_have_started(oos, feed, now):
+    """kickoff.may_have_started for every row of `oos`, with the feed attached by fixture key."""
+    rows = kickoff.attach_kickoff(oos.assign(fixture_key=fixture_keys(oos)), feed)
+    return kickoff.may_have_started(rows['kick_off'], rows['kick_off_utc'], rows['time_confirmed'],
+                                    now)
+
+
+def select_forecast_window(oos, feed, now, horizon_days):
+    """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon
+    -- kickoff.select_forecast_window, asked with the HOLD rule.
+
+    stale    : MAY have kicked off and still carries no result. Never re-forecast: its feed row
+               ships the forecast frozen before kick-off (or none, if it never had one).
+    window   : anchor .. anchor + horizon_days (day-inclusive) -> forecast in this run.
+    deferred : beyond the horizon, or undated (it waits for a date; main() warns).
+
+    Why the hold rule (`may_have_started`) and not the board's narrow one (`certainly_started`,
+    which 006_040 uses for its player board): this script's feed IS a receipts channel. Every
+    upcoming row it ships carries a probability and a `forecast_frozen_at`, and consumers record
+    the last one they saw before kick-off. A fixture that may have started must therefore never
+    appear with a fresh number. The cost is small: an unconfirmed fixture within the hold window
+    shows last run's forecast, and confirmed times usually exist weeks ahead."""
+    started = may_have_started(oos, feed, now)
+    return kickoff.select_forecast_window(oos, started, now, horizon_days)
 
 
 def merge_frozen_ledger(led, fresh, key):
@@ -553,6 +568,8 @@ def forecast_fixtures(oos, B, rho, factors_CS, factors_g):
 
 
 def main():
+    if ROOTS:                     # say where this run writes BEFORE it writes anything
+        print(ROOTS.describe())
     # ----------------------- 1. bundle ----------------------- #
     print(f"Loading season bundle:\n  {BUNDLE_PATH}")
     with open(BUNDLE_PATH, 'rb') as f:
@@ -590,12 +607,17 @@ def main():
                          f"nothing to forecast. "
                          f"(Has the fixture data been rolled into {os.path.basename(OOS_PATH)}?)")
     n_all = oos['id_match'].nunique()
-    oos, deferred, stale, horizon = select_forecast_window(oos, pd.Timestamp.now(), HORIZON_DAYS)
+    feed = kickoff.read_kickoff_feed(KICKOFF_PATH)
+    if feed.attrs['missing']:
+        print(f"  ⚠️  {os.path.basename(KICKOFF_PATH)} not found -- kick-off TIMES unknown, so every "
+              f"fixture is held from {kickoff.UNCONFIRMED_HOLD_DAYS} days before its OOS date")
+    oos, deferred, stale, horizon = select_forecast_window(oos, feed, pd.Timestamp.now(tz='UTC'),
+                                                           HORIZON_DAYS)
     if len(stale):
         _sh = stale[stale['home_pitch'] == 1]
-        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) already kicked off but carry NO "
-              f"result yet (results feed lagging? postponement not yet re-dated?) -- NOT re-forecast, "
-              f"their frozen forecast stands: "
+        print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) may have kicked off and carry NO "
+              f"result yet (results feed lagging? time unconfirmed? postponement not re-dated?) -- "
+              f"NOT re-forecast, their frozen forecast stands: "
               f"{[f'{h} v {a}' for h, a in zip(_sh['name_team'], _sh['name_opp'])][:4]}")
     _ud = deferred[deferred['kick_off'].isna() & (deferred['home_pitch'] == 1)]
     if len(_ud):
@@ -611,7 +633,7 @@ def main():
         if not os.path.exists(OUT_PKL):
             raise SystemExit(f"Nothing to forecast ({n_all} unplayed fixture(s), none still to come with "
                              f"a date) and no previous board at {OUT_PKL} to carry scorelines from.")
-        print(f"  nothing to forecast: {stale['id_match'].nunique()} fixture(s) kicked off and await "
+        print(f"  nothing to forecast: {stale['id_match'].nunique()} fixture(s) may have kicked off and await "
               f"results, {_ud['id_match'].nunique()} undated -- rebuilding the feed from results + "
               f"frozen forecasts only")
         df_matches, grid_rows, team_rows, dev = pd.DataFrame(), [], [], None
@@ -623,6 +645,21 @@ def main():
         print(f"\nUpcoming fixtures in {TARGET_SEASON}: {n_fix} "
               f"({', '.join(f'{k} {v}' for k, v in oos[oos.home_pitch == 1].groupby('name_league').size().items())})")
         df_matches, grid_rows, team_rows, dev = forecast_fixtures(oos, B, rho, factors_CS, factors_g)
+        # The model samples for minutes and the clock moves meanwhile: a fixture can reach its
+        # hold point between the window above and the ledger write below (a run started at 20:40
+        # for a 20:45 kick-off). So the rule is asked AGAIN now, and anything that may have started
+        # since is treated exactly like a stale fixture: no fresh number in the ledger or the feed.
+        late = may_have_started(oos, feed, pd.Timestamp.now(tz='UTC'))
+        if late.any():
+            ids = set(oos.loc[late, 'id_match'])
+            _lh = oos[late & (oos['home_pitch'] == 1)]
+            print(f"  ⚠️  {len(ids)} fixture(s) reached their hold point WHILE the model ran -- forecast "
+                  f"discarded, frozen row kept: "
+                  f"{[f'{h} v {a}' for h, a in zip(_lh['name_team'], _lh['name_opp'])][:4]}")
+            stale = pd.concat([stale, oos[late]], ignore_index=True)
+            df_matches = df_matches[~df_matches['id_match'].isin(ids)].reset_index(drop=True)
+            grid_rows = [g for g in grid_rows if g['id_match'] not in ids]
+            team_rows = [t for t in team_rows if t['id_match'] not in ids]
 
 
     # ------------------------------------------------------------------ #

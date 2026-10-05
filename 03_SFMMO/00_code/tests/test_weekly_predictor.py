@@ -33,66 +33,104 @@ def _load():
 W = _load()
 KEY = ["season", "home_team", "away_team"]
 PCOLS = ["p_home_win", "p_draw", "p_away_win"]
-NOW = pd.Timestamp("2026-09-07 10:00")
+NOW = pd.Timestamp("2026-09-07 10:00", tz="Europe/Berlin")  # a Monday-morning run
 
 
 def _oos(rows):
+    """Team-perspective OOS rows in the REAL shape: kick_off is a DATE. The time lives in the
+    kick-off feed (_feed), as it does in production."""
     return pd.DataFrame(
         rows, columns=["id_match", "name_team", "name_opp", "kick_off", "match_outcome"]
-    ).assign(kick_off=lambda d: pd.to_datetime(d["kick_off"]), season="2026/27")
+    ).assign(
+        kick_off=lambda d: pd.to_datetime(d["kick_off"]).dt.normalize(),
+        season="2026/27", name_league="premier-league", home_pitch=1,
+    )  # fmt: skip
+
+
+def _feed(tmp_path, rows, league="premier-league"):
+    """A kick-off feed file on disk, read back through the shared reader: (home, away, kick-off
+    UTC, confirmed) per fixture."""
+    path = tmp_path / "fixtures_2026-27__kickoff.csv"
+    pd.DataFrame(
+        [dict(season="2026-27", league=league, team_home=h, team_away=a, kick_off_utc=t,
+              time_confirmed=c) for h, a, t, c in rows]
+    ).to_csv(path, index=False)  # fmt: skip
+    return W.kickoff.read_kickoff_feed(path)
 
 
 # --- forecast window ------------------------------------------------------------------
+# The kick-off RULE is the shared module's and is tested there against the kick-off vectors.
+# These tests pin how 006_060 asks it: real data shapes, the hold rule, both perspectives.
 
 
-def test_window_excludes_fixtures_that_already_kicked_off():
+def test_window_excludes_fixtures_that_may_have_kicked_off(tmp_path):
     oos = _oos(
         [
-            ("g1", "A", "B", "2026-09-06 15:00", np.nan),  # played yesterday, result not in yet
-            ("g2", "C", "D", "2026-09-07 20:00", np.nan),  # tonight
-            ("g3", "E", "F", "2026-09-12 15:00", np.nan),  # inside the horizon
-            ("g4", "G", "H", "2026-09-30 15:00", np.nan),  # beyond the horizon
+            ("g1", "A", "B", "2026-09-06", np.nan),  # played yesterday, result not in yet
+            ("g2", "C", "D", "2026-09-07", np.nan),  # tonight, 20:45
+            ("g3", "E", "F", "2026-09-12", np.nan),  # inside the horizon
+            ("g4", "G", "H", "2026-09-30", np.nan),  # beyond the horizon
         ]
     )
-    window, deferred, stale, _ = W.select_forecast_window(oos, NOW, horizon_days=14)
+    feed = _feed(tmp_path, [("A", "B", "2026-09-06T13:00:00Z", True),
+                            ("C", "D", "2026-09-07T18:45:00Z", True),
+                            ("E", "F", "2026-09-12T13:30:00Z", True),
+                            ("G", "H", "2026-09-30T13:30:00Z", True)])  # fmt: skip
+    window, deferred, stale, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert list(window["id_match"]) == ["g2", "g3"]
     assert list(deferred["id_match"]) == ["g4"]
     assert list(stale["id_match"]) == ["g1"]
 
 
-def test_window_keeps_same_day_fixture_with_date_only_stamp():
-    # the fixture feed stores an unconfirmed slot as 00:00 local -- NOT a midnight kick-off
-    oos = _oos([("g1", "A", "B", "2026-09-07 00:00", np.nan)])
-    window, deferred, stale, _ = W.select_forecast_window(oos, NOW, horizon_days=14)
-    assert list(window["id_match"]) == ["g1"] and stale.empty
+def test_window_holds_an_unconfirmed_fixture_from_three_days_before_its_placeholder(tmp_path):
+    # Monaco v Lens: stored unconfirmed on the Saturday, played on the Friday night
+    oos = _oos([("g1", "A", "B", "2026-09-10", np.nan), ("g2", "C", "D", "2026-09-11", np.nan)])
+    feed = _feed(tmp_path, [("A", "B", "2026-09-10T13:00:00Z", False),
+                            ("C", "D", "2026-09-11T13:00:00Z", False)])  # fmt: skip
+    window, _, stale, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
+    assert list(stale["id_match"]) == ["g1"] and list(window["id_match"]) == ["g2"]
 
 
-def test_window_horizon_is_inclusive_of_the_last_day():
-    oos = _oos(
-        [
-            ("g0", "C", "D", "2026-09-07 20:00", np.nan),  # tonight -> anchor is today
-            ("g1", "A", "B", "2026-09-21 20:00", np.nan),  # NOW + 14 days, evening
-        ]
-    )
-    window, deferred, stale, _ = W.select_forecast_window(oos, NOW, horizon_days=14)
+def test_window_asks_the_hold_rule_not_the_boards_narrow_one(tmp_path):
+    # Not CERTAINLY started (a board would still show it), but this feed is a receipts channel:
+    # a fixture that may have started never ships a fresh number.
+    oos = _oos([("g1", "A", "B", "2026-09-09", np.nan)])
+    feed = _feed(tmp_path, [("A", "B", "2026-09-09T13:00:00Z", False)])
+    rows = W.kickoff.attach_kickoff(oos.assign(fixture_key=W.fixture_keys(oos)), feed)
+    assert not W.kickoff.certainly_started(
+        rows["kick_off"], rows["kick_off_utc"], rows["time_confirmed"], NOW
+    ).any()
+    window, _, stale, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
+    assert list(stale["id_match"]) == ["g1"] and window.empty
+
+
+def test_window_without_a_kickoff_feed_holds_from_three_days_before_the_oos_date(tmp_path):
+    feed = W.kickoff.read_kickoff_feed(tmp_path / "no_such_feed.csv")
+    oos = _oos([("g1", "A", "B", "2026-09-08", np.nan), ("g2", "C", "D", "2026-09-12", np.nan)])
+    window, _, stale, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
+    assert feed.attrs["missing"]
+    assert list(stale["id_match"]) == ["g1"] and list(window["id_match"]) == ["g2"]
+
+
+def test_both_perspectives_of_a_fixture_take_the_home_ordered_key(tmp_path):
+    # Keyed naively, the away row (B, A) would find no feed row, fall back to its OOS date --
+    # today, inside the hold -- and be held while its home row is forecast.
+    oos = pd.concat(
+        [_oos([("g1", "A", "B", "2026-09-07", np.nan)]),
+         _oos([("g1", "B", "A", "2026-09-07", np.nan)]).assign(home_pitch=0)],
+        ignore_index=True,
+    )  # fmt: skip
+    feed = _feed(tmp_path, [("A", "B", "2026-09-07T18:45:00Z", True)])  # tonight
+    window, _, stale, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
+    assert sorted(window["home_pitch"]) == [0, 1] and stale.empty
+
+
+def test_window_horizon_is_inclusive_of_the_last_day(tmp_path):
+    oos = _oos([("g0", "C", "D", "2026-09-07", np.nan), ("g1", "A", "B", "2026-09-21", np.nan)])
+    feed = _feed(tmp_path, [("C", "D", "2026-09-07T18:00:00Z", True),   # tonight: anchor = today
+                            ("A", "B", "2026-09-21T18:00:00Z", True)])  # NOW + 14 days, evening
+    window, _, _, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert list(window["id_match"]) == ["g0", "g1"]
-
-
-@pytest.mark.parametrize(
-    "kick_off, expected",
-    [
-        ("2026-09-06 15:00", True),  # yesterday
-        ("2026-09-06 00:00", True),  # yesterday, unconfirmed slot: the day itself has passed
-        ("2026-09-07 09:00", True),  # today, confirmed time already passed
-        ("2026-09-07 10:00", False),  # today, kicking off right now: not yet
-        ("2026-09-07 20:00", False),  # tonight
-        ("2026-09-07 00:00", False),  # today, unconfirmed slot: cannot be judged
-        ("2026-09-08 15:00", False),  # tomorrow
-    ],
-)
-def test_kicked_off_mask(kick_off, expected):
-    ko = pd.Series(pd.to_datetime([kick_off]))
-    assert bool(W.kicked_off_mask(ko, NOW).iloc[0]) is expected
 
 
 # --- ledger merge ---------------------------------------------------------------------
@@ -132,16 +170,13 @@ def test_merge_refuses_duplicate_keys(side):
         W.merge_frozen_ledger(led, fresh, KEY)
 
 
-def test_stale_fixture_frozen_row_survives_a_run_end_to_end():
+def test_stale_fixture_frozen_row_survives_a_run_end_to_end(tmp_path):
     """The scenario the guard exists for: result feed lags, the run happens anyway."""
     led = _ledger([("2026/27", "A", "B", "g1", 0.5, 0.3, 0.2, "2026-09-01")])
-    oos = _oos(
-        [
-            ("g1", "A", "B", "2026-09-06 15:00", np.nan),  # kicked off, no result yet
-            ("g2", "C", "D", "2026-09-12 15:00", np.nan),
-        ]
-    )
-    window, _, stale, _ = W.select_forecast_window(oos, NOW, horizon_days=14)
+    oos = _oos([("g1", "A", "B", "2026-09-06", np.nan), ("g2", "C", "D", "2026-09-12", np.nan)])
+    feed = _feed(tmp_path, [("A", "B", "2026-09-06T13:00:00Z", True),   # kicked off, no result
+                            ("C", "D", "2026-09-12T13:00:00Z", True)])  # fmt: skip
+    window, _, stale, _ = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     fresh = _ledger([("2026/27", "C", "D", "g2", 0.4, 0.3, 0.3, "2026-09-07")])
     assert set(fresh["id_match"]) == set(window["id_match"])  # only the window is forecast
     out = W.merge_frozen_ledger(led, fresh, KEY)
@@ -177,18 +212,21 @@ def test_stale_rows_enter_the_feed_with_their_frozen_numbers():
 # --- red-team round 1 additions -------------------------------------------------------
 
 
-def test_window_marks_same_day_fixture_with_a_real_time_in_the_past_as_stale():
-    late = pd.Timestamp("2026-09-07 22:00")
+def test_window_late_on_match_day_holds_the_started_and_the_unconfirmed(tmp_path):
+    late = pd.Timestamp("2026-09-07 22:00", tz="Europe/Berlin")
     oos = _oos(
         [
-            ("g1", "A", "B", "2026-09-07 15:00", np.nan),  # kicked off 7 h ago, no result
-            ("g2", "C", "D", "2026-09-07 00:00", np.nan),  # unconfirmed slot -> keep
-            ("g3", "E", "F", "2026-09-07 22:30", np.nan),  # later tonight -> keep
+            ("g1", "A", "B", "2026-09-07", np.nan),  # kicked off 7 h ago, no result
+            ("g2", "C", "D", "2026-09-07", np.nan),  # unconfirmed slot today -> cannot be judged
+            ("g3", "E", "F", "2026-09-07", np.nan),  # later tonight, confirmed -> forecast
         ]
     )
-    window, _, stale, _ = W.select_forecast_window(oos, late, horizon_days=14)
-    assert list(stale["id_match"]) == ["g1"]
-    assert list(window["id_match"]) == ["g2", "g3"]
+    feed = _feed(tmp_path, [("A", "B", "2026-09-07T13:00:00Z", True),
+                            ("C", "D", "2026-09-07T13:00:00Z", False),
+                            ("E", "F", "2026-09-07T20:30:00Z", True)])  # fmt: skip
+    window, _, stale, _ = W.select_forecast_window(oos, feed, late, horizon_days=14)
+    assert list(stale["id_match"]) == ["g1", "g2"]
+    assert list(window["id_match"]) == ["g3"]
 
 
 def test_stale_rows_carry_elo_when_available():
@@ -244,14 +282,13 @@ def test_previous_board_rows_are_carried_forward_for_stale_fixtures():
 # --- red-team round 2 additions -------------------------------------------------------
 
 
-def test_window_defers_rows_without_kick_off():
+def test_window_defers_rows_without_kick_off(tmp_path):
     # an undated fixture is neither forecast nor treated as kicked off: it waits for a date
     # (main() warns), rather than crashing the weekly run or vanishing silently
-    oos = _oos(
-        [("g1", "A", "B", "2026-09-12 15:00", np.nan), ("g2", "C", "D", "2026-09-13 15:00", np.nan)]
-    )
+    oos = _oos([("g1", "A", "B", "2026-09-12", np.nan), ("g2", "C", "D", "2026-09-13", np.nan)])
     oos.loc[1, "kick_off"] = pd.NaT
-    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+    feed = _feed(tmp_path, [("A", "B", "2026-09-12T13:00:00Z", True)])
+    window, deferred, stale, horizon = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert (
         list(window["id_match"]) == ["g1"] and list(deferred["id_match"]) == ["g2"] and stale.empty
     )
@@ -287,57 +324,63 @@ def test_carry_forward_ignores_the_return_leg_and_remaps_renumbered_ids():
     assert missing == []
 
 
-def test_window_anchors_at_the_earliest_forecastable_fixture_during_a_break():
+def test_window_anchors_at_the_earliest_forecastable_fixture_during_a_break(tmp_path):
     # International break: nothing for 18 days. A today-anchored window would come back empty
     # and the run would exit instead of forecasting the next round (Max, 64f86df).
     oos = _oos(
         [
-            ("g1", "A", "B", "2026-09-25 15:00", np.nan),
-            ("g2", "C", "D", "2026-09-26 15:00", np.nan),
-            ("g3", "E", "F", "2026-10-12 15:00", np.nan),  # 14 days past the 09-25 anchor + 3
+            ("g1", "A", "B", "2026-09-25", np.nan),
+            ("g2", "C", "D", "2026-09-26", np.nan),
+            ("g3", "E", "F", "2026-10-12", np.nan),  # 14 days past the 09-25 anchor + 3
         ]
     )
-    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+    feed = _feed(tmp_path, [("A", "B", "2026-09-25T13:00:00Z", True),
+                            ("C", "D", "2026-09-26T13:00:00Z", True),
+                            ("E", "F", "2026-10-12T13:00:00Z", True)])  # fmt: skip
+    window, deferred, stale, horizon = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert list(window["id_match"]) == ["g1", "g2"]
     assert list(deferred["id_match"]) == ["g3"]
     assert horizon == pd.Timestamp("2026-10-09")
     assert len(stale) == 0
 
 
-def test_window_anchor_ignores_kicked_off_fixtures():
+def test_window_anchor_ignores_kicked_off_fixtures(tmp_path):
     # A postponed / unrecorded fixture carrying a past kick-off must neither be re-forecast nor
     # pull the anchor backwards: the anchor is the earliest fixture that is still forecastable.
     oos = _oos(
         [
-            ("g0", "X", "Y", "2026-08-30 15:00", np.nan),  # kicked off, no result
-            ("g1", "A", "B", "2026-09-25 15:00", np.nan),
-            ("g2", "E", "F", "2026-10-12 15:00", np.nan),
+            ("g0", "X", "Y", "2026-08-30", np.nan),  # kicked off, no result
+            ("g1", "A", "B", "2026-09-25", np.nan),
+            ("g2", "E", "F", "2026-10-12", np.nan),
         ]
     )
-    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+    feed = _feed(tmp_path, [("X", "Y", "2026-08-30T13:00:00Z", True),
+                            ("A", "B", "2026-09-25T13:00:00Z", True),
+                            ("E", "F", "2026-10-12T13:00:00Z", True)])  # fmt: skip
+    window, deferred, stale, horizon = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert list(stale["id_match"]) == ["g0"]
     assert list(window["id_match"]) == ["g1"]
     assert list(deferred["id_match"]) == ["g2"]
     assert horizon == pd.Timestamp("2026-10-09")
 
 
-def test_window_starts_at_the_next_forecastable_fixture():
+def test_window_starts_at_the_next_forecastable_fixture(tmp_path):
     # Max's rule (64f86df): anchor = max(today, earliest unplayed), here over fixtures that have
     # not kicked off. Same rule as 006_040, so the two boards cover the same fixtures.
-    oos = _oos(
-        [("g1", "A", "B", "2026-09-08 15:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)]
-    )
-    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+    oos = _oos([("g1", "A", "B", "2026-09-08", np.nan), ("g2", "C", "D", "2026-09-22", np.nan)])
+    feed = _feed(tmp_path, [("A", "B", "2026-09-08T13:00:00Z", True),
+                            ("C", "D", "2026-09-22T13:00:00Z", True)])  # fmt: skip
+    window, deferred, stale, horizon = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert horizon == pd.Timestamp("2026-09-22")
     assert list(window["id_match"]) == ["g1", "g2"]
     assert deferred.empty
 
 
-def test_window_anchor_is_today_when_a_fixture_is_still_to_come_today():
-    oos = _oos(
-        [("g1", "A", "B", "2026-09-07 20:00", np.nan), ("g2", "C", "D", "2026-09-22 15:00", np.nan)]
-    )
-    window, deferred, stale, horizon = W.select_forecast_window(oos, NOW, horizon_days=14)
+def test_window_anchor_is_today_when_a_fixture_is_still_to_come_today(tmp_path):
+    oos = _oos([("g1", "A", "B", "2026-09-07", np.nan), ("g2", "C", "D", "2026-09-22", np.nan)])
+    feed = _feed(tmp_path, [("A", "B", "2026-09-07T18:00:00Z", True),
+                            ("C", "D", "2026-09-22T13:00:00Z", True)])  # fmt: skip
+    window, deferred, stale, horizon = W.select_forecast_window(oos, feed, NOW, horizon_days=14)
     assert horizon == pd.Timestamp("2026-09-21")
     assert list(window["id_match"]) == ["g1"]
     assert list(deferred["id_match"]) == ["g2"]
@@ -401,12 +444,18 @@ def _frozen(home, away, id_match, p_home, stamp):
 def season_files(tmp_path, monkeypatch):
     import cloudpickle
 
-    future = (pd.Timestamp.now() + pd.Timedelta(days=3)).strftime("%Y-%m-%d 20:00")
-    hist = pd.DataFrame(_raw("PL_GD01_AB", "A", "B", "2026-09-01 15:00", 2, 1))
+    # real shapes: the OOS file carries the DATE, the kick-off feed the confirmed UTC time
+    future = (pd.Timestamp.now(tz="Europe/Berlin") + pd.Timedelta(days=3)).strftime("%Y-%m-%d")
+    hist = pd.DataFrame(_raw("PL_GD01_AB", "A", "B", "2026-09-01", 2, 1))
     oos = pd.DataFrame(
-        _raw("PL_GD02_CD", "C", "D", "2026-09-20 15:00", np.nan, np.nan)  # kicked off, no result
+        _raw("PL_GD02_CD", "C", "D", "2026-09-20", np.nan, np.nan)  # kicked off, no result
         + _raw("PL_GD03_EF", "E", "F", future, np.nan, np.nan)
     )
+    kickoff_feed = pd.DataFrame(
+        [dict(season="2026-27", league="PL", team_home=h, team_away=a, kick_off_utc=t,
+              time_confirmed=True)
+         for h, a, t in [("C", "D", "2026-09-20T13:00:00Z"), ("E", "F", f"{future}T18:00:00Z")]]
+    )  # fmt: skip
     ledger = pd.DataFrame(
         [
             _frozen("A", "B", "PL_GD01_AB", 0.5, "2026-08-30"),
@@ -433,7 +482,7 @@ def season_files(tmp_path, monkeypatch):
     p = {k: tmp_path / v for k, v in dict(
         BUNDLE_PATH="bundle.pkl", HIST_PATH="hist.csv", OOS_PATH="oos.csv",
         FROZEN_LEDGER="frozen.csv", OUT_MATCH_CSV="matches.csv", OUT_GRID_CSV="grid.csv",
-        OUT_TEAM_CSV="team.csv", OUT_PKL="board.pkl").items()}  # fmt: skip
+        OUT_TEAM_CSV="team.csv", OUT_PKL="board.pkl", KICKOFF_PATH="kickoff.csv").items()}  # fmt: skip
     with open(p["BUNDLE_PATH"], "wb") as f:
         cloudpickle.dump(bundle, f)
     with open(p["OUT_PKL"], "wb") as f:
@@ -441,6 +490,7 @@ def season_files(tmp_path, monkeypatch):
     hist.to_csv(p["HIST_PATH"], index=False)
     oos.to_csv(p["OOS_PATH"], index=False)
     ledger.to_csv(p["FROZEN_LEDGER"], index=False)
+    kickoff_feed.to_csv(p["KICKOFF_PATH"], index=False)
     for k, v in p.items():
         monkeypatch.setattr(W, k, str(v))
     monkeypatch.setattr(W, "OUT_DIR", str(tmp_path))
@@ -473,8 +523,8 @@ def test_main_rebuilds_the_feed_when_only_kicked_off_fixtures_remain(season_file
     assert set(pd.read_csv(season_files["OUT_TEAM_CSV"])["team"]) == {"C", "D"}
 
 
-def test_main_forecasts_only_fixtures_that_have_not_kicked_off(season_files, monkeypatch):
-    seen = {}
+def _fake_model(seen):
+    """A stand-in for forecast_fixtures: one fixture at p_home_win 0.55, plus its board rows."""
 
     def fake_model(oos, *a, **k):
         seen["ids"] = sorted(oos["id_match"].unique())
@@ -491,7 +541,12 @@ def test_main_forecasts_only_fixtures_that_have_not_kicked_off(season_files, mon
                 for t, o, i in [("E", "F", 1), ("F", "E", 0)]]  # fmt: skip
         return pd.DataFrame([row]), grid, team, 0.0
 
-    monkeypatch.setattr(W, "forecast_fixtures", fake_model)
+    return fake_model
+
+
+def test_main_forecasts_only_fixtures_that_have_not_kicked_off(season_files, monkeypatch):
+    seen = {}
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model(seen))
     W.main()
     assert seen["ids"] == ["PL_GD03_EF"]  # the kicked-off C v D is never sent to the model
     led = pd.read_csv(season_files["FROZEN_LEDGER"]).set_index("id_match")
@@ -502,6 +557,32 @@ def test_main_forecasts_only_fixtures_that_have_not_kicked_off(season_files, mon
         "finished", "upcoming", "upcoming",
     ]  # fmt: skip
     assert feed.loc["PL_GD02_CD", "p_home_win"] == 0.4
+
+
+def test_main_discards_a_forecast_whose_fixture_reached_its_hold_point_during_the_run(
+    season_files, monkeypatch
+):
+    # The model samples for minutes: a run that starts at 20:40 for a 20:45 kick-off must not
+    # write the 20:46 forecast. The rule is asked again after sampling; here the clock "moves"
+    # between the two asks and E v F (no frozen row) gets no receipt and no feed row.
+    seen, asks = {}, []
+    rule = W.may_have_started
+
+    def clock_moves(oos, feed, now):
+        asks.append(now)
+        started = rule(oos, feed, now)
+        return started if len(asks) == 1 else started | True
+
+    monkeypatch.setattr(W, "may_have_started", clock_moves)
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model(seen))
+    ledger_before = season_files["FROZEN_LEDGER"].read_bytes()
+    W.main()
+    assert len(asks) == 2 and seen["ids"] == ["PL_GD03_EF"]  # it WAS forecast...
+    assert season_files["FROZEN_LEDGER"].read_bytes() == ledger_before  # ...and never frozen
+    feed = pd.read_csv(season_files["OUT_MATCH_CSV"])
+    assert "PL_GD03_EF" not in set(feed["id_match"])  # ...nor shipped
+    assert "PL_GD03_EF" not in set(pd.read_csv(season_files["OUT_GRID_CSV"])["id_match"])
+    assert feed.set_index("id_match").loc["PL_GD02_CD", "p_home_win"] == 0.4
 
 
 def test_main_with_nothing_to_forecast_still_refuses_a_duplicated_ledger(season_files, monkeypatch):
