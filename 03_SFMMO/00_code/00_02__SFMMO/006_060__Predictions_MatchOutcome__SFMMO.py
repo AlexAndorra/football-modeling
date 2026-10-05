@@ -629,7 +629,12 @@ def main():
     # fatal to the receipts. (season, home_team, away_team) is unique in a double round-robin
     # and immune to both renumbering and date changes.
     KEY = ['season', 'home_team', 'away_team']
-    stamp = datetime.now().strftime('%Y-%m-%d')
+    # Full timestamp, not a date. A date-only stamp cannot be resolved against a same-day
+    # kick-off: 26 ledger rows were frozen ON their fixture's kick-off date, and the claim that
+    # they were frozen before it rested on knowing that runs happen in the morning, not on
+    # anything in the file. With a time, "frozen before kick-off" is auditable from the ledger
+    # alone. ISO format keeps the lexical sort order of the older date-only stamps.
+    stamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     led = None
     if os.path.exists(FROZEN_LEDGER):
         led = pd.read_csv(FROZEN_LEDGER)
