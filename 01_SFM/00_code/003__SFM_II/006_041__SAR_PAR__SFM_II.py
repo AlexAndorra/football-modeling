@@ -22,8 +22,8 @@
 #    pair of the dev notebook collapses to a single SAR here.  Nothing is lost.
 #
 # 2. THE ARTIFACT IS ~5 ORDERS OF MAGNITUDE SMALLER.  The OG script pickles the full
-#    obs-level posterior predictive: the live 041_SARPAR__prod.pkl is **10.5 GB**.  The
-#    website only ever needs SAR/PAR *per player per draw* -- which is exactly what
+#    obs-level posterior predictive: the live 041_SARPAR__prod.pkl is **10.5 GB**.
+#    Consumers only ever need SAR/PAR *per player per draw* -- which is exactly what
 #    006_042__SAR_PAR_funcCalc computes from it -- so this script does that aggregation
 #    here, in chunks, and ships ~50 MB.  A drop-in `get__SAR_PAR__SFM_II()` is provided at
 #    the bottom for 006_042 to call.
@@ -32,7 +32,9 @@
 # ======================================================================================== #
 
 import os
+import pathlib
 import pickle
+import sys
 
 import numpy as np
 import pandas as pd
@@ -45,8 +47,14 @@ rng = np.random.default_rng(seed)
 
 # ----------------------------- USER INTERACTION ----------------------------- #
 
-# --- Set the directory to the data folder:
-directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
+# --- The data folder and the publish folder come from sfm_local.toml at the repo root
+# --- (git-ignored; copy sfm_local.example.toml). On a validation run (SFM_VALIDATION_DIR set)
+# --- the inputs stay real and the pickle is written to scratch.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / '00_shared'))
+import runroots  # noqa: E402
+ROOTS = runroots.load_roots()
+print(ROOTS.describe())
+directory = str(ROOTS.data)
 
 # --- Fitted bundle stem (the LIGHT companion is read: {stem}__LIGHT.pkl):
 SFM_model__NAME = 'SFM_II_FinalC_ELO_scaleCS__2526'
@@ -264,7 +272,7 @@ for key in ('PAR', 'SAR'):
 
 
 # ======================================== Export ======================================== #
-# Aggregated per player per draw -- what the website actually plots. Reshaped to
+# Aggregated per player per draw -- what consumers actually plot. Reshaped to
 # (chain, draw, name_player) so the xarray idiom downstream is unchanged.
 
 _n_chains = int(L['provenance'].get('n_chains', 4))
@@ -291,7 +299,7 @@ dict_SARPAR = {
                      'obs-level predictive (10.5 GB). Use get__SAR_PAR__SFM_II() below.'},
 }
 
-_out = f'{directory}/00_code/006_Website/01__SFMcom/SFMwebsite__v2/static/data/041_SARPAR__prod__SFM_II.pkl'
+_out = str(ROOTS.publish / '041_SARPAR__prod__SFM_II.pkl')   # scratch when validating
 with open(_out, 'wb') as f:
     pickle.dump(dict_SARPAR, f, protocol=4)
 
@@ -308,9 +316,9 @@ print('\n[SUCCESS]: SAR/PAR exported.')
 # Drop-in for 006_042__SAR_PAR_funcCalc.get__SAR_PAR -- the aggregation now happens upstream,
 # so this only slices and summarizes.
 # ======================================================================================== #
-def get__SAR_PAR__SFM_II(cred_region=0.9, directory=directory):
-    with open(f'{directory}/00_code/006_Website/01__SFMcom/SFMwebsite__v2/'
-              f'static/data/041_SARPAR__prod__SFM_II.pkl', 'rb') as fh:
+def get__SAR_PAR__SFM_II(cred_region=0.9, publish_dir=None):
+    path = pathlib.Path(publish_dir or ROOTS.publish) / '041_SARPAR__prod__SFM_II.pkl'
+    with open(path, 'rb') as fh:
         dd = pickle.load(fh)
     lo, up = (1 - cred_region) / 2, 1 - (1 - cred_region) / 2
     out = {}
