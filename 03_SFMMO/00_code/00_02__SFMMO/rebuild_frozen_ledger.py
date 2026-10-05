@@ -61,7 +61,7 @@ def rebuild(boards, feed):
     that were still 'upcoming' (no result yet) but may already have started."""
     rows, dropped = [], {}
     for path, stamp, now in boards:
-        d = pd.read_csv(path)
+        d = pd.read_csv(path, float_precision='round_trip')   # exact: these become receipts
         if 'status' in d.columns:                      # newer boards carry played rows too
             d = d[d['status'] == 'upcoming']
         d = d[d['p_home_win'].notna()]
@@ -78,6 +78,8 @@ def rebuild(boards, feed):
     # STABLE sort: boards are concatenated oldest first, so on a tied stamp keep='last' is the
     # later board, not whichever quicksort happened to put last.
     led = led.sort_values('forecast_frozen_at', kind='stable').drop_duplicates(KEY, keep='last')
+    for c in ('ml_score_home', 'ml_score_away'):   # a board with played rows reads them as float
+        led[c] = led[c].astype('Int64')              # the ledger writes 2, not 2.0
     return led.reset_index(drop=True), dropped
 
 
@@ -130,7 +132,7 @@ def main():
 
     live_path = out_dir / 'SFMMO_predictions__frozen.csv'
     if live_path.exists():
-        diff = compare(led, pd.read_csv(live_path))
+        diff = compare(led, pd.read_csv(live_path, float_precision='round_trip'))
         print(f"vs the live ledger: {len(diff['only_live'])} fixture(s) only live, "
               f"{len(diff['only_rebuilt'])} only rebuilt, max probability diff "
               f"{diff['max_prob_diff']:.2e}, {len(diff['freeze_day_differs'])} freeze-day difference(s)")

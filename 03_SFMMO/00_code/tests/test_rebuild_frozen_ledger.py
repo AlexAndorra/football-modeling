@@ -76,6 +76,18 @@ def test_a_fixture_seen_only_after_kick_off_gets_no_row(tmp_path):
     assert list(led["home_team"]) == ["A"]  # results-only for Rayo v Alaves, never a late receipt
 
 
+def test_rebuilt_rows_carry_the_board_text_exactly(tmp_path):
+    # read with round_trip: the default parser would turn this board value into ...0102
+    feed = _feed(tmp_path, [("A", "B", "2026-09-30T13:00:00Z")])
+    b = _board(tmp_path, "2026-09-18T06:40:39Z", [("A", "B", "2026-09-30", 0.21200813546201028)])
+    led, _ = R.rebuild(_boards(b), feed)
+    out = tmp_path / "rebuilt.csv"
+    led.to_csv(out, index=False)
+    row = out.read_text().splitlines()[1]
+    assert ",0.21200813546201028," in row
+    assert row.endswith(",0,0,2026-09-18 08:40:39")  # most-likely score as 0, not 0.0
+
+
 def test_board_time_is_an_instant_and_its_stamp_is_berlin_local(tmp_path):
     b = _board(tmp_path, "2026-10-25T22:30:00Z", [("A", "B", "2026-10-29", 0.5)])  # after DST ends
     stamp, now = R.board_time(b)
