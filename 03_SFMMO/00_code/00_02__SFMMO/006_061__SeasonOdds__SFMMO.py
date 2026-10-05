@@ -45,8 +45,16 @@ import numpy as np
 import pandas as pd
 import cloudpickle
 
+# --- reuse 006_060's data/feature helpers rather than duplicating them (M6: one source) ---
+# --- and its run roots: inputs from the data root, the board, its vintages and the tracker to
+# --- the state root (production in place; a seeded scratch folder on a validation run)
+_spec = importlib.util.spec_from_file_location(
+    'sfmmo_predict', os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  '006_060__Predictions_MatchOutcome__SFMMO.py'))
+_p = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_p)
 
-directory = '/Users/maximilian/Dropbox/Max/51_SoccerAnalytics'
+directory = _p.directory
 
 BUNDLE_PATH   = f'{directory}/10_data/01_Models/SFMMO_DevK__scaleCS__train202526__PROD.pkl'
 TARGET_SEASON = '2026/27'
@@ -54,19 +62,16 @@ N_SIM         = None          # None = all posterior draws (posterior-consistent
 TOP_N         = 4             # "top-4" definition
 RELEGATED     = {'bundesliga': 3, 'la-liga': 3, 'ligue-1': 3, 'premier-league': 3, 'serie-a': 3}
 
-OUT_DIR      = f'{directory}/10_data/106_Website'
+OUT_DIR      = f'{_p.state_dir}/10_data/106_Website'
 VINTAGE_DIR  = f'{OUT_DIR}/_vintages'
 OUT_CSV      = f'{OUT_DIR}/SFMMO_season_odds.csv'
 TRACKER_CSV  = f'{OUT_DIR}/SFMMO_season_odds__tracker.csv'
+# seed these into a validation run's scratch first: the tracker is APPENDED to, so an unseeded
+# run would start the odds history from nothing (paths relative to the data root)
+STATE_FILES = ['10_data/106_Website/SFMMO_season_odds.csv',
+               '10_data/106_Website/SFMMO_season_odds__tracker.csv']
 
 SEED = 326
-
-# --- reuse 006_060's data/feature helpers rather than duplicating them (M6: one source) ---
-_spec = importlib.util.spec_from_file_location(
-    'sfmmo_predict', os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  '006_060__Predictions_MatchOutcome__SFMMO.py'))
-_p = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_p)
 
 
 def simulate_league(teams, played, sp, rng, n_sim, n_releg):
@@ -131,6 +136,8 @@ def simulate_league(teams, played, sp, rng, n_sim, n_releg):
 
 
 def main():
+    if _p.ROOTS:
+        print(_p.ROOTS.describe())
     print(f"Loading bundle: {os.path.basename(BUNDLE_PATH)}")
     with open(BUNDLE_PATH, 'rb') as f:
         B = cloudpickle.load(f)
