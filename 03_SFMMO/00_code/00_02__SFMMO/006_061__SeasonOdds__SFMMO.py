@@ -16,10 +16,10 @@ far automatically and tightens week by week.
 Run it on the same cadence as 006_060. Each run:
   * writes the current board (`SFMMO_season_odds.csv`),
   * archives a DATED snapshot into `_vintages/`,
-  * appends to a running tracker (`SFMMO_season_odds__tracker.csv`) so the website's
-    title-odds chart has a time series to draw.
+  * appends to a running tracker (`SFMMO_season_odds__tracker.csv`) so the title
+    odds have a time series.
 
-METHOD AND ITS LIMITS (state these on the site, as with the WC board)
+METHOD AND ITS LIMITS (state these wherever the odds are shown, as with the WC board)
 --------------------------------------------------------------------
 *  Team strength per posterior draw: lam(i->j) = exp(mu + ATT_i + DEF_j [+ beta_home_i]),
    with ATT_i = alpha_i + b_eloT*z(elo_i) and DEF_j = -delta_j + b_eloO*z(elo_j).
@@ -230,7 +230,7 @@ def main():
         print(f"\nArchived previous board -> {os.path.basename(dest)}")
     board.to_csv(OUT_CSV, index=False)
 
-    # running tracker: one row per (as_of, league, team) -> the site's title-odds line chart
+    # running tracker: one row per (as_of, league, team) -> the title-odds time series
     cols = ['as_of', 'league', 'team', 'p_title', 'p_top4', 'p_releg', 'exp_pts']
     trk = board[cols]
     if os.path.exists(TRACKER_CSV):

@@ -13,7 +13,7 @@ Same architecture, proven over the WC campaign: **fit once, predict many.**
     THIS SCRIPT (weekly, on CPU, seconds)
         -> re-runs feature engineering on the UPDATED data (results roll in -> ELO moves),
            pushes the upcoming fixtures through the model's OOS graph, applies the
-           Dixon-Coles correction, and writes the website/app feed.
+           Dixon-Coles correction, and writes the match feed.
 
 The posterior never moves during the season. That is not a shortcut: it is exactly the
 protocol the expanding-window validation measured (train through season t, predict season
@@ -625,7 +625,7 @@ def main():
     # ------------------------------------------------------------------ #
     #  FROZEN FORECAST LEDGER  +  full-season feed (played + upcoming)
     #
-    #  Two things the downstream stack (validation / receipts / pick'em) needs and that a
+    #  Two things any grading of these forecasts needs and that a
     #  naive "forecast the unplayed" feed cannot give:
     #    (a) results must APPEAR in the feed once a match is played -- otherwise played
     #        fixtures silently leave the file;
@@ -735,7 +735,7 @@ def main():
               + (f"; not on the previous board: {_miss[:3]}" if _miss else ""))
     if not len(df_grid.columns) or not len(df_team.columns):
         # nothing forecast and nothing carried forward: keep the previous board's columns, so the
-        # site reads an empty table rather than a header-less file
+        # reader gets an empty table rather than a header-less file
         with open(OUT_PKL, 'rb') as f:
             _prev = pickle.load(f)
         df_grid = df_grid if len(df_grid.columns) else _prev['scorelines'].iloc[0:0]
