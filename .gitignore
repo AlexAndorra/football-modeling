@@ -167,3 +167,5 @@ cython_debug/
 *.nc
 # Generated SFMMO evaluation reports/figures (regenerate with the scripts)
 03_SFMMO/00_code/artifacts/
+# Machine-specific paths for the weekly forecast runs (see 00_shared/runroots.py)
+sfm_local.toml

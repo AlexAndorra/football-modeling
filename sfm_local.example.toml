@@ -1,0 +1,9 @@
+# Copy to sfm_local.toml (git-ignored) and set the paths for this machine.
+# Read by 00_shared/runroots.py. Validation runs keep data_root and move state + publish to
+# the folder in the SFM_VALIDATION_DIR environment variable.
+
+# Root of the data tree the weekly scripts read (10_data/... lives under it).
+data_root = "/path/to/51_SoccerAnalytics"
+
+# Folder that receives the published board pickles.
+publish_dir = "/path/to/published/data"
