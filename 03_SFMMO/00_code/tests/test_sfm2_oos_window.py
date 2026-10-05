@@ -310,6 +310,7 @@ def test_load_cell_flags_kicked_off_fixtures_and_keeps_them_in_the_data(tmp_path
     oos.assign(kick_off=pd.to_datetime(oos.kick_off).dt.strftime("%Y-%m-%d")).to_csv(
         web / "data_byPlayer__OOS.csv", index=False)  # date-only, like the real OOS file
     ns = dict(pd=pd, np=np, os=os, kickoff=kickoff, directory=str(tmp_path), oos_season="2026/27",
+              runroots=types.SimpleNamespace(run_clock=lambda r: pd.Timestamp.now(tz=kickoff.BERLIN)), ROOTS=None,
               FORECAST_HORIZON_DAYS=14)  # fmt: skip
     exec(compile(src, str(NB), "exec"), ns)
     assert ns["STALE_MATCH_IDS"] == {"gS"}
@@ -450,3 +451,15 @@ def test_export_stops_when_the_train_block_is_neither_computed_nor_cached(tmp_pa
     with pytest.raises(FileNotFoundError, match="neither computed this run nor cached"):
         exec(compile(src, str(NB), "exec"), ns)
     assert not (tmp_path / "pub").exists()
+
+
+def test_a_held_row_comes_back_byte_for_byte(tmp_path):
+    # A receipt is never rewritten -- not even its last float digits (the default CSV parser is
+    # off by up to 1 ULP, so a plain read -> write changed every pending line until 2026-10).
+    lg = Ledger(tmp_path)
+    p0 = 0.13567400305398386  # 17 significant digits: the case the default parser rounds
+    lg.run(_board([("p1", 5, "A", "B", p0)]), _scored([G1]), NO_PLAYED, "run1", at="2026-09-05 10:00")
+    before = [ln for ln in pathlib.Path(lg.path).read_text().splitlines() if "p1" in ln]
+    lg.run(_board([("p1", 5, "A", "B", 0.2)]), _scored([G1]), NO_PLAYED, "run2", at="2026-09-07 10:00")
+    after = [ln for ln in pathlib.Path(lg.path).read_text().splitlines() if "p1" in ln]
+    assert after == before
