@@ -7,6 +7,7 @@ stale fixtures to the feed.
 """
 
 import importlib.util
+import io
 import pathlib
 import warnings
 
@@ -583,6 +584,24 @@ def test_main_discards_a_forecast_whose_fixture_reached_its_hold_point_during_th
     assert "PL_GD03_EF" not in set(feed["id_match"])  # ...nor shipped
     assert "PL_GD03_EF" not in set(pd.read_csv(season_files["OUT_GRID_CSV"])["id_match"])
     assert feed.set_index("id_match").loc["PL_GD02_CD", "p_home_win"] == 0.4
+
+
+def test_main_writes_finished_and_held_ledger_rows_back_byte_for_byte(season_files, monkeypatch):
+    # The default float parser is off by up to 1 ULP: this value, from the live ledger, reads
+    # back as 0.1657176973373485. A receipt must not change by a digit, so the ledger is read
+    # exactly and a row the run does not refresh is written back as it was read.
+    drifts = "0.16571769733734856"
+    assert repr(pd.read_csv(io.StringIO(f"x\n{drifts}"))["x"][0]) != drifts  # the trap is real
+    led = pd.read_csv(season_files["FROZEN_LEDGER"])
+    led["p_draw"] = float(drifts)
+    led["p_away_win"] = 1 - led["p_home_win"] - led["p_draw"]  # rows still sum to 1 (export gate)
+    led.to_csv(season_files["FROZEN_LEDGER"], index=False)
+    before = season_files["FROZEN_LEDGER"].read_text().splitlines()[1:]
+    assert len(before) == 2 and all(drifts in line for line in before)
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model({}))
+    W.main()
+    after = set(season_files["FROZEN_LEDGER"].read_text().splitlines())
+    assert all(line in after for line in before)  # A v B finished, C v D held: untouched
 
 
 def test_main_with_nothing_to_forecast_still_refuses_a_duplicated_ledger(season_files, monkeypatch):

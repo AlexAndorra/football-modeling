@@ -270,6 +270,13 @@ def may_have_started(oos, feed, now):
                                     now)
 
 
+def run_clock():
+    """Now, tz-aware Berlin -- asked twice per run (before the window, and again after sampling),
+    so in production it is the real time at each ask. A validation run may replay one moment
+    (SFM_VALIDATION_NOW, see runroots.run_clock); both asks then return it."""
+    return runroots.run_clock(ROOTS) if ROOTS else pd.Timestamp.now(tz=kickoff.BERLIN)
+
+
 def select_forecast_window(oos, feed, now, horizon_days):
     """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon
     -- kickoff.select_forecast_window, asked with the HOLD rule.
@@ -611,8 +618,8 @@ def main():
     if feed.attrs['missing']:
         print(f"  ⚠️  {os.path.basename(KICKOFF_PATH)} not found -- kick-off TIMES unknown, so every "
               f"fixture is held from {kickoff.UNCONFIRMED_HOLD_DAYS} days before its OOS date")
-    oos, deferred, stale, horizon = select_forecast_window(oos, feed, pd.Timestamp.now(tz='UTC'),
-                                                           HORIZON_DAYS)
+    now = now_write = run_clock()
+    oos, deferred, stale, horizon = select_forecast_window(oos, feed, now, HORIZON_DAYS)
     if len(stale):
         _sh = stale[stale['home_pitch'] == 1]
         print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) may have kicked off and carry NO "
@@ -649,7 +656,8 @@ def main():
         # hold point between the window above and the ledger write below (a run started at 20:40
         # for a 20:45 kick-off). So the rule is asked AGAIN now, and anything that may have started
         # since is treated exactly like a stale fixture: no fresh number in the ledger or the feed.
-        late = may_have_started(oos, feed, pd.Timestamp.now(tz='UTC'))
+        now_write = run_clock()
+        late = may_have_started(oos, feed, now_write)
         if late.any():
             ids = set(oos.loc[late, 'id_match'])
             _lh = oos[late & (oos['home_pitch'] == 1)]
@@ -689,10 +697,15 @@ def main():
     # they were frozen before it rested on knowing that runs happen in the morning, not on
     # anything in the file. With a time, "frozen before kick-off" is auditable from the ledger
     # alone. ISO format keeps the lexical sort order of the older date-only stamps.
-    stamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # The clock of the kick-off check above, in Berlin local time, so the stamp and the rule can
+    # never disagree about when the forecast was frozen.
+    stamp = now_write.tz_convert(kickoff.BERLIN).strftime('%Y-%m-%d %H:%M:%S')
     led = None
     if os.path.exists(FROZEN_LEDGER):
-        led = pd.read_csv(FROZEN_LEDGER)
+        # round_trip: the default float parser is off by up to 1 ULP, so every row frozen in the
+        # previous run had its last digit rewritten on the next one (101 of 350 rows, 22 Sep). A
+        # receipt must not change at all; with round_trip a held row comes back byte-for-byte.
+        led = pd.read_csv(FROZEN_LEDGER, float_precision='round_trip')
         if not all(k in led.columns for k in KEY):
             raise SystemExit(f"{FROZEN_LEDGER} predates the team-keyed schema. Rebuild it from "
                              f"the archived vintages before running (see rebuild_frozen_ledger.py).")
