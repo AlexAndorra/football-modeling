@@ -613,3 +613,23 @@ def test_season_complete_counts_fixtures_not_rows():
     twice = missing + [missing[0]]  # one played fixture listed twice must not stand in for C v B
     assert not W.season_complete(_cd(twice), "2026/27")
     assert W.season_complete(_cd(rr), "2026/27")
+
+
+# --- gameday_label ----------------------------------------------------------------------
+
+
+def test_gameday_label_keeps_the_half_the_integer_gameday_floors_away():
+    ids = ["PL1-S2627_GD2_G5", "PL1-S2627_GD2.5_G1", "BL1-S2627_GD10_G3"]
+    label, n_fallback = W.gameday_label(ids, [2, 2, 10])
+    assert list(label) == ["2", "2.5", "10"] and n_fallback == 0
+
+
+def test_gameday_label_falls_back_to_the_integer_gameday_without_a_token():
+    label, n_fallback = W.gameday_label(["PL1-S2627_GD3_G1", "no-token"], [3, 7])
+    assert list(label) == ["3", "7"] and n_fallback == 1
+
+
+def test_gameday_label_does_not_match_a_longer_round_number():
+    # the token is delimited on both sides: GD1 must not be read out of GD10 or GD1x
+    label, _ = W.gameday_label(["X_GD10_G1"], [10])
+    assert list(label) == ["10"]

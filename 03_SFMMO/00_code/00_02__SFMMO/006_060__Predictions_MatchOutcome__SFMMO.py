@@ -314,6 +314,21 @@ def stale_feed_rows(stale_home, ledger, key, pcols):
     return rows, missing
 
 
+def gameday_label(id_match, gameday):
+    """The round AS WRITTEN, including the half ('2.5', '3.5', '7'), read from the `_GD<n>_`
+    token of id_match; falls back to the integer `gameday` for an id without the token.
+
+    It sits beside `gameday`, which has already floored the half away: `gameday` is for
+    ordering, bucketing and joins, the label is for display only. Never join on the label.
+    Published so that no consumer has to parse id_match -- which is not stable -- to show a
+    rescheduled round. READ IT AS A STRING: every value looks numeric, so `pd.read_csv` without
+    `dtype={'gameday_label': str}` infers float and renders '1.0', the thing it exists to avoid."""
+    label = pd.Series(id_match, dtype=str).str.extract(r'_GD(\d+(?:\.\d+)?)_', expand=False)
+    fallback = label.isna()
+    label[fallback] = pd.Series(gameday).astype(str).values[fallback.values]
+    return label, int(fallback.sum())
+
+
 def carry_forward_board_rows(prev, stale_home):
     """Scoreline grids and team-goal rows for stale fixtures, taken from the PREVIOUS board
     (`prev` = the last run's exported dict) so they do not vanish from those two feeds while the
@@ -697,7 +712,11 @@ def main():
             df_matches[c] = np.nan
     for c in ['ml_score_home', 'ml_score_away', 'home_goals', 'away_goals']:
         df_matches[c] = df_matches[c].astype('Int64')     # nullable int: render 2, not 2.0
-    print(f"  feed: {int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
+    _label, _nolabel = gameday_label(df_matches['id_match'].values, df_matches['gameday'].values)
+    df_matches['gameday_label'] = _label.values
+    if _nolabel:
+        print(f"  [gameday_label] {_nolabel} id(s) carried no _GD token -- fell back to the integer gameday")
+    print(f"  feed:{int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
           f"forecast) + {int((df_matches['status'] == 'upcoming').sum())} upcoming")
     df_grid = pd.DataFrame(grid_rows)
     df_team = pd.DataFrame(team_rows)
