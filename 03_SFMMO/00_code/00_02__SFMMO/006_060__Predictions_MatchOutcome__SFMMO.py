@@ -286,7 +286,10 @@ def merge_frozen_ledger(led, fresh, key):
                              f"{df.loc[dup, key].drop_duplicates().values.tolist()[:3]}")
     kept = led.merge(fresh[key].assign(_refresh=1), on=key, how='left')
     kept = kept[kept['_refresh'].isna()].drop(columns='_refresh')     # NOT refreshed -> verbatim
-    return pd.concat([kept, fresh], ignore_index=True)
+    # an empty side is left out of the concat: pandas >= 2.1 warns that empty frames will soon
+    # take part in dtype inference, and the first run (empty ledger) is exactly that case
+    parts = [d for d in (kept, fresh) if len(d)] or [kept]
+    return pd.concat(parts, ignore_index=True)
 
 
 def stale_feed_rows(stale_home, ledger, key, pcols):
