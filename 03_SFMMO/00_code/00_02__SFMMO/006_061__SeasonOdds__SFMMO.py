@@ -166,7 +166,7 @@ def main():
     print(f"  {TARGET_SEASON}: {home['id_match'].nunique()} fixtures known, "
           f"{played_rows['id_match'].nunique()} already played")
 
-    stamp = datetime.now().strftime('%Y-%m-%d')
+    stamp = _p.run_clock().strftime('%Y-%m-%d')   # Berlin date; a replayed run is dated as replayed
     boards = []
     for lg, g in home.groupby('name_league'):
         teams = sorted(set(g['name_team']) | set(g['name_opp']))

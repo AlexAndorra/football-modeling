@@ -830,7 +830,8 @@ def main():
     out = dict(meta=dict(bundle=os.path.basename(BUNDLE_PATH), devVersion=meta['devVersion'],
                          train_end=meta['train_end'], target_season=TARGET_SEASON,
                          rho=rho, k_max=K_MAX, cred_region=CRED_REGION,
-                         run=datetime.now().strftime('%Y-%m-%d %H:%M'), eta_parity=dev),
+                         run=now_write.tz_convert(kickoff.BERLIN).strftime('%Y-%m-%d %H:%M'),
+                         eta_parity=dev),
                matches=df_matches, scorelines=df_grid, team_goals=df_team)
     with open(OUT_PKL, 'wb') as f:
         pickle.dump(out, f)
