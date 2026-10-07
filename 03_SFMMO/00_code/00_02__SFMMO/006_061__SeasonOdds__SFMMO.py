@@ -43,7 +43,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import cloudpickle
 
 # --- reuse 006_060's data/feature helpers rather than duplicating them (M6: one source) ---
 # --- and its run roots: inputs from the data root, the board, its vintages and the tracker to
@@ -138,8 +137,7 @@ def simulate_league(teams, played, sp, rng, n_sim, n_releg):
 def load_bundle(path):
     """The season bundle -> (meta, simulation parameters: posterior draws + ELO scaling moments)."""
     print(f"Loading bundle: {os.path.basename(path)}")
-    with open(path, 'rb') as f:
-        B = cloudpickle.load(f)
+    B = _p.load_bundle_file(path)
     meta, post = B['meta'], B['idata'].posterior
     S = lambda v: post[v].stack(s=('chain', 'draw')).values
     sp = dict(mu=S('mu'), alpha=S('alpha'), delta=S('delta'), beta_home=S('beta_home'),

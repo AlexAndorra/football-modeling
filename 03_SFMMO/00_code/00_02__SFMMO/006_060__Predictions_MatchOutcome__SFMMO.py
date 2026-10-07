@@ -88,7 +88,7 @@ state_dir = str(ROOTS.state) if ROOTS else _UNSET
 # HL=4 bundle and writes EVERYTHING -- ledger, board, feed, vintages -- under
 # 10_data/106_Website/_shadow/hl4/. It never touches a live file. Unset = the live run.
 BUNDLES = {
-    None:  'SFMMO_DevK__scaleCS__train202526__PROD.pkl',          # live: K
+    None:  'SFMMO_DevK__scaleCS__train202526__PROD__4ch.pkl',     # live: K (4 chains since 2026-10)
     'hl4': 'SFMMO_DevK_hl4__scaleCS__train202526__PROD__4ch.pkl',  # shadow: K + 4-year decay
 }
 SHADOW = os.environ.get('SFMMO_SHADOW') or None
@@ -136,6 +136,16 @@ STATE_FILES = [f'10_data/106_Website/{f}' for f in (
     'SFMMO_predictions__scorelines.csv', 'SFMMO_predictions__team_goals.csv')]
 
 # ============================================================================= #
+
+
+def load_bundle_file(path):
+    """cloudpickle.load of a season bundle. Bundles fitted on Colab since 2026-10 are pickled under
+    Python 3.13, which moved pathlib.PosixPath into pathlib._local; aliasing that module lets the
+    production interpreter (3.12) read them. It is the only 3.13-specific reference in a bundle
+    (checked opcode by opcode: no pickled code objects)."""
+    sys.modules.setdefault('pathlib._local', pathlib)
+    with open(path, 'rb') as f:
+        return cloudpickle.load(f)
 
 
 def archive_existing_outputs(paths, vintage_dir=VINTAGE_DIR):
@@ -593,8 +603,7 @@ def main():
         os.makedirs(OUT_DIR, exist_ok=True)
     # ----------------------- 1. bundle ----------------------- #
     print(f"Loading season bundle:\n  {BUNDLE_PATH}")
-    with open(BUNDLE_PATH, 'rb') as f:
-        B = cloudpickle.load(f)
+    B = load_bundle_file(BUNDLE_PATH)
     meta = B['meta']      # model, idata, team maps and training moments: see forecast_fixtures()
     rho = B['rho'] if USE_DIXON_COLES else None
     factors_CS = meta['factors_CS']

@@ -96,3 +96,21 @@ def test_season_board_pins_nothing_once_the_season_is_cleared(PB):
     # with A's 2-0 win pinned, A's expected points exceed B's; cleared, they are symmetric
     assert pinned_live.set_index("team").loc["A", "exp_pts"] > pinned_live.set_index("team").loc["B", "exp_pts"]
     assert abs(pre.set_index("team").loc["A", "exp_pts"] - pre.set_index("team").loc["B", "exp_pts"]) < 1.0
+
+
+@pytest.mark.skipif(__import__("sys").version_info >= (3, 13), reason="pathlib._local exists natively")
+def test_a_bundle_pickled_under_python_313_loads(tmp_path, monkeypatch):
+    # Colab moved to Python 3.13 (2026-10), whose pickles name PosixPath as pathlib._local.PosixPath
+    import pickle
+    import sys
+
+    monkeypatch.delitem(sys.modules, "pathlib._local", raising=False)
+    py312 = pickle.dumps({"rho": -0.05, "where": pathlib.PosixPath("/content/drive")}, protocol=4)
+    py313 = py312.replace(b"\x8c\x07pathlib", b"\x8c\x0epathlib._local")
+    assert py313 != py312
+    with pytest.raises(ModuleNotFoundError):
+        pickle.loads(py313)  # what the production interpreter does without the alias
+    f = tmp_path / "bundle.pkl"
+    f.write_bytes(py313)
+    W = _load("w_313", "006_060__Predictions_MatchOutcome__SFMMO.py")
+    assert W.load_bundle_file(f) == {"rho": -0.05, "where": pathlib.PosixPath("/content/drive")}
