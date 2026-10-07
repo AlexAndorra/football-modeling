@@ -12,7 +12,7 @@ Requested by Alex; approved by Max.
   the M2 arm (`DECAY_HALFLIFE_YEARS = 4` in `SFMMO__dev_EW.ipynb`).
 
 Both are fitted once on all data through 2025/26, seed 326, NumPyro NUTS, **4 chains** ×
-4,000 draws, and are never refitted during a season (the expanding-window protocol). K's live
+2,000 draws (Amendment 2), and are never refitted during a season (the expanding-window protocol). K's live
 bundle moves from 2 to 4 chains at the same time; same specification, same data, only more
 posterior draws.
 
@@ -86,3 +86,11 @@ result leaks in), starting ELO within 0.7 points of the 14-Aug file for all 96 t
 probabilities within 1.3 points of the 14-Aug file and 0.9 of the 15-Aug snapshot, i.e. within
 Monte-Carlo noise of 8,000 simulated seasons. The published boards are reported alongside, not
 scored.
+
+## Amendment 2 — 2026-10-07, before any bundle was fitted
+
+4 chains × **2,000** draws instead of 4 × 4,000. The fit holds three per-row arrays (eta, the
+log-likelihood, the posterior predictive) for every draw before the bundle discards them: about
+29 GB at 16,000 draws, more than the Colab runtime or the local 32 GB machine holds. 8,000 draws
+is the live bundle's own total (2 × 4,000), so Monte-Carlo precision is unchanged while the
+4-chain convergence check is gained. Nothing else changes.
