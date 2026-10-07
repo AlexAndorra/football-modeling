@@ -26,10 +26,9 @@ league-seasons. This is M2's metric; it reproduces M2's table from
 Sample: 5 leagues × 2026/27 and 2027/28 = **10 league-seasons**, none of them seen by any
 experiment.
 
-- 2026/27, K: the published pre-season board of 2026-08-15 (2 chains — it is the receipt).
-- 2026/27, HL=4: reconstructed from the same inputs with every 2026/27 result removed. Honest
-  because the bundle contains no 2026/27 data. The method is validated first by rebuilding K's
-  published pre-season board the same way; the agreement is reported with the result.
+- 2026/27, both arms: rebuilt by `preseason_board.py` from each arm's 4-chain bundle, with the
+  same code and the same inputs, every 2026/27 result removed (see Amendment 1). Honest because
+  neither bundle contains 2026/27 data.
 - 2027/28: both boards made fresh before the first kick-off, 4 chains.
 
 ## Decision rule (title-odds product only; the match model stays K, per experiment M)
@@ -72,3 +71,18 @@ file.
 2. HL=4's 2026/27 pre-season board is reconstructed after the season began. The model cannot see
    2026/27, but the choice to run it was made with the season under way. Everything about it is
    fixed here, before it is computed.
+
+## Amendment 1 — 2026-10-07, before any HL=4 bundle or number existed
+
+The original text scored K's 2026/27 pre-season board as "the published board of 2026-08-15".
+There are two candidates: `SFMMO_preseason_odds__2026-27.csv` (14 Aug) and 006_061's first
+snapshot (15 Aug). They differ from each other by up to 0.9 points of title probability, and the
+code that produced the 14-Aug file is in no repository. Both arms are therefore rebuilt
+by the same script (`preseason_board.py`, which calls 006_061's own simulation) from the same
+inputs, so the comparison is symmetric by construction.
+
+Validation of the rebuild, on the live 2-chain K bundle: 0 of 1,752 fixtures pinned (no 2026/27
+result leaks in), starting ELO within 0.7 points of the 14-Aug file for all 96 teams, and title
+probabilities within 1.3 points of the 14-Aug file and 0.9 of the 15-Aug snapshot, i.e. within
+Monte-Carlo noise of 8,000 simulated seasons. The published boards are reported alongside, not
+scored.
