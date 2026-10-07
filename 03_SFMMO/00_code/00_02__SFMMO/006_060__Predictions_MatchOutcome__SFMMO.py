@@ -84,7 +84,17 @@ _UNSET = '<sfm_local.toml missing>'
 directory = str(ROOTS.data) if ROOTS else _UNSET
 state_dir = str(ROOTS.state) if ROOTS else _UNSET
 
-BUNDLE_PATH   = f'{directory}/10_data/01_Models/SFMMO_DevK__scaleCS__train202526__PROD.pkl'
+# SHADOW RUNS (PREREG_HL4_prospective_2026-28.md): SFMMO_SHADOW=hl4 runs this same code with the
+# HL=4 bundle and writes EVERYTHING -- ledger, board, feed, vintages -- under
+# 10_data/106_Website/_shadow/hl4/. It never touches a live file. Unset = the live run.
+BUNDLES = {
+    None:  'SFMMO_DevK__scaleCS__train202526__PROD.pkl',          # live: K
+    'hl4': 'SFMMO_DevK_hl4__scaleCS__train202526__PROD__4ch.pkl',  # shadow: K + 4-year decay
+}
+SHADOW = os.environ.get('SFMMO_SHADOW') or None
+if SHADOW not in BUNDLES:
+    raise SystemExit(f"SFMMO_SHADOW={SHADOW!r} is not one of {sorted(k for k in BUNDLES if k)}")
+BUNDLE_PATH   = f'{directory}/10_data/01_Models/{BUNDLES[SHADOW]}'
 HIST_PATH     = f'{directory}/10_data/106_Website/data_byPlayer.csv'       # played history
 # NOTE: the weekly pipeline refreshes the NON-TM file; the __TM variant (market values) is
 # only rebuilt for model fitting. Model K uses no Transfermarkt columns, and the K features
@@ -111,7 +121,7 @@ CRED_REGION   = 0.90               # credible band for the W/D/L probabilities
 USE_DIXON_COLES = True             # apply tau with the bundle's fitted rho
 
 ARCHIVE_VINTAGES = True
-OUT_DIR     = f'{state_dir}/10_data/106_Website'
+OUT_DIR     = f'{state_dir}/10_data/106_Website' + (f'/_shadow/{SHADOW}' if SHADOW else '')
 VINTAGE_DIR = f'{OUT_DIR}/_vintages'
 
 OUT_MATCH_CSV = f'{OUT_DIR}/SFMMO_predictions__matches.csv'
@@ -577,6 +587,10 @@ def forecast_fixtures(oos, B, rho, factors_CS, factors_g):
 def main():
     if ROOTS:                     # say where this run writes BEFORE it writes anything
         print(ROOTS.describe())
+    if SHADOW:
+        print(f"[shadow] {SHADOW}: bundle {os.path.basename(BUNDLE_PATH)} -> {OUT_DIR} (no live file "
+              f"is written)")
+        os.makedirs(OUT_DIR, exist_ok=True)
     # ----------------------- 1. bundle ----------------------- #
     print(f"Loading season bundle:\n  {BUNDLE_PATH}")
     with open(BUNDLE_PATH, 'rb') as f:

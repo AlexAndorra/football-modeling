@@ -56,13 +56,13 @@ _spec.loader.exec_module(_p)
 
 directory = _p.directory
 
-BUNDLE_PATH   = f'{directory}/10_data/01_Models/SFMMO_DevK__scaleCS__train202526__PROD.pkl'
+BUNDLE_PATH   = _p.BUNDLE_PATH    # one place: 006_060 picks the bundle (live, or a shadow arm)
 TARGET_SEASON = '2026/27'
 N_SIM         = None          # None = all posterior draws (posterior-consistent)
 TOP_N         = 4             # "top-4" definition
 RELEGATED     = {'bundesliga': 3, 'la-liga': 3, 'ligue-1': 3, 'premier-league': 3, 'serie-a': 3}
 
-OUT_DIR      = f'{_p.state_dir}/10_data/106_Website'
+OUT_DIR      = _p.OUT_DIR        # the shadow arm's own folder when SFMMO_SHADOW is set
 VINTAGE_DIR  = f'{OUT_DIR}/_vintages'
 OUT_CSV      = f'{OUT_DIR}/SFMMO_season_odds.csv'
 TRACKER_CSV  = f'{OUT_DIR}/SFMMO_season_odds__tracker.csv'
@@ -135,11 +135,10 @@ def simulate_league(teams, played, sp, rng, n_sim, n_releg):
     }), n_pinned, n_sim
 
 
-def main():
-    if _p.ROOTS:
-        print(_p.ROOTS.describe())
-    print(f"Loading bundle: {os.path.basename(BUNDLE_PATH)}")
-    with open(BUNDLE_PATH, 'rb') as f:
+def load_bundle(path):
+    """The season bundle -> (meta, simulation parameters: posterior draws + ELO scaling moments)."""
+    print(f"Loading bundle: {os.path.basename(path)}")
+    with open(path, 'rb') as f:
         B = cloudpickle.load(f)
     meta, post = B['meta'], B['idata'].posterior
     S = lambda v: post[v].stack(s=('chain', 'draw')).values
@@ -151,22 +150,22 @@ def main():
               eloopp_mu=float(B['train_means']['elo_opp'].mean()),
               eloopp_sd=float(B['train_stds']['elo_opp'].mean()))
     print(f"  devVersion {meta['devVersion']} | trained through {meta['train_end']} | "
-          f"{sp['mu'].shape[0]:,} posterior draws")
+          f"{sp['mu'].shape[0]:,} posterior draws"
+          + (f" | decay half-life {meta['decay_halflife_years']}y" if meta.get('decay_halflife_years') else ''))
+    return meta, sp
 
-    print("\nLoading data + rebuilding ELO through the last played match ...")
-    raw = pd.concat([pd.read_csv(_p.HIST_PATH, low_memory=False),
-                     pd.read_csv(_p.OOS_PATH, low_memory=False)], ignore_index=True)
-    cd = _p.compute_elo(_p.build_match_level(raw))
 
-    season = cd[cd['season'] == TARGET_SEASON]
+def season_board(cd, sp, stamp, target_season=TARGET_SEASON):
+    """The season board from match-level data with ELO (`cd`): every league of `target_season`
+    simulated from its played results onward. Pure -- reads and writes no file."""
+    season = cd[cd['season'] == target_season]
     if not len(season):
-        raise SystemExit(f"No {TARGET_SEASON} rows found.")
+        raise SystemExit(f"No {target_season} rows found.")
     home = season[season['home_pitch'] == 1]
     played_rows = home[home['match_outcome'].notna()]
-    print(f"  {TARGET_SEASON}: {home['id_match'].nunique()} fixtures known, "
+    print(f"  {target_season}: {home['id_match'].nunique()} fixtures known, "
           f"{played_rows['id_match'].nunique()} already played")
 
-    stamp = _p.run_clock().strftime('%Y-%m-%d')   # Berlin date; a replayed run is dated as replayed
     boards = []
     for lg, g in home.groupby('name_league'):
         teams = sorted(set(g['name_team']) | set(g['name_opp']))
@@ -203,8 +202,11 @@ def main():
         print(f"  {lg:16s} {len(teams)} teams | {n_pin} of {len(teams)*(len(teams)-1)} fixtures pinned "
               f"| {n_sim:,} simulated seasons | sum p_title {df['p_title'].sum():.3f}")
 
-    board = pd.concat(boards, ignore_index=True)
+    return pd.concat(boards, ignore_index=True)
 
+
+def check_rank_validity(board):
+    """Raise unless every league's p_title / p_top4 / p_releg sum exactly to 1 / TOP_N / n_releg."""
     # ---------------------- RANK-VALIDITY GATE (pre-export) ---------------------- #
     # The per-league line above only PRINTS sum p_title at 3dp -- a league summing to 0.970
     # would print "0.970" and export anyway. Same failure mode as 006_060's old row-sum check:
@@ -226,6 +228,23 @@ def main():
                     f"nothing exported.")
     print(f"\n[rank validity] PASS — p_title/p_top4/p_releg sum exactly across all "
           f"{board['league'].nunique()} leagues. Safe to export.")
+
+
+def main():
+    if _p.ROOTS:
+        print(_p.ROOTS.describe())
+    if _p.SHADOW:
+        print(f"[shadow] {_p.SHADOW}: board and tracker -> {OUT_DIR} (no live file is written)")
+    _, sp = load_bundle(BUNDLE_PATH)
+
+    print("\nLoading data + rebuilding ELO through the last played match ...")
+    raw = pd.concat([pd.read_csv(_p.HIST_PATH, low_memory=False),
+                     pd.read_csv(_p.OOS_PATH, low_memory=False)], ignore_index=True)
+    cd = _p.compute_elo(_p.build_match_level(raw))
+
+    stamp = _p.run_clock().strftime('%Y-%m-%d')   # Berlin date; a replayed run is dated as replayed
+    board = season_board(cd, sp, stamp)
+    check_rank_validity(board)
 
     os.makedirs(VINTAGE_DIR, exist_ok=True)
     if os.path.exists(OUT_CSV):     # archive the outgoing board before overwriting
