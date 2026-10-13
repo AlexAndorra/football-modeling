@@ -39,7 +39,8 @@ SFM_SAR = REPO / '01_SFM/00_code/003__SFM_II/006_041__SAR_PAR__SFM_II.py'
 MMO_060 = REPO / '03_SFMMO/00_code/00_02__SFMMO/006_060__Predictions_MatchOutcome__SFMMO.py'
 MMO_061 = REPO / '03_SFMMO/00_code/00_02__SFMMO/006_061__SeasonOdds__SFMMO.py'
 SFM_STATE = [f'{W}/SFM_predictions__frozen.csv',
-             f'{W}/040_ScoringProb__SFM_II_FinalC_ELO_scaleCS__2526__train.pkl']
+             f'{W}/040_ScoringProb__SFM_II_FinalC_ELO_scaleCS__2526__train.pkl',
+             f'{W}/SFM_started_fixtures.csv']
 LEDGERS = {'SFM': (f'{W}/SFM_predictions__frozen.csv', ['fixture_key', 'name_player']),
            'SFMMO': (f'{W}/SFMMO_predictions__frozen.csv', ['season', 'home_team', 'away_team'])}
 

@@ -85,12 +85,14 @@ def _key(df):
                                np.where(h, df["name_opp"], df["name_team"]))  # fmt: skip
 
 
-def _feed(scored, confirmed=True):
-    """The kick-off feed as read_kickoff_feed returns it: one row per fixture, UTC, confirmed."""
+def _feed(scored, confirmed=True, first=None):
+    """The kick-off feed as read_kickoff_feed returns it: one row per fixture, UTC, confirmed, and
+    `first` as every fixture's first_kick_off_utc (None = never kicked off)."""
     fx = scored.drop_duplicates("id_match").reset_index(drop=True)
     ko = pd.to_datetime(fx["kick_off"]).dt.tz_localize(kickoff.BERLIN).dt.tz_convert("UTC")
     feed = pd.DataFrame({"fixture_key": _key(fx), "kick_off_utc": ko,
-                         "time_confirmed": pd.array([confirmed] * len(fx), dtype="boolean")})  # fmt: skip
+                         "time_confirmed": pd.array([confirmed] * len(fx), dtype="boolean"),
+                         "first_kick_off_utc": pd.to_datetime(pd.Series([first] * len(fx)), utc=True)})  # fmt: skip
     feed = feed.drop_duplicates("fixture_key")
     feed.attrs["missing"] = False
     return feed
@@ -224,12 +226,13 @@ def test_smoke_run_never_writes_the_ledger(smoke):
     )  # fmt: skip
     ns = dict(
         SMOKE=smoke, dict_PLAYERS={"oos": {"p1": {}}}, data__all=data, SFM_model__NAME="m",
-        KICKOFF_FEED=FEED, RUN_TIME=RT, update_frozen_ledger=lambda *a, **k: calls.append(k),
+        KICKOFF_FEED=FEED, RUN_TIME=RT, EVER_STARTED={"k"}, update_frozen_ledger=lambda *a, **k: calls.append(k),
     )  # fmt: skip
     exec(_run_block(), ns)
     assert len(calls) == (0 if smoke else 1)
     if not smoke:
         assert calls[0]["feed"] is FEED and calls[0]["run_time"] == RT
+        assert calls[0]["ever_started"] == {"k"}
 
 
 # --- ledger identity: each leg keeps its own receipt ------------------------------------------
@@ -310,10 +313,12 @@ def test_load_cell_flags_kicked_off_fixtures_and_keeps_them_in_the_data(tmp_path
     oos.assign(kick_off=pd.to_datetime(oos.kick_off).dt.strftime("%Y-%m-%d")).to_csv(
         web / "data_byPlayer__OOS.csv", index=False)  # date-only, like the real OOS file
     ns = dict(pd=pd, np=np, os=os, kickoff=kickoff, directory=str(tmp_path), oos_season="2026/27",
-              runroots=types.SimpleNamespace(run_clock=lambda r: pd.Timestamp.now(tz=kickoff.BERLIN)), ROOTS=None,
+              runroots=types.SimpleNamespace(run_clock=lambda r: pd.Timestamp.now(tz=kickoff.BERLIN)),
+              ROOTS=types.SimpleNamespace(state=tmp_path), SMOKE=False,
               FORECAST_HORIZON_DAYS=14)  # fmt: skip
     exec(compile(src, str(NB), "exec"), ns)
     assert ns["STALE_MATCH_IDS"] == {"gS"}
+    assert (web / "SFM_started_fixtures.csv").exists()  # the registry, written before forecasting
     assert set(ns["data__all"].loc[ns["data__all"].is_oos, "id_match"]) == {"gS", "gL"}
 
 
@@ -397,7 +402,7 @@ def test_run_block_routes_an_empty_board(board, datasets, ledger_exists, expecte
     )  # fmt: skip
     ns = dict(
         SMOKE=False, dict_PLAYERS={"oos": board}, data__all=data, SFM_model__NAME="m",
-        KICKOFF_FEED=FEED, RUN_TIME=RT, datasets_to_process=datasets, os=os, LEDGER_PATH=str(ledger),
+        KICKOFF_FEED=FEED, RUN_TIME=RT, EVER_STARTED=set(), datasets_to_process=datasets, os=os, LEDGER_PATH=str(ledger),
         update_frozen_ledger=lambda b, *a, **k: calls.append((b, k)),
     )  # fmt: skip
     exec(_run_block(), ns)
@@ -463,3 +468,25 @@ def test_a_held_row_comes_back_byte_for_byte(tmp_path):
     lg.run(_board([("p1", 5, "A", "B", 0.2)]), _scored([G1]), NO_PLAYED, "run2", at="2026-09-07 10:00")
     after = [ln for ln in pathlib.Path(lg.path).read_text().splitlines() if "p1" in ln]
     assert after == before
+
+
+# --- a fixture that KICKED OFF is final, even when re-dated (Rayo Vallecano v Athletic Bilbao) -------
+
+ABANDONED = ("g1", "p1", 8, "A", "B", 1, pd.Timestamp("2026-10-10 14:00"))
+REDATED = ("g1", "p1", 8, "A", "B", 1, pd.Timestamp("2026-10-28 20:00"))  # replay, same ordered pair
+
+
+@pytest.mark.parametrize("how, held", [("first_kick_off_utc", True), ("registry", True), ("neither", False)])
+def test_an_abandoned_fixture_keeps_its_receipt_after_a_re_date(tmp_path, how, held):
+    # It kicked off on 10 Oct, so the 22-Sep-style forecast is the receipt. Once re-dated, the feed
+    # shows a FUTURE kick-off and only the marker or the registry can still tell. "neither" is a
+    # fixture postponed BEFORE kick-off: re-forecasting it is correct.
+    lg = Ledger(tmp_path)
+    lg.run(_board([("p1", 8, "A", "B", 0.70)]), _scored([ABANDONED]), NO_PLAYED, "run1", at="2026-09-22 10:45")
+    first = "2026-10-10 12:00:00+00:00" if how == "first_kick_off_utc" else None
+    ever = set(_key(_scored([REDATED]))) if how == "registry" else frozenset()
+    out = lg.run(_board([("p1", 8, "A", "B", 0.20)]), _scored([REDATED]), NO_PLAYED, "run2",
+                 at="2026-10-13 09:00", feed=_feed(_scored([REDATED]), first=first),
+                 ever_started=ever).set_index("id_match")  # fmt: skip
+    assert out.loc["g1", "p0_mid"] == (0.70 if held else 0.20)
+    assert out.loc["g1", "forecast_frozen_at"] == ("run1" if held else "run2")
