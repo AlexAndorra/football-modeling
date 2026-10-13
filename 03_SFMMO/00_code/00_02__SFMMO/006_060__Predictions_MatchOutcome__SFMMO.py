@@ -129,11 +129,16 @@ OUT_GRID_CSV  = f'{OUT_DIR}/SFMMO_predictions__scorelines.csv'
 OUT_TEAM_CSV  = f'{OUT_DIR}/SFMMO_predictions__team_goals.csv'
 OUT_PKL       = f'{OUT_DIR}/SFMMO_predictions__prod.pkl'
 FROZEN_LEDGER = f'{OUT_DIR}/SFMMO_predictions__frozen.csv'   # last PRE-MATCH forecast per fixture
+# Every fixture ever seen as CERTAINLY started, with the kick-off seen then. Append-only: a fixture
+# that kicked off is never forecast again, even when it is later re-dated (an abandoned match,
+# resumed or replayed weeks later -- Rayo Vallecano v Athletic Bilbao, 10 Oct 2026).
+STARTED_FIXTURES = f'{OUT_DIR}/SFMMO_started_fixtures.csv'
 # What a validation run must copy from production before it starts (runroots.seed_validation_state):
 # the files the NEXT run reads back. Paths relative to the data root.
 STATE_FILES = [f'10_data/106_Website/{f}' for f in (
     'SFMMO_predictions__frozen.csv', 'SFMMO_predictions__prod.pkl', 'SFMMO_predictions__matches.csv',
-    'SFMMO_predictions__scorelines.csv', 'SFMMO_predictions__team_goals.csv')]
+    'SFMMO_predictions__scorelines.csv', 'SFMMO_predictions__team_goals.csv',
+    'SFMMO_started_fixtures.csv')]
 
 # ============================================================================= #
 
@@ -297,7 +302,39 @@ def run_clock():
     return runroots.run_clock(ROOTS) if ROOTS else pd.Timestamp.now(tz=kickoff.BERLIN)
 
 
-def select_forecast_window(oos, feed, now, horizon_days):
+STARTED_COLS = ['fixture_key', 'kick_off_utc', 'first_seen_started']
+
+
+def load_started(path):
+    """The started-fixtures registry (STARTED_FIXTURES), or an empty one."""
+    if not os.path.exists(path):
+        return pd.DataFrame(columns=STARTED_COLS)
+    return pd.read_csv(path, dtype=str, keep_default_na=False)[STARTED_COLS]
+
+
+def record_started(registry, feed, now):
+    """Add every fixture the kick-off feed shows as CERTAINLY started -- a confirmed kick-off that
+    has passed, or a kick-off day that is over -- with the kick-off as the feed has it now.
+    Never removes or rewrites a key: once a fixture has kicked off it stays started, whatever
+    date the feed gives it later. Returns (registry, newly added keys).
+
+    `certainly_started`, not the hold rule: an unconfirmed fixture three days out has almost
+    always NOT started, and recording it would lock it for good if it were postponed before
+    kick-off. Holding the uncertain is the window's job, run by run; this file records facts."""
+    certain = kickoff.certainly_started(pd.Series(pd.NaT, index=feed.index), feed['kick_off_utc'],
+                                        feed['time_confirmed'], now)
+    seen = set(registry['fixture_key'])
+    new = feed[certain & ~feed['fixture_key'].isin(seen)]
+    add = pd.DataFrame({
+        'fixture_key': new['fixture_key'].values,
+        'kick_off_utc': new['kick_off_utc'].dt.strftime('%Y-%m-%d %H:%M:%S%z').values,
+        'first_seen_started': now.tz_convert(kickoff.BERLIN).strftime('%Y-%m-%d %H:%M:%S'),
+    })
+    parts = [d for d in (registry, add) if len(d)] or [registry]
+    return pd.concat(parts, ignore_index=True)[STARTED_COLS], list(add['fixture_key'])
+
+
+def select_forecast_window(oos, feed, now, horizon_days, ever_started=()):
     """Split the UNPLAYED target-season rows into (window, deferred, stale) and return the horizon
     -- kickoff.select_forecast_window, asked with the HOLD rule.
 
@@ -311,8 +348,11 @@ def select_forecast_window(oos, feed, now, horizon_days):
     upcoming row it ships carries a probability and a `forecast_frozen_at`, and consumers record
     the last one they saw before kick-off. A fixture that may have started must therefore never
     appear with a fresh number. The cost is small: an unconfirmed fixture within the hold window
-    shows last run's forecast, and confirmed times usually exist weeks ahead."""
-    started = may_have_started(oos, feed, now)
+    shows last run's forecast, and confirmed times usually exist weeks ahead.
+
+    `ever_started`: fixture keys recorded as started on an earlier run (STARTED_FIXTURES). They
+    are stale whatever their current date says: a re-dated abandoned match kicked off already."""
+    started = may_have_started(oos, feed, now) | fixture_keys(oos).isin(set(ever_started)).values
     return kickoff.select_forecast_window(oos, started, now, horizon_days)
 
 
@@ -642,7 +682,25 @@ def main():
         print(f"  ⚠️  {os.path.basename(KICKOFF_PATH)} not found -- kick-off TIMES unknown, so every "
               f"fixture is held from {kickoff.UNCONFIRMED_HOLD_DAYS} days before its OOS date")
     now = now_write = run_clock()
-    oos, deferred, stale, horizon = select_forecast_window(oos, feed, now, HORIZON_DAYS)
+    # Record what has certainly kicked off BEFORE anything is forecast, and keep it: the feed only
+    # shows a fixture's current date, so an abandoned match that is re-dated would otherwise look
+    # unplayed and be forecast again after it kicked off.
+    registry, new_started = record_started(load_started(STARTED_FIXTURES), feed, now)
+    os.makedirs(OUT_DIR, exist_ok=True)
+    registry.to_csv(STARTED_FIXTURES, index=False)
+    print(f"  [started] {len(new_started)} fixture(s) newly recorded as kicked off | "
+          f"{len(registry)} in {os.path.basename(STARTED_FIXTURES)}")
+    oos, deferred, stale, horizon = select_forecast_window(oos, feed, now, HORIZON_DAYS,
+                                                           ever_started=registry['fixture_key'])
+    _keys = fixture_keys(stale) if len(stale) else pd.Series(dtype=object)
+    _redated = stale[_keys.isin(set(registry['fixture_key'])).values
+                     & (pd.to_datetime(stale['kick_off']).dt.normalize()
+                        > now.tz_convert(kickoff.BERLIN).tz_localize(None).normalize()).values
+                     & (stale['home_pitch'] == 1).values]
+    if len(_redated):
+        print(f"  ⚠️  {len(_redated)} fixture(s) KICKED OFF earlier and are now dated in the future "
+              f"(abandoned and re-scheduled?) -- held at their pre-kick-off forecast for good: "
+              f"{[f'{h} v {a}' for h, a in zip(_redated['name_team'], _redated['name_opp'])][:4]}")
     if len(stale):
         _sh = stale[stale['home_pitch'] == 1]
         print(f"  ⚠️  {_sh['id_match'].nunique()} fixture(s) may have kicked off and carry NO "

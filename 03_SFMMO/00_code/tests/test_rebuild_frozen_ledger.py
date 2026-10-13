@@ -117,3 +117,18 @@ def test_compare_reports_values_days_and_missing_fixtures():
     assert d["only_live"] == [["2026/27", "E", "F"]] and d["only_rebuilt"] == []
     assert abs(d["max_prob_diff"] - 0.05) < 1e-12
     assert d["freeze_day_differs"] == [["2026/27", "C", "D"]]
+
+
+def test_a_re_dated_abandoned_match_is_judged_at_its_real_kick_off(tmp_path):
+    # the feed now shows the NEW date; the registry still has the kick-off that really happened
+    feed = _feed(tmp_path, [("Rayo", "Bilbao", "2026-11-04T19:00:00Z")])
+    started = pd.DataFrame(dict(fixture_key=["2026/27|premier-league|Rayo|Bilbao"],
+                                kick_off_utc=["2026-10-10 12:00:00+0000"],
+                                first_seen_started=["2026-10-13 09:00:00"]))  # fmt: skip
+    b1 = _board(tmp_path, "2026-09-22T05:44:55Z", [("Rayo", "Bilbao", "2026-10-10", 0.37)])
+    b2 = _board(tmp_path, "2026-10-20T06:00:00Z", [("Rayo", "Bilbao", "2026-11-04", 0.41)])  # after
+    led, dropped = R.rebuild(_boards(b1, b2), R.apply_started(feed, started))
+    row = led.set_index(KEY).loc[("2026/27", "Rayo", "Bilbao")]
+    assert row["p_home_win"] == 0.37 and dropped == {b2.name: 1}
+    led_naive, _ = R.rebuild(_boards(b1, b2), feed)        # without the registry: the trap
+    assert led_naive.set_index(KEY).loc[("2026/27", "Rayo", "Bilbao"), "p_home_win"] == 0.41

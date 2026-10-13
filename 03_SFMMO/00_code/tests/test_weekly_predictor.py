@@ -483,7 +483,8 @@ def season_files(tmp_path, monkeypatch):
     p = {k: tmp_path / v for k, v in dict(
         BUNDLE_PATH="bundle.pkl", HIST_PATH="hist.csv", OOS_PATH="oos.csv",
         FROZEN_LEDGER="frozen.csv", OUT_MATCH_CSV="matches.csv", OUT_GRID_CSV="grid.csv",
-        OUT_TEAM_CSV="team.csv", OUT_PKL="board.pkl", KICKOFF_PATH="kickoff.csv").items()}  # fmt: skip
+        OUT_TEAM_CSV="team.csv", OUT_PKL="board.pkl", KICKOFF_PATH="kickoff.csv",
+        STARTED_FIXTURES="started.csv").items()}  # fmt: skip
     with open(p["BUNDLE_PATH"], "wb") as f:
         cloudpickle.dump(bundle, f)
     with open(p["OUT_PKL"], "wb") as f:
@@ -733,3 +734,74 @@ def test_gameday_label_does_not_match_a_longer_round_number():
     # the token is delimited on both sides: GD1 must not be read out of GD10 or GD1x
     label, _ = W.gameday_label(["X_GD10_G1"], [10])
     assert list(label) == ["10"]
+
+
+# --- fixtures that kicked off are final, whatever date they get later ---------------------------
+
+
+def _feed_rows(tmp_path, rows):
+    return _feed(tmp_path, [(h, a, t, c) for h, a, t, c in rows])
+
+
+def test_record_started_keeps_what_kicked_off_and_skips_the_merely_uncertain(tmp_path):
+    feed = _feed_rows(tmp_path, [("A", "B", "2026-09-06T13:00:00Z", True),     # confirmed, passed
+                                 ("C", "D", "2026-09-05T13:00:00Z", False),    # placeholder, day over
+                                 ("E", "F", "2026-09-08T13:00:00Z", False),    # placeholder, tomorrow
+                                 ("G", "H", "2026-09-07T18:45:00Z", True)])    # tonight  # fmt: skip
+    reg, new = W.record_started(W.load_started(tmp_path / "none.csv"), feed, NOW)
+    assert sorted(k.split("|")[2] for k in new) == ["A", "C"]
+    assert list(reg.columns) == W.STARTED_COLS
+
+
+def test_a_started_fixture_stays_started_when_the_feed_re_dates_it(tmp_path):
+    first = _feed_rows(tmp_path, [("A", "B", "2026-09-06T13:00:00Z", True)])
+    reg, _ = W.record_started(W.load_started(tmp_path / "none.csv"), first, NOW)
+    redated = _feed_rows(tmp_path, [("A", "B", "2026-10-20T18:00:00Z", True)])  # abandoned, re-dated
+    reg2, new = W.record_started(reg, redated, NOW + pd.Timedelta(days=14))
+    assert new == [] and len(reg2) == 1
+    assert reg2.loc[0, "kick_off_utc"].startswith("2026-09-06 13:00")  # the kick-off it really had
+
+
+def test_window_holds_a_re_dated_fixture_that_kicked_off_before(tmp_path):
+    oos = _oos([("g1", "A", "B", "2026-09-12", np.nan), ("g2", "C", "D", "2026-09-12", np.nan)])
+    feed = _feed(tmp_path, [("A", "B", "2026-09-12T13:00:00Z", True),
+                            ("C", "D", "2026-09-12T13:00:00Z", True)])  # fmt: skip
+    started = [W.fixture_keys(oos).iloc[0]]  # A v B kicked off once already
+    window, _, stale, _ = W.select_forecast_window(oos, feed, NOW, 14, ever_started=started)
+    assert list(stale["id_match"]) == ["g1"] and list(window["id_match"]) == ["g2"]
+
+
+def test_main_never_re_forecasts_an_abandoned_match_after_it_is_re_dated(season_files, monkeypatch):
+    # Rayo Vallecano v Athletic Bilbao, 10 Oct 2026: kicked off, abandoned, no result. Run 1 sees
+    # it in the feed with its past kick-off (and not in OOS: the prune dropped it). Run 2 sees it
+    # back in OOS, re-dated to a future day. Its pre-kick-off receipt must survive both.
+    p = season_files
+    led = pd.read_csv(p["FROZEN_LEDGER"])
+    led = pd.concat([led, pd.DataFrame([_frozen("G", "H", "PL_GD02_GH", 0.33, "2026-09-25 08:00:00")])])
+    led.to_csv(p["FROZEN_LEDGER"], index=False)
+    feed = pd.read_csv(p["KICKOFF_PATH"])
+    yesterday = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=1)).strftime("%Y-%m-%dT13:00:00Z")
+    feed = pd.concat([feed, pd.DataFrame([dict(season="2026-27", league="PL", team_home="G",
+                                               team_away="H", kick_off_utc=yesterday,
+                                               time_confirmed=True)])])  # fmt: skip
+    feed.to_csv(p["KICKOFF_PATH"], index=False)
+    seen = {}
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model(seen))
+    W.main()                                                              # run 1
+    reg = pd.read_csv(p["STARTED_FIXTURES"])
+    assert any(k.endswith("|G|H") for k in reg["fixture_key"])
+    before = [l for l in p["FROZEN_LEDGER"].read_text().splitlines() if l.startswith("2026/27,G,H,")]
+
+    redate = (pd.Timestamp.now(tz="Europe/Berlin") + pd.Timedelta(days=5)).strftime("%Y-%m-%d")
+    oos = pd.read_csv(p["OOS_PATH"])
+    oos = pd.concat([oos, pd.DataFrame(_raw("PL_GD02_GH", "G", "H", redate, np.nan, np.nan))])
+    oos.to_csv(p["OOS_PATH"], index=False)
+    feed.loc[feed["team_home"] == "G", "kick_off_utc"] = f"{redate}T18:00:00Z"   # feed re-dates it
+    feed.to_csv(p["KICKOFF_PATH"], index=False)
+    W.main()                                                              # run 2
+    assert "PL_GD02_GH" not in seen["ids"]                     # never sent to the model again
+    after = [l for l in p["FROZEN_LEDGER"].read_text().splitlines() if l.startswith("2026/27,G,H,")]
+    assert after == before and len(after) == 1                 # receipt untouched, byte for byte
+    out = pd.read_csv(p["OUT_MATCH_CSV"]).set_index("id_match")
+    assert out.loc["PL_GD02_GH", "p_home_win"] == 0.33         # ships the pre-kick-off forecast
+    assert out.loc["PL_GD02_GH", "forecast_frozen_at"] == "2026-09-25 08:00:00"

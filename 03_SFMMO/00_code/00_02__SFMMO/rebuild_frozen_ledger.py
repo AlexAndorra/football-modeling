@@ -83,6 +83,20 @@ def rebuild(boards, feed):
     return led.reset_index(drop=True), dropped
 
 
+def apply_started(feed, started):
+    """The feed with every fixture of the started-fixtures registry (006_060's STARTED_FIXTURES)
+    put back at the kick-off it had when it was first seen as started. A re-dated abandoned match
+    otherwise shows only its NEW date, and a board row written after the real kick-off would pass."""
+    if not len(started):
+        return feed
+    reg = pd.DataFrame({'fixture_key': started['fixture_key'],
+                        'kick_off_utc': pd.to_datetime(started['kick_off_utc'], utc=True),
+                        'time_confirmed': pd.Series(True, index=started.index, dtype='boolean')})
+    out = pd.concat([feed[~feed['fixture_key'].isin(set(reg['fixture_key']))], reg], ignore_index=True)
+    out.attrs = feed.attrs
+    return out
+
+
 def compare(rebuilt, live):
     """How the rebuilt ledger differs from the live one: fixtures in only one of them, the largest
     probability difference, and fixtures whose freeze DAY differs (live stamps written before
@@ -108,6 +122,9 @@ def main():
     if feed.attrs['missing']:
         print(f"  ⚠️  no kick-off feed -- every fixture is judged from {kickoff.UNCONFIRMED_HOLD_DAYS} "
               f"days before its board date, so the rebuild will drop rows the live ledger kept")
+    _started = src / 'SFMMO_started_fixtures.csv'
+    if _started.exists():
+        feed = apply_started(feed, pd.read_csv(_started, dtype=str, keep_default_na=False))
 
     boards = []
     for v in sorted(glob.glob(str(src / '_vintages' / 'SFMMO_predictions__matches__*.csv'))):
