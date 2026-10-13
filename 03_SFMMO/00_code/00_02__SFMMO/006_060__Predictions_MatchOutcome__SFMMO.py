@@ -292,7 +292,7 @@ def may_have_started(oos, feed, now):
     """kickoff.may_have_started for every row of `oos`, with the feed attached by fixture key."""
     rows = kickoff.attach_kickoff(oos.assign(fixture_key=fixture_keys(oos)), feed)
     return kickoff.may_have_started(rows['kick_off'], rows['kick_off_utc'], rows['time_confirmed'],
-                                    now)
+                                    now, first_kick_off_utc=rows['first_kick_off_utc'])
 
 
 def run_clock():
@@ -300,38 +300,6 @@ def run_clock():
     so in production it is the real time at each ask. A validation run may replay one moment
     (SFM_VALIDATION_NOW, see runroots.run_clock); both asks then return it."""
     return runroots.run_clock(ROOTS) if ROOTS else pd.Timestamp.now(tz=kickoff.BERLIN)
-
-
-STARTED_COLS = ['fixture_key', 'kick_off_utc', 'first_seen_started']
-
-
-def load_started(path):
-    """The started-fixtures registry (STARTED_FIXTURES), or an empty one."""
-    if not os.path.exists(path):
-        return pd.DataFrame(columns=STARTED_COLS)
-    return pd.read_csv(path, dtype=str, keep_default_na=False)[STARTED_COLS]
-
-
-def record_started(registry, feed, now):
-    """Add every fixture the kick-off feed shows as CERTAINLY started -- a confirmed kick-off that
-    has passed, or a kick-off day that is over -- with the kick-off as the feed has it now.
-    Never removes or rewrites a key: once a fixture has kicked off it stays started, whatever
-    date the feed gives it later. Returns (registry, newly added keys).
-
-    `certainly_started`, not the hold rule: an unconfirmed fixture three days out has almost
-    always NOT started, and recording it would lock it for good if it were postponed before
-    kick-off. Holding the uncertain is the window's job, run by run; this file records facts."""
-    certain = kickoff.certainly_started(pd.Series(pd.NaT, index=feed.index), feed['kick_off_utc'],
-                                        feed['time_confirmed'], now)
-    seen = set(registry['fixture_key'])
-    new = feed[certain & ~feed['fixture_key'].isin(seen)]
-    add = pd.DataFrame({
-        'fixture_key': new['fixture_key'].values,
-        'kick_off_utc': new['kick_off_utc'].dt.strftime('%Y-%m-%d %H:%M:%S%z').values,
-        'first_seen_started': now.tz_convert(kickoff.BERLIN).strftime('%Y-%m-%d %H:%M:%S'),
-    })
-    parts = [d for d in (registry, add) if len(d)] or [registry]
-    return pd.concat(parts, ignore_index=True)[STARTED_COLS], list(add['fixture_key'])
 
 
 def select_forecast_window(oos, feed, now, horizon_days, ever_started=()):
@@ -685,7 +653,7 @@ def main():
     # Record what has certainly kicked off BEFORE anything is forecast, and keep it: the feed only
     # shows a fixture's current date, so an abandoned match that is re-dated would otherwise look
     # unplayed and be forecast again after it kicked off.
-    registry, new_started = record_started(load_started(STARTED_FIXTURES), feed, now)
+    registry, new_started = kickoff.record_started(kickoff.load_started(STARTED_FIXTURES), feed, now)
     os.makedirs(OUT_DIR, exist_ok=True)
     registry.to_csv(STARTED_FIXTURES, index=False)
     print(f"  [started] {len(new_started)} fixture(s) newly recorded as kicked off | "

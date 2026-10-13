@@ -15,7 +15,12 @@ Facts, as the data actually carries them:
   - the kick-off feed (fixtures_<season>__kickoff.csv) carries the time, as UTC, plus a
     `time_confirmed` flag. An unconfirmed time is a placeholder: it can sit on a LATER day than
     the real slot (Monaco v Lens: stored Sat 15:00, played Fri 20:45);
-  - the feed file can be missing, and a fixture can be missing from it.
+  - the feed file can be missing, and a fixture can be missing from it;
+  - `first_kick_off_utc` (since 2026-10-13) is when a fixture FIRST kicked off: set for every
+    played match and for an abandoned one, empty only if it never started. It survives a re-date,
+    so it is the only column that still tells the truth about a match abandoned and re-scheduled
+    (Rayo Vallecano v Athletic Bilbao, 10 Oct 2026). A fixture that kicked off is final: its
+    pre-kick-off forecast is the receipt, whatever date it is replayed on.
 """
 
 import os
@@ -49,7 +54,8 @@ def read_kickoff_feed(path):
     if not os.path.exists(path):
         feed = pd.DataFrame({'fixture_key': pd.Series(dtype=object),
                              'kick_off_utc': pd.Series(dtype='datetime64[ns, UTC]'),
-                             'time_confirmed': pd.Series(dtype='boolean')})
+                             'time_confirmed': pd.Series(dtype='boolean'),
+                             'first_kick_off_utc': pd.Series(dtype='datetime64[ns, UTC]')})
         feed.attrs['missing'] = True
         return feed
     k = pd.read_csv(path)
@@ -59,9 +65,12 @@ def read_kickoff_feed(path):
     ko = pd.to_datetime(k['kick_off_utc'], utc=True)
     conf = k['time_confirmed'].map(
         lambda v: pd.NA if pd.isna(v) else str(v).strip().lower() in ('true', '1')).astype('boolean')
+    # optional column: an older feed without it means "no fixture is known to have kicked off"
+    first = (pd.to_datetime(k['first_kick_off_utc'], utc=True) if 'first_kick_off_utc' in k.columns
+             else pd.Series(pd.NaT, index=k.index, dtype='datetime64[ns, UTC]'))
     feed = pd.DataFrame({'fixture_key': fixture_key(k['season'], k['league'], k['team_home'],
                                                     k['team_away']),
-                         'kick_off_utc': ko, 'time_confirmed': conf})
+                         'kick_off_utc': ko, 'time_confirmed': conf, 'first_kick_off_utc': first})
     dup = feed['fixture_key'].duplicated(keep=False)
     if dup.any():
         raise ValueError(f'{path}: {feed.loc[dup, "fixture_key"].nunique()} fixture(s) listed twice, '
@@ -79,7 +88,17 @@ def attach_kickoff(rows, feed, key='fixture_key'):
     return out
 
 
-def may_have_started(oos_date, kick_off_utc, time_confirmed, now):
+def _kicked_off(first_kick_off_utc, index, now):
+    """True where the feed records a FIRST kick-off at or before `now` (see the module docstring).
+    At or before `now`, not merely set: rebuild_frozen_ledger asks with a board's write time as
+    `now`, and a board written before the match first kicked off is still a pre-kick-off board."""
+    if first_kick_off_utc is None:
+        return pd.Series(False, index=index)
+    first = pd.to_datetime(pd.Series(first_kick_off_utc, index=index), utc=True)
+    return (first.notna() & (first <= now)).astype(bool)
+
+
+def may_have_started(oos_date, kick_off_utc, time_confirmed, now, first_kick_off_utc=None):
     """True where a fixture MAY have kicked off, so its ledger row must not be refreshed.
 
         confirmed feed time          -> kick_off_utc <= now (inclusive: at the instant, held)
@@ -87,6 +106,8 @@ def may_have_started(oos_date, kick_off_utc, time_confirmed, now):
           (unconfirmed time, no feed     where the placeholder day is the feed time's Berlin date,
            row, no feed file)            or the OOS date when there is no feed time
         no date anywhere             -> always (nothing can prove it has not started)
+        first kick-off recorded      -> always, whatever the current date says (abandoned and
+          (first_kick_off_utc <= now)    re-dated: it kicked off, so its forecast is final)
 
     `now` must be tz-aware; "today" is the Berlin calendar day, so neither the machine's timezone
     nor a fixed UTC offset (wrong after 25 Oct) can shift it. Arguments are aligned Series."""
@@ -103,10 +124,10 @@ def may_have_started(oos_date, kick_off_utc, time_confirmed, now):
     placeholder_day = feed_day.where(ko.notna(), oos_day)
     from_day = placeholder_day - pd.Timedelta(days=UNCONFIRMED_HOLD_DAYS)
     uncertain = placeholder_day.isna() | (from_day <= today)
-    return (exact & (ko <= now)) | (~exact & uncertain)
+    return (exact & (ko <= now)) | (~exact & uncertain) | _kicked_off(first_kick_off_utc, ko.index, now)
 
 
-def certainly_started(oos_date, kick_off_utc, time_confirmed, now):
+def certainly_started(oos_date, kick_off_utc, time_confirmed, now, first_kick_off_utc=None):
     """True only where a fixture has CERTAINLY kicked off: a confirmed feed time that has passed
     (inclusive), or a fixture day before today. The narrow question, for the BOARD.
 
@@ -114,7 +135,8 @@ def certainly_started(oos_date, kick_off_utc, time_confirmed, now):
     because a late refresh costs a receipt. The board asks this one and drops only what is certain,
     because an unconfirmed fixture three days out has almost always NOT started, and dropping it
     would empty the weekend board midweek. Protect the receipt, not the display. An undated
-    fixture is never certain (it is deferred anyway: it has no day to forecast)."""
+    fixture is never certain (it is deferred anyway: it has no day to forecast). A recorded first
+    kick-off at or before `now` is certain, whatever the current date says."""
     now = pd.Timestamp(now)
     if now.tzinfo is None:
         raise ValueError('certainly_started needs a tz-aware `now`')
@@ -123,7 +145,42 @@ def certainly_started(oos_date, kick_off_utc, time_confirmed, now):
     conf = pd.Series(time_confirmed, index=ko.index).astype('boolean').fillna(False).astype(bool)
     oos_day = pd.to_datetime(pd.Series(oos_date, index=ko.index)).dt.normalize()
     day = ko.dt.tz_convert(BERLIN).dt.normalize().dt.tz_localize(None).where(ko.notna(), oos_day)
-    return (conf & ko.notna() & (ko <= now)) | (day < today).fillna(False).astype(bool)
+    return ((conf & ko.notna() & (ko <= now)) | (day < today).fillna(False).astype(bool)
+            | _kicked_off(first_kick_off_utc, ko.index, now))
+
+
+STARTED_COLS = ['fixture_key', 'kick_off_utc', 'first_seen_started']
+
+
+def load_started(path):
+    """A writer's started-fixtures registry (see record_started), or an empty one. Never raises
+    for a missing file."""
+    if not os.path.exists(path):
+        return pd.DataFrame(columns=STARTED_COLS)
+    return pd.read_csv(path, dtype=str, keep_default_na=False)[STARTED_COLS]
+
+
+def record_started(registry, feed, now):
+    """Add every fixture the feed shows as CERTAINLY started, with the kick-off that happened (the
+    recorded first kick-off when there is one, else the feed time). Never removes or rewrites a
+    key. Returns (registry, newly added keys).
+
+    The SECOND layer under `first_kick_off_utc`, and it fails differently: it needs no manually
+    maintained list upstream, only one run that saw the fixture start. A writer holds every key
+    in it for good. Certain, not "may have started": an unconfirmed fixture postponed before
+    kick-off must stay forecastable."""
+    first = feed.get('first_kick_off_utc')
+    certain = certainly_started(pd.Series(pd.NaT, index=feed.index), feed['kick_off_utc'],
+                                feed['time_confirmed'], now, first_kick_off_utc=first)
+    new = feed[certain & ~feed['fixture_key'].isin(set(registry['fixture_key']))]
+    when = new['kick_off_utc'] if first is None else new['first_kick_off_utc'].fillna(new['kick_off_utc'])
+    add = pd.DataFrame({
+        'fixture_key': new['fixture_key'].values,
+        'kick_off_utc': when.dt.strftime('%Y-%m-%d %H:%M:%S%z').values,
+        'first_seen_started': pd.Timestamp(now).tz_convert(BERLIN).strftime('%Y-%m-%d %H:%M:%S'),
+    })
+    parts = [d for d in (registry, add) if len(d)] or [registry]
+    return pd.concat(parts, ignore_index=True)[STARTED_COLS], list(add['fixture_key'])
 
 
 def select_forecast_window(oos, started, now, horizon_days):

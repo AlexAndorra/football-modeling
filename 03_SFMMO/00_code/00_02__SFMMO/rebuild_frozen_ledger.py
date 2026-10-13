@@ -70,7 +70,8 @@ def rebuild(boards, feed):
         d = d.assign(fixture_key=kickoff.fixture_key(d['season'], d['name_league'],
                                                      d['home_team'], d['away_team']))
         r = kickoff.attach_kickoff(d, feed)
-        late = kickoff.may_have_started(r['kick_off'], r['kick_off_utc'], r['time_confirmed'], now)
+        late = kickoff.may_have_started(r['kick_off'], r['kick_off_utc'], r['time_confirmed'], now,
+                                        first_kick_off_utc=r['first_kick_off_utc'])
         if late.any():
             dropped[os.path.basename(path)] = int(late.sum())
         rows.append(d[~late][KEY + ['id_match'] + PCOLS].assign(forecast_frozen_at=stamp))
@@ -89,9 +90,10 @@ def apply_started(feed, started):
     otherwise shows only its NEW date, and a board row written after the real kick-off would pass."""
     if not len(started):
         return feed
-    reg = pd.DataFrame({'fixture_key': started['fixture_key'],
-                        'kick_off_utc': pd.to_datetime(started['kick_off_utc'], utc=True),
-                        'time_confirmed': pd.Series(True, index=started.index, dtype='boolean')})
+    ko = pd.to_datetime(started['kick_off_utc'], utc=True)
+    reg = pd.DataFrame({'fixture_key': started['fixture_key'], 'kick_off_utc': ko,
+                        'time_confirmed': pd.Series(True, index=started.index, dtype='boolean'),
+                        'first_kick_off_utc': ko})
     out = pd.concat([feed[~feed['fixture_key'].isin(set(reg['fixture_key']))], reg], ignore_index=True)
     out.attrs = feed.attrs
     return out
