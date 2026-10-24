@@ -68,12 +68,17 @@ CONTEXT_FACTORS = ['points_diff', 'goalsconceded_rank_opp', 'goal_appeal', 'elo_
 # ---   'sampled'  -> a categorical draw per row          (reproduces the OG script's object)
 # --- 'expected' is the better estimator of the underlying quantity: it removes
 # --- observation-level sampling noise and keeps posterior uncertainty, so the published
-# --- credible bands get NARROWER than the OG ones.  That is a visible change on the site --
+# --- credible bands get NARROWER than the OG ones.  That is a visible change downstream --
 # --- switch to 'sampled' if you want the old spread.
 GOALS_MODE = 'expected'
 
 # --- Row chunk for the accumulation (memory ~ S x chunk x 4 floats):
 CHUNK = 20_000
+
+# --- Serve anyway if the bundle/CSV contract fails? Normally NO (same gate as 006_040): a
+# --- mismatch means the dataset was rebuilt since the fit, so the boards would come from a model
+# --- fitted on different data. True only for a deliberate one-off; it is an override, not a pass.
+ALLOW_CONTRACT_MISMATCH = False
 
 # ----------------------------- USER INTERACTION ----------------------------- #
 
@@ -101,12 +106,6 @@ def player_effect_and_cutpoints(L):
     cut = np.concatenate([np.full((pe.shape[0], pe.shape[1], 1), L['cutpoint_offset']),
                           L['cutpoint_offset'] + np.cumsum(softplus(delta), axis=-1)], axis=-1)
     return pe, cut
-
-
-def update_elo(r_home, r_away, result, K=20, home_adv=50):
-    exp_home = 1 / (1 + 10 ** ((r_away - r_home - home_adv) / 400))
-    s_home = {2: 1.0, 1: 0.5, 0: 0.0}[result]
-    return r_home + K * (s_home - exp_home), r_away + K * ((1 - s_home) - (1 - exp_home))
 
 
 def _cs_scale_cols(x):
@@ -163,39 +162,41 @@ d['position_FOR'] = np.where(d['position_player'] == 'Sturm', 1, 0)
 d = d.loc[d['goalsscored_share_player_team'] <= 1, :].reset_index(drop=True)
 d['season_nbr'] = d.groupby(['name_player'])['season'].transform(lambda x: x.factorize(sort=True)[0])
 
-# --- ELO over the training window (same recursion as training) ---
-_m = (d[d.home_pitch == 1].drop_duplicates('id_match')
-      [['id_match', 'name_league', 'season', 'kick_off', 'name_team', 'name_opp',
-        'goalsscored_inGame_team', 'goalsscored_inGame_opp']]
-      .rename(columns={'name_team': 'home', 'name_opp': 'away',
-                       'goalsscored_inGame_team': 'g_home', 'goalsscored_inGame_opp': 'g_away'}))
-_missing = set(d.id_match.unique()) - set(_m.id_match)
-if _missing:
-    _aw = (d[d.id_match.isin(_missing) & (d.home_pitch == 0)].drop_duplicates('id_match')
-           [['id_match', 'name_league', 'season', 'kick_off', 'name_opp', 'name_team',
-             'goalsscored_inGame_opp', 'goalsscored_inGame_team']])
-    _aw.columns = _m.columns
-    _m = pd.concat([_m, _aw], ignore_index=True)
-_m['res'] = np.select([_m.g_home > _m.g_away, _m.g_home < _m.g_away], [2, 0], default=1)
-_rows = []
-for _ll, _g_ in _m.groupby('name_league', sort=False):
-    _R, _seen = {}, set()
-    for _ss, _sg in _g_.sort_values(['kick_off', 'id_match']).groupby('season', sort=False):
-        if _seen:
-            _ret = set(_R)
-            for _t in set(_sg.home) | set(_sg.away):
-                _R[_t] = _R[_t] * 0.75 + 1500 * 0.25 if _t in _ret else 1300.0
-        else:
-            for _t in set(_sg.home) | set(_sg.away):
-                _R.setdefault(_t, 1500.0)
-        _seen.add(_ss)
-        for _i in _sg.index:
-            _h, _a = _m.at[_i, 'home'], _m.at[_i, 'away']
-            _R.setdefault(_h, 1500.0); _R.setdefault(_a, 1500.0)
-            _rows.append((_m.at[_i, 'id_match'], _R[_h], _R[_a]))
-            _R[_h], _R[_a] = update_elo(_R[_h], _R[_a], _m.at[_i, 'res'],
-                                        K=elo_cfg['K'], home_adv=elo_cfg['home_adv'])
-d = d.merge(pd.DataFrame(_rows, columns=['id_match', 'elo_home', 'elo_away']), on='id_match', how='left')
+# --- bundle <-> CSV contract (same gate as 006_040): the training rows the bundle was fitted on
+# --- must still be the rows scored here -- same count, same goal-category mix.
+_mix_now = d['goals_cats'].value_counts(normalize=True).sort_index().round(6).to_dict()
+_n_ok = len(d) == _dc.get('n_rows')
+_mix_ok = all(abs(_mix_now.get(_k, 0) - _v) < 1e-4 for _k, _v in _dc.get('goal_cats_share', {}).items())
+print(f'bundle/CSV contract: rows {_dc.get("n_rows"):,} vs {len(d):,} {"OK" if _n_ok else "MISMATCH"} '
+      f'| category mix {"OK" if _mix_ok else "MISMATCH"}')
+if not (_n_ok and _mix_ok):
+    _why = ('bundle/CSV contract FAILED: the dataset was rebuilt since this bundle was fitted, so the '
+            'boards would come from a model fitted on different data. REFIT before serving.')
+    if not ALLOW_CONTRACT_MISMATCH:
+        raise RuntimeError(_why + ' Override for one run with ALLOW_CONTRACT_MISMATCH = True.')
+    print(f'   !! {_why}\n   !! ALLOW_CONTRACT_MISMATCH=True -- a STALE MODEL, deliberately. Not a pass.')
+
+# --- ELO: the bundle's STORED pre-match ratings (issue #7). Every row scored here is a training
+# --- match, so the served elo_diff is exactly the fitted one, as in 006_040. The previous in-script
+# --- rebuild counted every team ever seen in a league as "returning" (training carries over only
+# --- the previous season's teams and starts the rest at the promoted rating) and hardcoded the
+# --- season-start constants, moving elo_diff on 91% of rows -- and with it the published PAR.
+_mt = elo_cfg['match_table'][['id_match', 'home', 'away', 'elo_home', 'elo_away']]
+_miss = set(d['id_match']) - set(_mt['id_match'])
+if _miss:
+    raise RuntimeError(f'{len(_miss)} training match(es) have no stored ELO in the bundle, e.g. '
+                       f'{sorted(_miss)[:3]} -- the CSV and the bundle disagree; REFIT before serving.')
+d = d.merge(_mt, on='id_match', how='left', validate='many_to_one')
+# --- both teams of every row must be the bundle's teams for that match, in that orientation --
+# --- an explicit stop, not an assert (python -O strips asserts)
+_h = d['home_pitch'] == 1
+_bad = ((np.where(_h, d['name_team'], d['name_opp']) != d['home'].to_numpy())
+        | (np.where(_h, d['name_opp'], d['name_team']) != d['away'].to_numpy()))
+if _bad.any():
+    raise RuntimeError(f'{int(_bad.sum())} row(s) on {d.loc[_bad, "id_match"].nunique()} match(es) disagree with the '
+                       f'bundle on the home/away teams, e.g. {d.loc[_bad, "id_match"].iloc[0]} -- the CSV and the '
+                       f'bundle describe different matches; REFIT before serving.')
+d = d.drop(columns=['home', 'away'])
 d['elo_team'] = np.where(d.home_pitch == 1, d.elo_home, d.elo_away)
 d['elo_opp'] = np.where(d.home_pitch == 1, d.elo_away, d.elo_home)
 d['elo_diff'] = d['elo_team'] - d['elo_opp']
