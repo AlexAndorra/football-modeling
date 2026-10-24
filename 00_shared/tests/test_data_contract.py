@@ -58,6 +58,17 @@ def test_a_changed_value_is_caught_and_its_season_named(tmp_path):
     assert new['sha256'] != ref['sha256'] and dc.changed_seasons(ref, new) == ['2024/25']
 
 
+def test_an_in_memory_frame_hashes_like_the_file(tmp_path):
+    # a writer with its own model inputs passes a frame; numeric dtypes and NaN must not matter
+    d = _rows()
+    f = d.copy()
+    f['goals_in_match'] = f['goals_in_match'].astype(float)            # numeric dtype
+    f['gameday'] = f['gameday'].astype(int)
+    assert dc.fingerprint_frame(f, '2025/26') == _fp(d, tmp_path)
+    m = dc.fingerprint_frame(f, '2025/26', columns=['season', 'id_match', 'goals_in_match'], keys=['id_match'])
+    assert m['columns'] == ['season', 'id_match', 'goals_in_match'] and m['n_rows'] == 6
+
+
 def test_check_raises_on_a_mismatch_unless_overridden(tmp_path):
     good = tmp_path / 'good.csv'
     _rows().to_csv(good, index=False)
@@ -89,7 +100,7 @@ def _defs(src):
     tree = ast.parse(src)
     out = {}
     for n in tree.body:
-        if isinstance(n, ast.FunctionDef) and n.name in ('_canon', 'training_fingerprint'):
+        if isinstance(n, ast.FunctionDef) and n.name in ('_canon', 'fingerprint_frame', 'training_fingerprint'):
             out[n.name] = ast.dump(n)
         if isinstance(n, ast.Assign) and getattr(n.targets[0], 'id', None) == 'FINGERPRINT_COLS':
             out['FINGERPRINT_COLS'] = ast.dump(n)
@@ -103,4 +114,4 @@ def test_the_colab_export_carries_an_identical_copy():
                   and 'def training_fingerprint' in ''.join(c['source']))
     assert "'fingerprint': training_fingerprint(" in export
     mod = _defs((HERE.parent / 'data_contract.py').read_text())
-    assert _defs(export) == mod and len(mod) == 3, 'the export\'s inline copy drifted from data_contract.py'
+    assert _defs(export) == mod and len(mod) == 4, 'the export\'s inline copy drifted from data_contract.py'

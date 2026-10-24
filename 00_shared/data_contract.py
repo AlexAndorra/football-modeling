@@ -48,17 +48,24 @@ def _canon(col):
     return col
 
 
-def training_fingerprint(csv_path, train_end):
-    """{'version', 'columns', 'train_end', 'n_rows', 'sha256', 'by_season'} for the rows of
-    `csv_path` with season <= train_end."""
-    t = pd.read_csv(csv_path, dtype=str, keep_default_na=False, usecols=FINGERPRINT_COLS)
-    t = t[t['season'] <= train_end][FINGERPRINT_COLS].apply(_canon)
-    t = t.sort_values(['id_match', 'name_player'], kind='mergesort')
+def fingerprint_frame(df, train_end, columns=FINGERPRINT_COLS, keys=('id_match', 'name_player')):
+    """{'version', 'columns', 'train_end', 'n_rows', 'sha256', 'by_season'} for the rows of `df` with
+    season <= train_end, over `columns`, sorted by `keys`. For a writer whose model inputs are not
+    data_byPlayer's player rows (e.g. a match-level frame), pass its own columns and keys."""
+    t = df.loc[df['season'] <= train_end, list(columns)]
+    t = t.astype(object).where(t.notna(), '').astype(str).apply(_canon)
+    t = t.sort_values(list(keys), kind='mergesort')
     by_season = {s: hashlib.sha256(g.to_csv(index=False, header=False).encode()).hexdigest()[:16]
                  for s, g in t.groupby('season', sort=True)}
     overall = hashlib.sha256(json.dumps(by_season, sort_keys=True).encode()).hexdigest()[:16]
-    return {'version': 1, 'columns': FINGERPRINT_COLS, 'train_end': train_end,
+    return {'version': 1, 'columns': list(columns), 'train_end': train_end,
             'n_rows': int(len(t)), 'sha256': overall, 'by_season': by_season}
+
+
+def training_fingerprint(csv_path, train_end):
+    """The SFM fingerprint: data_byPlayer's model-input columns, read as text from `csv_path`."""
+    t = pd.read_csv(csv_path, dtype=str, keep_default_na=False, usecols=FINGERPRINT_COLS)
+    return fingerprint_frame(t, train_end)
 
 
 def _baseline_path(bundle_path):
