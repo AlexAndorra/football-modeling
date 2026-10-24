@@ -187,9 +187,15 @@ if _miss:
     raise RuntimeError(f'{len(_miss)} training match(es) have no stored ELO in the bundle, e.g. '
                        f'{sorted(_miss)[:3]} -- the CSV and the bundle disagree; REFIT before serving.')
 d = d.merge(_mt, on='id_match', how='left', validate='many_to_one')
+# --- both teams of every row must be the bundle's teams for that match, in that orientation --
+# --- an explicit stop, not an assert (python -O strips asserts)
 _h = d['home_pitch'] == 1
-assert (d.loc[_h, 'name_team'] == d.loc[_h, 'home']).all() and (d.loc[~_h, 'name_opp'] == d.loc[~_h, 'home']).all(), \
-    'bundle match_table orientation disagrees with the CSV'
+_bad = ((np.where(_h, d['name_team'], d['name_opp']) != d['home'].to_numpy())
+        | (np.where(_h, d['name_opp'], d['name_team']) != d['away'].to_numpy()))
+if _bad.any():
+    raise RuntimeError(f'{int(_bad.sum())} row(s) on {d.loc[_bad, "id_match"].nunique()} match(es) disagree with the '
+                       f'bundle on the home/away teams, e.g. {d.loc[_bad, "id_match"].iloc[0]} -- the CSV and the '
+                       f'bundle describe different matches; REFIT before serving.')
 d = d.drop(columns=['home', 'away'])
 d['elo_team'] = np.where(d.home_pitch == 1, d.elo_home, d.elo_away)
 d['elo_opp'] = np.where(d.home_pitch == 1, d.elo_away, d.elo_home)
