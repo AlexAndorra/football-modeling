@@ -52,6 +52,7 @@ rng = np.random.default_rng(seed)
 # --- the inputs stay real and the pickle is written to scratch.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / '00_shared'))
 import runroots  # noqa: E402
+import data_contract  # noqa: E402
 ROOTS = runroots.load_roots()
 print(ROOTS.describe())
 directory = str(ROOTS.data)
@@ -175,6 +176,12 @@ if not (_n_ok and _mix_ok):
     if not ALLOW_CONTRACT_MISMATCH:
         raise RuntimeError(_why + ' Override for one run with ALLOW_CONTRACT_MISMATCH = True.')
     print(f'   !! {_why}\n   !! ALLOW_CONTRACT_MISMATCH=True -- a STALE MODEL, deliberately. Not a pass.')
+
+# --- ...and the ROWS themselves (00_shared/data_contract.py): count and mix cannot see a repair
+# --- that changes values, so the training rows' fingerprint must match the bundle's.
+data_contract.check(f'{directory}/10_data/106_Website/data_byPlayer.csv', _dc,
+                    f'{directory}/10_data/01_Models/{SFM_model__NAME}__LIGHT.pkl',
+                    allow=ALLOW_CONTRACT_MISMATCH)
 
 # --- ELO: the bundle's STORED pre-match ratings (issue #7). Every row scored here is a training
 # --- match, so the served elo_diff is exactly the fitted one, as in 006_040. The previous in-script
