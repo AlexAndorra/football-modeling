@@ -135,7 +135,8 @@ def simulate_league(teams, played, sp, rng, n_sim, n_releg):
 
 
 def load_bundle(path):
-    """The season bundle -> (meta, simulation parameters: posterior draws + ELO scaling moments)."""
+    """The season bundle -> (meta, simulation parameters: posterior draws + ELO scaling moments,
+    its data contract)."""
     print(f"Loading bundle: {os.path.basename(path)}")
     B = _p.load_bundle_file(path)
     meta, post = B['meta'], B['idata'].posterior
@@ -150,7 +151,7 @@ def load_bundle(path):
     print(f"  devVersion {meta['devVersion']} | trained through {meta['train_end']} | "
           f"{sp['mu'].shape[0]:,} posterior draws"
           + (f" | decay half-life {meta['decay_halflife_years']}y" if meta.get('decay_halflife_years') else ''))
-    return meta, sp
+    return meta, sp, B.get('data_contract')
 
 
 def season_board(cd, sp, stamp, target_season=TARGET_SEASON):
@@ -233,12 +234,14 @@ def main():
         print(_p.ROOTS.describe())
     if _p.SHADOW:
         print(f"[shadow] {_p.SHADOW}: board and tracker -> {OUT_DIR} (no live file is written)")
-    _, sp = load_bundle(BUNDLE_PATH)
+    _, sp, contract = load_bundle(BUNDLE_PATH)
 
     print("\nLoading data + rebuilding ELO through the last played match ...")
     raw = pd.concat([pd.read_csv(_p.HIST_PATH, low_memory=False),
                      pd.read_csv(_p.OOS_PATH, low_memory=False)], ignore_index=True)
-    cd = _p.compute_elo(_p.build_match_level(raw))
+    cd = _p.build_match_level(raw)
+    _p.check_training_data(contract, cd, BUNDLE_PATH)
+    cd = _p.compute_elo(cd)
 
     stamp = _p.run_clock().strftime('%Y-%m-%d')   # Berlin date; a replayed run is dated as replayed
     board = season_board(cd, sp, stamp)

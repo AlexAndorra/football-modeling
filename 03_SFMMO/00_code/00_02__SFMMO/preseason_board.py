@@ -48,14 +48,16 @@ def main(argv=None):
     print(P.ROOTS.describe())
 
     bundle = P.ROOTS.data / '10_data' / '01_Models' / args.bundle
-    meta, sp = O.load_bundle(bundle)
+    meta, sp, contract = O.load_bundle(bundle)
     if meta['train_end'] >= args.season:
         raise SystemExit(f"{args.bundle} was trained through {meta['train_end']}: it has seen "
                          f"{args.season}, so its board for it is not a pre-season board")
 
     raw = pd.concat([pd.read_csv(P.HIST_PATH, low_memory=False),
                      pd.read_csv(P.OOS_PATH, low_memory=False)], ignore_index=True)
-    cd = P.compute_elo(without_season_results(P.build_match_level(raw), args.season))
+    cd = P.build_match_level(raw)
+    P.check_training_data(contract, cd, str(bundle))   # the board is only honest on the fitted data
+    cd = P.compute_elo(without_season_results(cd, args.season))
     board = O.season_board(cd, sp, stamp='preseason', target_season=args.season)
     O.check_rank_validity(board)
 
