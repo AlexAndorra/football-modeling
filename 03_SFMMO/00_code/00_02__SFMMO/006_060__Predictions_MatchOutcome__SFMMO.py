@@ -47,6 +47,7 @@ Set TARGET_SEASON to the season being forecast. Everything else is read from the
 ==========================================================================================
 """
 
+import json
 import os
 import pathlib
 import re
@@ -65,6 +66,7 @@ import pytensor.tensor as pt
 
 # the shared kick-off rule (006_040 asks the same one) and the run roots
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / '00_shared'))
+import data_contract
 import kickoff
 import runroots
 
@@ -121,6 +123,9 @@ CRED_REGION   = 0.90               # credible band for the W/D/L probabilities
 USE_DIXON_COLES = True             # apply tau with the bundle's fitted rho
 
 ARCHIVE_VINTAGES = True
+# The training rows must still be the rows the bundle was fitted on (00_shared/data_contract.py):
+# a mismatch stops the run. True serves anyway, for ONE run, and says so -- a stale model, not a pass.
+ALLOW_CONTRACT_MISMATCH = False
 OUT_DIR     = f'{state_dir}/10_data/106_Website' + (f'/_shadow/{SHADOW}' if SHADOW else '')
 VINTAGE_DIR = f'{OUT_DIR}/_vintages'
 
@@ -206,12 +211,16 @@ def mirror_missing_sides(cd):
     return pd.concat([cd, mir], ignore_index=True)
 
 
+# The match-level columns everything here is built from -- and what the training fingerprint hashes.
+MATCH_COLS = ['points_team', 'points_opp', 'goalsscored_inGame_team', 'goalsscored_inGame_opp',
+              'goalsscored_cum_team', 'goalsscored_cum_opp', 'goalsconceded_cum_team',
+              'goalsconceded_cum_opp', 'home_pitch', 'id_match', 'name_team', 'name_opp',
+              'name_league', 'id_league', 'season', 'gameday', 'kick_off', 'points_diff']
+
+
 def build_match_level(data_raw):
     """byPlayer -> one row per (match, side), the notebook's `complete_data`."""
-    keep = ['points_team', 'points_opp', 'goalsscored_inGame_team', 'goalsscored_inGame_opp',
-            'goalsscored_cum_team', 'goalsscored_cum_opp', 'goalsconceded_cum_team',
-            'goalsconceded_cum_opp', 'home_pitch', 'id_match', 'name_team', 'name_opp',
-            'name_league', 'id_league', 'season', 'gameday', 'kick_off', 'points_diff']
+    keep = MATCH_COLS
     data_raw = data_raw.copy()
     data_raw['kick_off'] = pd.to_datetime(data_raw['kick_off'])
     data_raw = data_raw.sort_values(['name_player', 'season', 'kick_off'])
@@ -224,6 +233,57 @@ def build_match_level(data_raw):
     cd['match_outcome'] = cd['goalsscored_inGame_team'].copy()
     cd['gameday'] = [int(float(i.split('_')[1][2:])) for i in cd['id_match'].values]
     return cd
+
+
+def training_fingerprint(cd, train_end):
+    """The SFMMO's training-data fingerprint (data_contract.fingerprint_frame): the MATCH-level frame
+    from build_match_level, one row per match side, seasons <= train_end. Not data_byPlayer's
+    player rows: the model is match-level, and its bundles were fitted on the __TM data file but are
+    served from data_byPlayer.csv -- the two agree only at match level (2026-10-24: both
+    dd512b5aeaa34d4a over 79,862 rows)."""
+    return data_contract.fingerprint_frame(cd, train_end, columns=MATCH_COLS,
+                                           keys=('id_match', 'home_pitch'))
+
+
+def check_training_data(contract, cd, bundle_path, allow=None):
+    """data_contract.check for the match-level frame: stop the run unless the training seasons are
+    exactly those the bundle was fitted / baselined on. `contract` is the bundle's 'data_contract'
+    (absent in bundles fitted before 2026-10-24, which fall back to <bundle>__fingerprint.json)."""
+    allow = ALLOW_CONTRACT_MISMATCH if allow is None else allow
+    expected, source = data_contract.expected_fingerprint(contract or {}, bundle_path)
+    if expected is None:
+        msg = ('training fingerprint: NONE to check against (bundle predates fingerprints and has no '
+               'baseline file)')
+        print(f'   !! {msg}')
+        return msg
+    actual = training_fingerprint(cd, expected['train_end'])
+    if actual['sha256'] == expected['sha256']:
+        msg = f'training fingerprint: OK ({actual["sha256"]}, {actual["n_rows"]:,} match rows, vs {source})'
+        print(f'  {msg}')
+        return msg
+    bad = data_contract.changed_seasons(expected, actual)
+    why = (f'training fingerprint MISMATCH vs {source}: {len(bad)} season(s) changed since the bundle '
+           f'was fitted / baselined: {bad}. The training data is not the data this model was fitted '
+           f'on. REFIT, or -- if the change is a reviewed repair accepted without a refit -- record a '
+           f'new baseline with record_training_baseline(..., reason=...).')
+    if not allow:
+        raise RuntimeError(why + ' Override for one run with ALLOW_CONTRACT_MISMATCH = True.')
+    print(f'   !! {why}\n   !! ALLOW_CONTRACT_MISMATCH=True -- a STALE MODEL, deliberately. Not a pass.')
+    return why
+
+
+def record_training_baseline(cd, train_end, bundle_path, reason):
+    """Write <bundle>__fingerprint.json from the match-level frame (data_contract.record_baseline for
+    a match-level writer). Only for a bundle without a fingerprint of its own, or to accept a
+    reviewed historical repair without a refit; `reason` is required."""
+    if not reason:
+        raise ValueError('record_training_baseline needs a reason')
+    out = {'recorded': datetime.now().astimezone().isoformat(timespec='seconds'), 'reason': reason,
+           'level': 'match (006_060 build_match_level)', 'bundle': os.path.basename(bundle_path),
+           'fingerprint': training_fingerprint(cd, train_end)}
+    with open(data_contract._baseline_path(bundle_path), 'w') as f:
+        json.dump(out, f, indent=1)
+    return out
 
 
 def compute_elo(cd):
@@ -629,6 +689,7 @@ def main():
     raw = pd.concat([hist_raw, oos_raw], axis=0, ignore_index=True)
     cd = build_match_level(raw)
     print(f"  {len(cd):,} team-match rows | seasons {cd['season'].min()} .. {cd['season'].max()}")
+    check_training_data(B.get('data_contract'), cd, BUNDLE_PATH)
     cd = compute_elo(cd)
 
     # ----------------------- 3. OOS slice + scaling ----------------------- #
