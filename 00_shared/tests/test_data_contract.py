@@ -96,6 +96,57 @@ def test_baseline_file_is_used_when_the_bundle_has_no_fingerprint(tmp_path):
     assert 'old_bundle__LIGHT__fingerprint.json' in dc.check(csv, {}, bundle)
 
 
+def _counts_rows():
+    # 20 training rows (one share > 1, so 19 served) + 2 current-season rows; one hat-trick+
+    d = _rows().iloc[:0]
+    rows = []
+    for i in range(20):
+        rows.append(dict(_rows().iloc[0], id_match=f'M{i}', name_player=f'p{i}', season='2025/26',
+                         goals_in_match='0' if i < 15 else '1', goalsscored_share_player_team='0.5'))
+    rows[15]['goals_in_match'] = '4'                                     # capped at 3
+    rows[19]['goalsscored_share_player_team'] = '2'                      # dropped, as served
+    for i in range(2):
+        rows.append(dict(rows[0], id_match=f'N{i}', season='2026/27', goals_in_match='2'))
+    return pd.concat([d, pd.DataFrame(rows)], ignore_index=True)
+
+
+def test_training_counts_filter_like_the_serving_scripts(tmp_path):
+    csv = tmp_path / 'd.csv'
+    _counts_rows().to_csv(csv, index=False)
+    c = dc.training_counts(csv, '2025/26')
+    assert c['n_rows'] == 19
+    assert c['goal_cats_share'] == {0: round(15 / 19, 6), 1: round(3 / 19, 6), 3: round(1 / 19, 6)}
+
+
+def test_counts_come_from_the_bundle_until_a_reviewed_baseline_accepts_a_repair(tmp_path):
+    csv = tmp_path / 'd.csv'
+    _counts_rows().to_csv(csv, index=False)
+    bundle = tmp_path / 'b__LIGHT.pkl'
+    contract = dc.training_counts(csv, '2025/26')                       # what the bundle stored at fit
+    n, mix = contract['n_rows'], contract['goal_cats_share']
+    assert 'OK' in dc.check_counts(n, mix, contract, bundle)
+    # a repair flips one target 1 -> 0 (an own goal): the mix moves by 1/19, far past 1e-4
+    d = _counts_rows()
+    d.loc[16, 'goals_in_match'] = '0'
+    d.to_csv(csv, index=False)
+    rep = dc.training_counts(csv, '2025/26')
+    with pytest.raises(RuntimeError, match='category mix MISMATCH'):
+        dc.check_counts(rep['n_rows'], rep['goal_cats_share'], contract, bundle)
+    assert 'FAILED' in dc.check_counts(rep['n_rows'], rep['goal_cats_share'], contract, bundle, allow=True)
+    # a baseline WITHOUT counts (the pre-2026-10-27 format) leaves the bundle's counts in charge
+    dc.record_baseline(csv, '2025/26', bundle, reason='fingerprint only')
+    with pytest.raises(RuntimeError, match='MISMATCH'):
+        dc.check_counts(rep['n_rows'], rep['goal_cats_share'], contract, bundle)
+    # the reviewed baseline accepts the repaired counts too (through a JSON round trip: int keys)
+    dc.record_baseline(csv, '2025/26', bundle, reason='own-goal repair', counts=rep)
+    status = dc.check_counts(rep['n_rows'], rep['goal_cats_share'], contract, bundle)
+    assert 'OK' in status and 'b__LIGHT__fingerprint.json' in status
+    assert 'OK' in dc.check(csv, {k: v for k, v in contract.items()}, bundle)
+    # ...and the pre-repair data now fails against it
+    with pytest.raises(RuntimeError, match='MISMATCH'):
+        dc.check_counts(n, mix, contract, bundle)
+
+
 def _defs(src):
     tree = ast.parse(src)
     out = {}

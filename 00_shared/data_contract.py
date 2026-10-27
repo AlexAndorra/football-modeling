@@ -22,7 +22,11 @@ Where the expected fingerprint comes from:
 
 A mismatch stops the run, like the count/mix contract, unless ALLOW_CONTRACT_MISMATCH overrides it
 for one run. If a historical repair is deliberately accepted WITHOUT a refit, record a new
-baseline with a reason: record_baseline(csv, train_end, bundle_path, reason='...').
+baseline with a reason AND the repaired data's counts, because a repair that changes the target
+moves the goal-category mix too:
+    record_baseline(csv, train_end, bundle_path, reason='...', counts=training_counts(csv, train_end))
+check_counts() then compares against the baseline's accepted counts instead of the bundle's. For
+a bundle with a fingerprint of its own (fitted on the repaired data) none of this applies.
 """
 
 import datetime as dt
@@ -113,14 +117,63 @@ def check(csv_path, data_contract, bundle_path, allow=False):
     return why
 
 
-def record_baseline(csv_path, train_end, bundle_path, reason):
+def training_counts(csv_path, train_end):
+    """The count/mix contract's numbers, from the CSV as 006_040 and 006_041 serve it: training
+    seasons, rows with goalsscored_share_player_team <= 1, goals_in_match capped at 3."""
+    t = pd.read_csv(csv_path, usecols=['season', 'goals_in_match', 'goalsscored_share_player_team'])
+    t = t[(t['season'] <= train_end) & (t['goalsscored_share_player_team'] <= 1)]
+    mix = t['goals_in_match'].astype(int).clip(upper=3).value_counts(normalize=True).sort_index()
+    return {'n_rows': int(len(t)), 'goal_cats_share': {int(k): float(round(v, 6)) for k, v in mix.items()}}
+
+
+def expected_counts(data_contract, bundle_path):
+    """(n_rows, goal_cats_share, source) -- a reviewed baseline's accepted counts if its file carries
+    them, else the bundle's own."""
+    p = _baseline_path(bundle_path)
+    if os.path.exists(p):
+        with open(p) as f:
+            counts = json.load(f).get('counts')
+        if counts:
+            return (counts['n_rows'], {int(k): v for k, v in counts['goal_cats_share'].items()},
+                    os.path.basename(p))
+    return (data_contract.get('n_rows'),
+            {int(k): v for k, v in data_contract.get('goal_cats_share', {}).items()}, 'bundle')
+
+
+def check_counts(n_rows, goal_cats_share, data_contract, bundle_path, allow=False):
+    """The count/mix contract for the training rows a script is about to serve: its own row count and
+    goal-category mix against the expected ones (tolerance 1e-4 per category). Raises on a mismatch
+    unless `allow`. Returns a one-line status."""
+    exp_n, exp_mix, source = expected_counts(data_contract, bundle_path)
+    n_ok = n_rows == exp_n
+    mix_ok = all(abs(goal_cats_share.get(k, 0) - v) < 1e-4 for k, v in exp_mix.items())
+    msg = (f'bundle/CSV contract: rows {exp_n:,} vs {n_rows:,} {"OK" if n_ok else "MISMATCH"} | '
+           f'category mix {"OK" if mix_ok else "MISMATCH"}' + ('' if source == 'bundle' else f' (vs {source})'))
+    print(msg)
+    if n_ok and mix_ok:
+        return msg
+    why = (f'bundle/CSV contract FAILED vs {source}: training rows {exp_n:,} vs {n_rows:,}, category '
+           f'mix {"OK" if mix_ok else "MISMATCH"}. The dataset was rebuilt since this bundle was '
+           f'fitted / baselined, so serving it would publish numbers from a model fitted on different '
+           f'data. REFIT before serving, or accept a reviewed repair with record_baseline(..., counts=...).')
+    if not allow:
+        raise RuntimeError(why + ' Override for one run with ALLOW_CONTRACT_MISMATCH=True.')
+    print(f'   !! {why}\n   !! ALLOW_CONTRACT_MISMATCH=True -- serving a STALE MODEL deliberately. Not a pass.')
+    return why
+
+
+def record_baseline(csv_path, train_end, bundle_path, reason, counts=None):
     """Write <bundle>__fingerprint.json from the current CSV. Only for a bundle without a fingerprint
-    of its own, or to accept a reviewed historical repair without a refit; `reason` is required."""
+    of its own, or to accept a reviewed historical repair without a refit; `reason` is required.
+    `counts` (training_counts of the same CSV) accepts the repaired row count and goal-category mix
+    as well; leave it out only when the repair cannot move them."""
     if not reason:
         raise ValueError('record_baseline needs a reason')
     out = {'recorded': dt.datetime.now().astimezone().isoformat(timespec='seconds'),
            'reason': reason, 'csv': str(csv_path), 'bundle': os.path.basename(bundle_path),
            'fingerprint': training_fingerprint(csv_path, train_end)}
+    if counts is not None:
+        out['counts'] = counts
     with open(_baseline_path(bundle_path), 'w') as f:
         json.dump(out, f, indent=1)
     return out
