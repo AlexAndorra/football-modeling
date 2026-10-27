@@ -164,23 +164,15 @@ d = d.loc[d['goalsscored_share_player_team'] <= 1, :].reset_index(drop=True)
 d['season_nbr'] = d.groupby(['name_player'])['season'].transform(lambda x: x.factorize(sort=True)[0])
 
 # --- bundle <-> CSV contract (same gate as 006_040): the training rows the bundle was fitted on
-# --- must still be the rows scored here -- same count, same goal-category mix.
+# --- must still be the rows scored here -- same count, same goal-category mix (the bundle's, or a
+# --- reviewed baseline's accepted ones after a repair).
 _mix_now = d['goals_cats'].value_counts(normalize=True).sort_index().round(6).to_dict()
-_n_ok = len(d) == _dc.get('n_rows')
-_mix_ok = all(abs(_mix_now.get(_k, 0) - _v) < 1e-4 for _k, _v in _dc.get('goal_cats_share', {}).items())
-print(f'bundle/CSV contract: rows {_dc.get("n_rows"):,} vs {len(d):,} {"OK" if _n_ok else "MISMATCH"} '
-      f'| category mix {"OK" if _mix_ok else "MISMATCH"}')
-if not (_n_ok and _mix_ok):
-    _why = ('bundle/CSV contract FAILED: the dataset was rebuilt since this bundle was fitted, so the '
-            'boards would come from a model fitted on different data. REFIT before serving.')
-    if not ALLOW_CONTRACT_MISMATCH:
-        raise RuntimeError(_why + ' Override for one run with ALLOW_CONTRACT_MISMATCH = True.')
-    print(f'   !! {_why}\n   !! ALLOW_CONTRACT_MISMATCH=True -- a STALE MODEL, deliberately. Not a pass.')
+_bundle_path = f'{directory}/10_data/01_Models/{SFM_model__NAME}__LIGHT.pkl'
+data_contract.check_counts(len(d), _mix_now, _dc, _bundle_path, allow=ALLOW_CONTRACT_MISMATCH)
 
 # --- ...and the ROWS themselves (00_shared/data_contract.py): count and mix cannot see a repair
 # --- that changes values, so the training rows' fingerprint must match the bundle's.
-data_contract.check(f'{directory}/10_data/106_Website/data_byPlayer.csv', _dc,
-                    f'{directory}/10_data/01_Models/{SFM_model__NAME}__LIGHT.pkl',
+data_contract.check(f'{directory}/10_data/106_Website/data_byPlayer.csv', _dc, _bundle_path,
                     allow=ALLOW_CONTRACT_MISMATCH)
 
 # --- ELO: the bundle's STORED pre-match ratings (issue #7). Every row scored here is a training
