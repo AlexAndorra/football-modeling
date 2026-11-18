@@ -134,6 +134,10 @@ OUT_GRID_CSV  = f'{OUT_DIR}/SFMMO_predictions__scorelines.csv'
 OUT_TEAM_CSV  = f'{OUT_DIR}/SFMMO_predictions__team_goals.csv'
 OUT_PKL       = f'{OUT_DIR}/SFMMO_predictions__prod.pkl'
 FROZEN_LEDGER = f'{OUT_DIR}/SFMMO_predictions__frozen.csv'   # last PRE-MATCH forecast per fixture
+# "What drives this forecast": the split of each forecast into reader groups (see DRIVER_GROUPS).
+# The ledger freezes it WITH the forecast it explains -- same key, same stamp, same rule.
+OUT_DRIVERS_CSV = f'{OUT_DIR}/SFMMO_predictions__drivers.csv'
+DRIVERS_LEDGER  = f'{OUT_DIR}/SFMMO_predictions__drivers_frozen.csv'
 # Every fixture ever seen as CERTAINLY started, with the kick-off seen then. Append-only: a fixture
 # that kicked off is never forecast again, even when it is later re-dated (an abandoned match,
 # resumed or replayed weeks later -- Rayo Vallecano v Athletic Bilbao, 10 Oct 2026).
@@ -143,7 +147,39 @@ STARTED_FIXTURES = f'{OUT_DIR}/SFMMO_started_fixtures.csv'
 STATE_FILES = [f'10_data/106_Website/{f}' for f in (
     'SFMMO_predictions__frozen.csv', 'SFMMO_predictions__prod.pkl', 'SFMMO_predictions__matches.csv',
     'SFMMO_predictions__scorelines.csv', 'SFMMO_predictions__team_goals.csv',
-    'SFMMO_started_fixtures.csv')]
+    'SFMMO_started_fixtures.csv', 'SFMMO_predictions__drivers_frozen.csv')]
+
+# --- DRIVERS: which reader group each model term belongs to (agreed with the website, 2026-11-17).
+#     Scale: the log ratio of expected goals, home over away, log(lam_h/lam_a) = eta_h - eta_a.
+#     That difference is EXACTLY additive per posterior draw: mu cancels, and so does every
+#     standardisation mean (both rows of a fixture are scaled with the same gameday moments), so a
+#     group at zero means "no edge either way", never "league average". Positive = towards home.
+#       home_advantage  beta_home[team] * home_pitch          (always towards the home side)
+#       long_run        alpha (attack) and delta (defence)    (the whole training history)
+#       current         ELO levels
+#       season_so_far   goals scored / conceded to date and the points difference
+#     Points sit with goals on purpose: their partial coefficient is negative given goals and ELO,
+#     so a bar of their own would tell readers that trailing in the table helps.
+#     EVERY factor of the bundle must be listed: a bundle with a factor this table does not know
+#     stops the run instead of silently dropping a term from the split.
+DRIVER_GROUPS = {
+    'points_diff': 'season_so_far',
+    'goalsscored_cum_team': 'season_so_far', 'goalsscored_cum_opp': 'season_so_far',
+    'goalsconceded_cum_team': 'season_so_far', 'goalsconceded_cum_opp': 'season_so_far',
+    'elo_team': 'current', 'elo_opp': 'current',
+}
+DRIVER_IDS = ['home_advantage', 'long_run', 'current', 'season_so_far', 'total']
+DRIVERS_SUM_TOL = 1e-8     # per draw, the groups must add up to eta_h - eta_a (exact arithmetic)
+# The total row is the posterior MEAN of eta_h - eta_a; the published exp_goals are means of
+# exp(eta), so log(exp_goals_h / exp_goals_a) differs by a Jensen term: 1.4e-4 on Atletico v
+# Barcelona, at most 3.2e-3 on the 9 Nov 2026 board (fixtures of promoted teams, whose home
+# advantage is a prior draw). The exact tie is checked per draw in forecast_fixtures; this bound
+# only catches a split joined to the wrong published row, which is off by tenths.
+DRIVERS_XG_TOL = 0.05
+# "Little data": a side new to the bundle (its alpha/delta are prior draws), or one whose long-run
+# strength alpha + delta has posterior sd above this (median fitted team ~0.10; Paris FC 0.19 on
+# 34 training matches, Paderborn 0.15 on 68).
+LITTLE_DATA_SD = 0.15
 
 # ============================================================================= #
 
@@ -503,10 +539,67 @@ def wdl_from_grid(g, cred=CRED_REGION):
     return out
 
 
+def driver_draws(h, a, ti, oi, Xh, Xg, alpha_s, delta_s, bhome_s, beta_s, factors_g):
+    """One fixture's log goal ratio, eta_h - eta_a, split into the DRIVER_GROUPS per posterior
+    draw. `h` / `a` are the row positions of its home / away perspective rows; the arrays are the
+    ones the eta parity gate rebuilds eta from (team arrays (n_teams, S), beta_s (n_factors, S)).
+    mu is absent on purpose: it is in both rows and cancels. Returns {group: (S,) array}."""
+    unknown = sorted(f for f in factors_g
+                     if DRIVER_GROUPS.get(f) not in ('current', 'season_so_far'))
+    if unknown:
+        raise SystemExit(f"[drivers] factor(s) with no driver group: {unknown} -- place them in "
+                         f"DRIVER_GROUPS before running. NOTHING EXPORTED.")
+    out = {'home_advantage': Xh[h] * bhome_s[ti[h]] - Xh[a] * bhome_s[ti[a]],
+           'long_run': (alpha_s[ti[h]] - delta_s[oi[h]]) - (alpha_s[ti[a]] - delta_s[oi[a]])}
+    dX = Xg[h] - Xg[a]
+    for g in ('current', 'season_so_far'):
+        m = np.array([DRIVER_GROUPS[f] == g for f in factors_g], dtype=bool)
+        out[g] = dX[m] @ beta_s[m] if m.any() else np.zeros(beta_s.shape[1])
+    return out
+
+
+def games_before(cd, rows, season):
+    """Per row: the league games its TEAM has a result for in `season` that kicked off before the
+    row's fixture -- what 'season so far' rests on ("after N games"). Per row, not per round, so a
+    side with a game in hand differs from its opponent."""
+    played = cd[(cd['season'] == season) & cd['match_outcome'].notna()]
+    ko = {t: np.sort(pd.to_datetime(g['kick_off']).dt.normalize().to_numpy())
+          for t, g in played.groupby('name_team')}
+    out = []
+    for t, k in zip(rows['name_team'], rows['kick_off']):
+        arr = ko.get(t, np.array([], dtype='datetime64[ns]'))
+        day = None if pd.isna(k) else pd.Timestamp(k).normalize().to_datetime64()
+        out.append(len(arr) if day is None else int(np.searchsorted(arr, day, side='left')))
+    return np.array(out, dtype=int)
+
+
+def drivers_for_feed(dled, board, key):
+    """The drivers rows the feed ships: every fixture on the board whose frozen split was frozen
+    WITH the forecast the board shows (same forecast_frozen_at). A split frozen with another
+    forecast is left out and named, never shipped beside numbers it does not explain. Fixtures
+    frozen before the split existed simply have none (no backfill: the receipts rule)."""
+    if dled is None or not len(dled):
+        return pd.DataFrame(columns=['season', 'id_match', 'home_team', 'away_team', 'group', 'mean',
+                                     'lo', 'up', 'n_games_home', 'n_games_away', 'flag',
+                                     'forecast_frozen_at']), []
+    shown = board.dropna(subset=['forecast_frozen_at'])[key + ['id_match', 'forecast_frozen_at']]
+    m = dled.drop(columns=['id_match']).merge(shown, on=key, how='inner', suffixes=('', '_board'))
+    bad = m['forecast_frozen_at'].astype(str) != m['forecast_frozen_at_board'].astype(str)
+    mismatched = sorted({f"{h} v {a}"
+                         for h, a in zip(m.loc[bad, 'home_team'], m.loc[bad, 'away_team'])})
+    m = m[~bad].drop(columns=['forecast_frozen_at_board'])
+    m['_o'] = m['group'].map({g: i for i, g in enumerate(DRIVER_IDS)})
+    cols = ['season', 'id_match', 'home_team', 'away_team', 'group', 'mean', 'lo', 'up',
+            'n_games_home', 'n_games_away', 'flag', 'forecast_frozen_at']
+    m['flag'] = m['flag'].fillna('')
+    return m.sort_values(key + ['_o'])[cols].reset_index(drop=True), mismatched
+
+
 def forecast_fixtures(oos, B, rho, factors_CS, factors_g):
     """Model forecasts for the fixtures in the window -> (df_matches, grid_rows, team_rows,
-    eta-parity deviation). Moved verbatim out of main() so that a run with nothing to forecast
-    can still rebuild the feed without touching the model."""
+    eta-parity deviation, driver_rows). Moved verbatim out of main() so that a run with nothing to
+    forecast can still rebuild the feed without touching the model. driver_rows: one per
+    (fixture, DRIVER_IDS group), from the same posterior draws as the forecast."""
     meta, model, idata = B['meta'], B['model'], B['idata']
     team_to_idx, names_teams = B['team_to_idx'], B['names_teams']
     train_means, train_stds = B['train_means'], B['train_stds']
@@ -609,10 +702,48 @@ def forecast_fixtures(oos, B, rho, factors_CS, factors_g):
     print(f"  building {len(pair)} joint grids lazily ({lam_h.shape[1]:,} draws, "
           f"{K_MAX+1}x{K_MAX+1} each) ...")
 
-    rows, grid_rows, team_rows = [], [], []
+    rows, grid_rows, team_rows, driver_rows = [], [], [], []
     q_lo, q_hi = (1 - CRED_REGION) / 2, 1 - (1 - CRED_REGION) / 2
     meta_h = oos.loc[idx_home].reset_index(drop=True)
     meta_a = oos.loc[idx_away].reset_index(drop=True)
+
+    # ----------------------- 5b. DRIVERS (+ exactness gate) ----------------------- #
+    # The forecast's log goal ratio split into reader groups, from the SAME draws. Gate: per draw
+    # the groups must add up to eta_h - eta_a of the reconstruction the parity gate just tied to
+    # the graph, or nothing is exported.
+    n_fitted = post['alpha'].shape[-1]
+    lr_sd = (alpha_s + delta_s).std(axis=1)                      # long-run strength sd per team
+    thin = (np.arange(len(lr_sd)) >= n_fitted) | (lr_sd > LITTLE_DATA_SD)
+    _ng = lambda m: (m['n_games_season'] if 'n_games_season' in m
+                     else pd.Series(pd.NA, index=m.index, dtype='Int64'))
+    ng_h, ng_a = _ng(meta_h), _ng(meta_a)
+    _dsum = 0.0
+    for f in range(len(pair)):
+        h, a = idx_home[f], idx_away[f]
+        d = driver_draws(h, a, ti, oi, Xh, Xg, alpha_s, delta_s, bhome_s, beta_s, factors_g)
+        d['total'] = eta_hat[h] - eta_hat[a]
+        _dsum = max(_dsum, float(np.abs(sum(d[g] for g in DRIVER_IDS[:-1]) - d['total']).max()),
+                    # ...and the total is the ratio of the very draws the forecast is built from
+                    float(np.abs(d['total'] - (np.log(lam_h[f]) - np.log(lam_a[f]))).max()) / 2)
+        th, ta = bool(thin[ti[h]]), bool(thin[ti[a]])
+        flag = {(True, True): 'little_data_both', (True, False): 'little_data_home',
+                (False, True): 'little_data_away'}.get((th, ta), '')
+        for g in DRIVER_IDS:
+            driver_rows.append(dict(
+                season=meta_h.loc[f, 'season'], id_match=meta_h.loc[f, 'id_match'],
+                home_team=meta_h.loc[f, 'name_team'], away_team=meta_h.loc[f, 'name_opp'],
+                group=g, mean=float(d[g].mean()),
+                lo=float(np.quantile(d[g], q_lo)), up=float(np.quantile(d[g], q_hi)),
+                n_games_home=ng_h[f], n_games_away=ng_a[f],
+                flag=flag))
+    print(f"[drivers] max |sum of groups - (eta_h - eta_a)| = {_dsum:.3e} over {len(pair)} fixtures "
+          f"(also against log(lam_h / lam_a) of the forecast's own draws)")
+    assert _dsum < DRIVERS_SUM_TOL, (f"DRIVERS GATE FAILED ({_dsum:.3e}): the groups do not add up "
+                                     f"to the forecast's log goal ratio. NOTHING EXPORTED.")
+    _win = np.unique(np.concatenate([ti, oi]))
+    print(f"[drivers] PASS — {int(thin[_win].sum())} of {len(_win)} team(s) in the window flagged "
+          f"little data")
+
     for f in range(len(pair)):
         g = joint_grid_one(lam_h[f], lam_a[f])
         if rho is not None:
@@ -659,7 +790,7 @@ def forecast_fixtures(oos, B, rho, factors_CS, factors_g):
                 rec[f'p_goals_{lbl}_up'] = float(np.quantile(pk[i], q_hi))
             team_rows.append(rec)
     df_matches = pd.DataFrame(rows).sort_values(['name_league', 'kick_off']).reset_index(drop=True)
-    return df_matches, grid_rows, team_rows, dev
+    return df_matches, grid_rows, team_rows, dev, driver_rows
 
 
 def main():
@@ -753,7 +884,7 @@ def main():
         print(f"  nothing to forecast: {stale['id_match'].nunique()} fixture(s) may have kicked off and await "
               f"results, {_ud['id_match'].nunique()} undated -- rebuilding the feed from results + "
               f"frozen forecasts only")
-        df_matches, grid_rows, team_rows, dev = pd.DataFrame(), [], [], None
+        df_matches, grid_rows, team_rows, dev, driver_rows = pd.DataFrame(), [], [], None, []
     else:
         oos = oos.sort_values(['name_league', 'kick_off']).reset_index(drop=True)
         n_fix = oos['id_match'].nunique()
@@ -761,7 +892,9 @@ def main():
               f"{n_all} unplayed fixtures; {deferred['id_match'].nunique()} deferred to later runs")
         print(f"\nUpcoming fixtures in {TARGET_SEASON}: {n_fix} "
               f"({', '.join(f'{k} {v}' for k, v in oos[oos.home_pitch == 1].groupby('name_league').size().items())})")
-        df_matches, grid_rows, team_rows, dev = forecast_fixtures(oos, B, rho, factors_CS, factors_g)
+        oos['n_games_season'] = games_before(cd, oos, TARGET_SEASON)     # "after N games" (drivers)
+        df_matches, grid_rows, team_rows, dev, driver_rows = forecast_fixtures(oos, B, rho, factors_CS,
+                                                                               factors_g)
         # The model samples for minutes and the clock moves meanwhile: a fixture can reach its
         # hold point between the window above and the ledger write below (a run started at 20:40
         # for a 20:45 kick-off). So the rule is asked AGAIN now, and anything that may have started
@@ -778,6 +911,7 @@ def main():
             df_matches = df_matches[~df_matches['id_match'].isin(ids)].reset_index(drop=True)
             grid_rows = [g for g in grid_rows if g['id_match'] not in ids]
             team_rows = [t for t in team_rows if t['id_match'] not in ids]
+            driver_rows = [d for d in driver_rows if d['id_match'] not in ids]
 
 
     # ------------------------------------------------------------------ #
@@ -810,6 +944,36 @@ def main():
     # The clock of the kick-off check above, in Berlin local time, so the stamp and the rule can
     # never disagree about when the forecast was frozen.
     stamp = now_write.tz_convert(kickoff.BERLIN).strftime('%Y-%m-%d %H:%M:%S')
+
+    # --- DRIVERS: the split freezes WITH the forecast it explains -- same key, same stamp, written
+    #     in the same step as the frozen ledger and checked against the published row BEFORE either
+    #     ledger is written. A fixture that kicked off is never re-split (it is never re-forecast).
+    DKEY = KEY + ['group']
+    fresh_d = pd.DataFrame(driver_rows)
+    if len(df_matches):
+        _fx = set(zip(df_matches['home_team'], df_matches['away_team']))
+        _dx = set(zip(fresh_d['home_team'], fresh_d['away_team'])) if len(fresh_d) else set()
+        if _fx != _dx or len(fresh_d) != len(DRIVER_IDS) * len(_fx):
+            raise AssertionError(f"[drivers] the split covers {len(_dx)} fixture(s) "
+                                 f"({len(fresh_d)} rows), the forecast {len(_fx)} -- NOTHING EXPORTED.")
+        _t = fresh_d[fresh_d['group'] == 'total'].merge(
+            df_matches[KEY + ['exp_goals_home', 'exp_goals_away']], on=KEY)
+        _gap = (_t['mean'] - np.log(_t['exp_goals_home'] / _t['exp_goals_away'])).abs()
+        print(f"[drivers] max |total - log(exp_goals_home/exp_goals_away)| = {_gap.max():.2e} "
+              f"(a Jensen term, bound {DRIVERS_XG_TOL})")
+        if not (_gap < DRIVERS_XG_TOL).all():
+            _w = _t.loc[_gap.idxmax()]
+            raise AssertionError(f"[drivers] the split does not belong to the published forecast "
+                                 f"({_w['home_team']} v {_w['away_team']}: {_gap.max():.3f}). "
+                                 f"NOTHING EXPORTED.")
+        fresh_d['forecast_frozen_at'] = stamp
+        for c in ('n_games_home', 'n_games_away'):
+            fresh_d[c] = fresh_d[c].astype('Int64')
+    dled = (pd.read_csv(DRIVERS_LEDGER, float_precision='round_trip', dtype={'flag': str})
+            if os.path.exists(DRIVERS_LEDGER) else None)
+    # nothing forecast: read only (same duplicate guard), never rewritten
+    dledger = merge_frozen_ledger(dled, dled.iloc[0:0], DKEY) if dled is not None else None
+
     led = None
     if os.path.exists(FROZEN_LEDGER):
         # round_trip: the default float parser is off by up to 1 ULP, so every row frozen in the
@@ -824,7 +988,9 @@ def main():
         fresh['forecast_frozen_at'] = stamp
         # first run: same guard (a duplicate key in the board must never reach the ledger)
         ledger = merge_frozen_ledger(led if led is not None else fresh.iloc[0:0], fresh, KEY)
+        dledger = merge_frozen_ledger(dled if dled is not None else fresh_d.iloc[0:0], fresh_d, DKEY)
         ledger.to_csv(FROZEN_LEDGER, index=False)
+        dledger.to_csv(DRIVERS_LEDGER, index=False)
     elif led is not None:   # nothing forecast this run: the ledger is read (same guard), never rewritten
         ledger = merge_frozen_ledger(led, led.iloc[0:0], KEY)
     else:
@@ -879,6 +1045,11 @@ def main():
     df_matches['gameday_label'] = _label.values
     if _nolabel:
         print(f"  [gameday_label] {_nolabel} id(s) carried no _GD token -- fell back to the integer gameday")
+    df_drivers, _dmis = drivers_for_feed(dledger, df_matches, KEY)
+    print(f"  drivers: {df_drivers[KEY].drop_duplicates().shape[0]} fixture(s) with a frozen split")
+    if _dmis:
+        print(f"  ⚠️  {len(_dmis)} fixture(s) have a split frozen with ANOTHER forecast -- left "
+              f"out of the feed: {_dmis[:3]}")
     print(f"  feed:{int((df_matches['status'] == 'finished').sum())} finished (results + frozen "
           f"forecast) + {int((df_matches['status'] == 'upcoming').sum())} upcoming")
     df_grid = pd.DataFrame(grid_rows)
@@ -933,7 +1104,8 @@ def main():
     # ----------------------- 7. archive + export ----------------------- #
     os.makedirs(OUT_DIR, exist_ok=True)
     if ARCHIVE_VINTAGES:
-        arch = archive_existing_outputs([OUT_MATCH_CSV, OUT_GRID_CSV, OUT_TEAM_CSV, OUT_PKL])
+        arch = archive_existing_outputs([OUT_MATCH_CSV, OUT_GRID_CSV, OUT_TEAM_CSV, OUT_DRIVERS_CSV,
+                                         OUT_PKL])
         print(f"\nArchived {len(arch)} previous output(s) -> {VINTAGE_DIR}/" if arch
               else "\n[vintage] no previous board to archive (first run)")
 
@@ -941,13 +1113,16 @@ def main():
                          train_end=meta['train_end'], target_season=TARGET_SEASON,
                          rho=rho, k_max=K_MAX, cred_region=CRED_REGION,
                          run=now_write.tz_convert(kickoff.BERLIN).strftime('%Y-%m-%d %H:%M'),
-                         eta_parity=dev),
-               matches=df_matches, scorelines=df_grid, team_goals=df_team)
+                         eta_parity=dev,
+                         drivers_scale='log(exp goals home / away); + = towards home; '
+                                       f'mean, {CRED_REGION:.0%} interval'),
+               matches=df_matches, scorelines=df_grid, team_goals=df_team, drivers=df_drivers)
     with open(OUT_PKL, 'wb') as f:
         pickle.dump(out, f)
     df_matches.to_csv(OUT_MATCH_CSV, index=False)
     df_grid.to_csv(OUT_GRID_CSV, index=False)
     df_team.to_csv(OUT_TEAM_CSV, index=False)
+    df_drivers.to_csv(OUT_DRIVERS_CSV, index=False)
 
     print(f"\n================== DONE ==================")
     print(f"Fixtures forecast : {len(df_matches)}")

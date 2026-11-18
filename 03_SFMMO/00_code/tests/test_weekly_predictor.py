@@ -9,6 +9,7 @@ stale fixtures to the feed.
 import importlib.util
 import io
 import pathlib
+import pickle
 import warnings
 
 import numpy as np
@@ -484,7 +485,8 @@ def season_files(tmp_path, monkeypatch):
         BUNDLE_PATH="bundle.pkl", HIST_PATH="hist.csv", OOS_PATH="oos.csv",
         FROZEN_LEDGER="frozen.csv", OUT_MATCH_CSV="matches.csv", OUT_GRID_CSV="grid.csv",
         OUT_TEAM_CSV="team.csv", OUT_PKL="board.pkl", KICKOFF_PATH="kickoff.csv",
-        STARTED_FIXTURES="started.csv").items()}  # fmt: skip
+        STARTED_FIXTURES="started.csv", DRIVERS_LEDGER="drivers_frozen.csv",
+        OUT_DRIVERS_CSV="drivers.csv").items()}  # fmt: skip
     with open(p["BUNDLE_PATH"], "wb") as f:
         cloudpickle.dump(bundle, f)
     with open(p["OUT_PKL"], "wb") as f:
@@ -525,23 +527,42 @@ def test_main_rebuilds_the_feed_when_only_kicked_off_fixtures_remain(season_file
     assert set(pd.read_csv(season_files["OUT_TEAM_CSV"])["team"]) == {"C", "D"}
 
 
-def _fake_model(seen):
-    """A stand-in for forecast_fixtures: one fixture at p_home_win 0.55, plus its board rows."""
+def _drivers(home, away, id_match, total, stamp=None, n_games=(2, 2)):
+    """A fixture's five driver rows whose groups add up to `total`."""
+    parts = dict(home_advantage=0.30, long_run=-0.10, current=0.05)
+    parts["season_so_far"] = total - sum(parts.values())
+    parts["total"] = total
+    rows = [dict(season="2026/27", id_match=id_match, home_team=home, away_team=away, group=g,
+                 mean=v, lo=v - 0.05, up=v + 0.05, n_games_home=n_games[0],
+                 n_games_away=n_games[1], flag="") for g, v in parts.items()]  # fmt: skip
+    if stamp is not None:
+        for r in rows:
+            r["forecast_frozen_at"] = stamp
+    return rows
+
+
+def _fake_model(seen, total=None):
+    """A stand-in for forecast_fixtures: one fixture at p_home_win 0.55, plus its board rows and
+    its driver split (whose total matches the exp goals unless `total` says otherwise)."""
 
     def fake_model(oos, *a, **k):
         seen["ids"] = sorted(oos["id_match"].unique())
+        seen["n_games"] = dict(zip(oos["name_team"], oos.get("n_games_season", [None] * len(oos))))
         h = oos[oos["home_pitch"] == 1].iloc[0]
         row = _frozen(h["name_team"], h["name_opp"], h["id_match"], 0.55, None)
         row.pop("forecast_frozen_at")
         row.update(
-            name_league="PL", gameday=3, kick_off=h["kick_off"], elo_home=1500.0, elo_away=1500.0
+            name_league="PL", gameday=3, kick_off=h["kick_off"], elo_home=1500.0, elo_away=1500.0,
+            exp_goals_home=1.2, exp_goals_away=1.0,
         )
         grid = [dict(id_match=h["id_match"], home_team="E", away_team="F", home_goals=1, away_goals=0,
                      p_mid=0.1, p_lo=0.08, p_up=0.12)]  # fmt: skip
         team = [dict(id_match=h["id_match"], name_league="PL", gameday=3, kick_off=h["kick_off"],
                      team=t, opponent=o, is_home=i, exp_goals=1.0)
                 for t, o, i in [("E", "F", 1), ("F", "E", 0)]]  # fmt: skip
-        return pd.DataFrame([row]), grid, team, 0.0
+        drv = _drivers(h["name_team"], h["name_opp"], h["id_match"],
+                       np.log(1.2) if total is None else total)  # fmt: skip
+        return pd.DataFrame([row]), grid, team, 0.0, drv
 
     return fake_model
 
@@ -584,6 +605,7 @@ def test_main_discards_a_forecast_whose_fixture_reached_its_hold_point_during_th
     feed = pd.read_csv(season_files["OUT_MATCH_CSV"])
     assert "PL_GD03_EF" not in set(feed["id_match"])  # ...nor shipped
     assert "PL_GD03_EF" not in set(pd.read_csv(season_files["OUT_GRID_CSV"])["id_match"])
+    assert not season_files["DRIVERS_LEDGER"].exists()  # ...and its split never frozen either
     assert feed.set_index("id_match").loc["PL_GD02_CD", "p_home_win"] == 0.4
 
 
@@ -782,3 +804,126 @@ def test_main_never_re_forecasts_an_abandoned_match_after_it_is_re_dated(season_
     out = pd.read_csv(p["OUT_MATCH_CSV"]).set_index("id_match")
     assert out.loc["PL_GD02_GH", "p_home_win"] == 0.33         # ships the pre-kick-off forecast
     assert out.loc["PL_GD02_GH", "forecast_frozen_at"] == "2026-09-25 08:00:00"
+
+
+# --- drivers: "what drives this forecast" ------------------------------------------------
+# The split of each forecast's log goal ratio into reader groups. The arithmetic is pinned on
+# synthetic draws; the freeze (same key, same stamp, held rows byte for byte, no backfill) on
+# main() with the stand-in model.
+
+
+def _draws(S=200, seed=0):
+    rng = np.random.default_rng(seed)
+    factors = list(W.DRIVER_GROUPS)
+    alpha, delta, bhome = (rng.normal(0, 0.3, (3, S)) for _ in range(3))
+    beta = rng.normal(0, 0.1, (len(factors), S))
+    mu = rng.normal(0.2, 0.05, S)
+    Xg, Xh = rng.normal(0, 1, (2, len(factors))), np.array([1.0, 0.0])
+    ti, oi = np.array([0, 2]), np.array([2, 0])  # row 0: team 0 at home to team 2; row 1: mirror
+    eta = mu[None] + alpha[ti] - delta[oi] + Xh[:, None] * bhome[ti] + Xg @ beta
+    kw = dict(ti=ti, oi=oi, Xh=Xh, Xg=Xg, alpha_s=alpha, delta_s=delta, bhome_s=bhome,
+              beta_s=beta, factors_g=factors)  # fmt: skip
+    return kw, eta
+
+
+def test_driver_groups_add_up_to_the_log_goal_ratio_with_mu_cancelling():
+    kw, eta = _draws()
+    d = W.driver_draws(0, 1, **kw)
+    assert set(d) == set(W.DRIVER_IDS) - {"total"}
+    np.testing.assert_allclose(sum(d.values()), eta[0] - eta[1], rtol=0, atol=1e-12)
+    np.testing.assert_allclose(d["home_advantage"], kw["bhome_s"][0])  # only the home row is home
+
+
+def test_driver_groups_put_each_factor_in_its_own_group():
+    kw, _ = _draws()
+    i = kw["factors_g"].index("elo_team")
+    kw["Xg"] = np.zeros_like(kw["Xg"])
+    kw["Xg"][0, i] = 1.0  # the home side's ELO above the away side's, nothing else differs
+    d = W.driver_draws(0, 1, **kw)
+    np.testing.assert_allclose(d["current"], kw["beta_s"][i])
+    assert not d["season_so_far"].any()
+
+
+def test_drivers_refuse_a_bundle_factor_without_a_group():
+    kw, _ = _draws()
+    kw["factors_g"] = kw["factors_g"][:-1] + ["tm_marketvalue_team_squad"]
+    with pytest.raises(SystemExit, match="no driver group"):
+        W.driver_draws(0, 1, **kw)
+
+
+def test_games_before_counts_each_sides_results_strictly_before_the_fixture():
+    cd = pd.DataFrame(dict(
+        season=["2026/27"] * 4 + ["2025/26"], name_team=["A", "A", "A", "B", "B"],
+        match_outcome=[1, 0, np.nan, 2, 1],
+        kick_off=pd.to_datetime(
+            ["2026-09-01", "2026-09-08", "2026-09-10", "2026-09-01", "2026-05-01"]),
+    ))  # fmt: skip
+    rows = pd.DataFrame(dict(name_team=["A", "B", "C", "A"],
+                             kick_off=pd.to_datetime(["2026-09-15"] * 3 + ["2026-09-08"])))
+    assert W.games_before(cd, rows, "2026/27").tolist() == [2, 1, 0, 1]
+
+
+def test_main_freezes_the_split_with_the_forecast_it_explains(season_files, monkeypatch):
+    seen = {}
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model(seen))
+    W.main()
+    assert seen["n_games"] == {"E": 0, "F": 0}  # "after N games" reaches the model step
+    led = pd.read_csv(season_files["FROZEN_LEDGER"]).set_index("id_match")
+    dled = pd.read_csv(season_files["DRIVERS_LEDGER"])
+    assert set(dled["id_match"]) == {"PL_GD03_EF"} and len(dled) == len(W.DRIVER_IDS)
+    assert (dled["forecast_frozen_at"] == led.loc["PL_GD03_EF", "forecast_frozen_at"]).all()
+    out = pd.read_csv(season_files["OUT_DRIVERS_CSV"], keep_default_na=False)
+    assert list(out["group"]) == W.DRIVER_IDS  # fixed order; A v B was frozen before drivers
+    with open(season_files["OUT_PKL"], "rb") as f:
+        board = pickle.load(f)
+    assert list(board["drivers"]["group"]) == W.DRIVER_IDS
+    stamp = led.loc["PL_GD03_EF", "forecast_frozen_at"]
+    assert board["drivers"]["forecast_frozen_at"].iloc[0] == stamp
+
+
+def test_main_carries_a_held_fixtures_split_byte_for_byte(season_files, monkeypatch):
+    # C v D kicked off and is held at its 2026-09-18 forecast; its split was frozen with it.
+    split = _drivers("C", "D", "PL_GD02_CD", 0.16571769733734856, stamp="2026-09-18")
+    pd.DataFrame(split).to_csv(season_files["DRIVERS_LEDGER"], index=False)
+    before = season_files["DRIVERS_LEDGER"].read_text().splitlines()[1:]
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model({}))
+    W.main()
+    after = set(season_files["DRIVERS_LEDGER"].read_text().splitlines())
+    assert all(line in after for line in before)
+    out = pd.read_csv(season_files["OUT_DRIVERS_CSV"])
+    assert set(out["id_match"]) == {"PL_GD02_CD", "PL_GD03_EF"}  # held + fresh; no backfill of A v B
+
+
+def test_main_ships_held_splits_when_nothing_is_forecast(season_files, monkeypatch):
+    oos = pd.read_csv(season_files["OOS_PATH"])
+    oos[oos["id_match"] == "PL_GD02_CD"].to_csv(season_files["OOS_PATH"], index=False)
+    pd.DataFrame(_drivers("C", "D", "PL_GD02_CD", 0.1, stamp="2026-09-18")).to_csv(
+        season_files["DRIVERS_LEDGER"], index=False)
+    before = season_files["DRIVERS_LEDGER"].read_bytes()
+    monkeypatch.setattr(
+        W, "forecast_fixtures", lambda *a, **k: (_ for _ in ()).throw(AssertionError)
+    )
+    W.main()
+    assert season_files["DRIVERS_LEDGER"].read_bytes() == before  # read, never rewritten
+    assert set(pd.read_csv(season_files["OUT_DRIVERS_CSV"])["id_match"]) == {"PL_GD02_CD"}
+
+
+def test_main_leaves_out_a_split_frozen_with_another_forecast(season_files, monkeypatch, capsys):
+    pd.DataFrame(_drivers("C", "D", "PL_GD02_CD", 0.1, stamp="2026-09-11")).to_csv(
+        season_files["DRIVERS_LEDGER"], index=False)  # C v D's board forecast is from 09-18
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model({}))
+    W.main()
+    assert "PL_GD02_CD" not in set(pd.read_csv(season_files["OUT_DRIVERS_CSV"])["id_match"])
+    assert "ANOTHER forecast" in capsys.readouterr().out
+
+
+def test_main_exports_nothing_when_the_split_does_not_explain_the_forecast(
+    season_files, monkeypatch
+):
+    ledger_before = season_files["FROZEN_LEDGER"].read_bytes()
+    monkeypatch.setattr(W, "forecast_fixtures", _fake_model({}, total=0.5))  # log(1.2) = 0.18
+    with pytest.raises(AssertionError, match="does not belong"):
+        W.main()
+    assert season_files["FROZEN_LEDGER"].read_bytes() == ledger_before
+    for k in ("DRIVERS_LEDGER", "OUT_DRIVERS_CSV", "OUT_MATCH_CSV"):
+        assert not season_files[k].exists()
